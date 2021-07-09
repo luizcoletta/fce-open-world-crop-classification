@@ -10,7 +10,8 @@ import cv2 # OpenCV (Open Source Computer Vision Library) is an open source comp
 from PIL import Image
 from keras_segmentation.metrics import get_iou
 import os
-import pip
+import imgaug as ia
+import imgaug.augmenters as iaa
 
 
 def file_exists(filePath):
@@ -129,6 +130,27 @@ def iou_metric(gt, pred, num_classes):
     v_iou = np.var(iou)
     d_iou = np.std(iou)
     return [iou.tolist(), [m_iou, v_iou, d_iou]]
+
+### https://github.com/aleju/imgaug
+def data_augmentation(img_path, seg_path):
+
+    seq = iaa.Sequential([
+        iaa.Crop(px=(0, 16)),  # crop images from each side by 0 to 16px (randomly chosen)
+        iaa.Fliplr(0.5),  # horizontally flip 50% of the images
+        iaa.GaussianBlur(sigma=(0, 3.0))  # blur images with a sigma of 0 to 3.0
+    ])
+
+    img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+    seg = cv2.cvtColor(cv2.imread(seg_path), cv2.COLOR_BGR2RGB)[:,:,0]
+
+    aug_det = seq.to_deterministic()
+    image_aug = aug_det.augment_image(img)
+
+    segmap = ia.SegmentationMapOnImage(seg, nb_classes=np.max(seg) + 1, shape=img.shape)
+    segmap_aug = aug_det.augment_segmentation_maps(segmap)
+    segmap_aug = segmap_aug.get_arr_int()
+
+    return image_aug, segmap_aug
 
 '''im_col = cv2.imread("results/typification/" + result_desc + "_colored_" + f)
    im_col[np.where(im_col == 211)] = 255

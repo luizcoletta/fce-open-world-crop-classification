@@ -9,7 +9,7 @@ import pandas as pd
 
 from keras_segmentation.models.unet import unet, vgg_unet, mobilenet_unet
 from keras_segmentation.models.segnet import segnet
-from utils import color_list, save_file, roi_extraction, matrix2augimage, iou_metric, create_dir
+from utils import color_list, save_file, roi_extraction, matrix2augimage, iou_metric, create_dir, data_augmentation
 
 
 def train_model(model_settings, dataset_name, num_classes, epochs):
@@ -170,7 +170,10 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
                    ("mobilenet_unet", 192, 160),    # 2
                    ("segnet", 192, 160)]            # 3
 
-    if use_trained_model:
+    img, seg = data_augmentation('data/train_images/typification_v1/images_train/11.png',
+                                 'data/train_images/typification_v1/annotations_train/11.png')
+
+    '''if use_trained_model:
         model = load_trained_model(models_list[sel_model], num_classes)
     else:
         model = train_model(models_list[sel_model], dataset_name, num_classes, epochs)
@@ -184,7 +187,7 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
 
     results = prediction(model, models_list[sel_model][0], num_classes, test_img_path, test_ann_path)
 
-    results.to_csv("results/results_" + models_list[sel_model][0] + ".csv", index=False, header=True)
+    results.to_csv("results/results_" + models_list[sel_model][0] + ".csv", index=False, header=True)'''
 
 
 if __name__ == "__main__":
