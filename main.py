@@ -170,9 +170,12 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
                    ("mobilenet_unet", 192, 160),    # 2
                    ("segnet", 192, 160)]            # 3
 
-    img, seg = data_augmentation('data/train_images/typification_v1/images_train/11.png',
-                                 'data/train_images/typification_v1/annotations_train/11.png')
+    img, seg = data_augmentation('data/train_images/typification_v1/images_train/1.png',
+                                 'data/train_images/typification_v1/annotations_train/1.png')
 
+   save_file('data/train_images/dataset_panicum/images_train/', '1-Nova', 'png', img)
+                                                                              
+                                                                              
     '''if use_trained_model:
         model = load_trained_model(models_list[sel_model], num_classes)
     else:
