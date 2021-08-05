@@ -150,6 +150,9 @@ def data_augmentation(img_path, seg_path):
     segmap_aug = aug_det.augment_segmentation_maps(segmap)
     segmap_aug = segmap_aug.get_arr_int()
 
+    # image_aug -> IMAGEM -> 1-aug1.png
+    # segmap_aug -> ANNOTATION -> 1-aug1.png
+
     return image_aug, segmap_aug
 
 '''im_col = cv2.imread("results/typification/" + result_desc + "_colored_" + f)

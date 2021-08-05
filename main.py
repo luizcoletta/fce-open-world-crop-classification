@@ -6,6 +6,7 @@ from os import listdir
 from os.path import isfile, join
 from copy import copy
 import pandas as pd
+from PIL import Image
 
 from keras_segmentation.models.unet import unet, vgg_unet, mobilenet_unet
 from keras_segmentation.models.segnet import segnet
@@ -170,12 +171,12 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
                    ("mobilenet_unet", 192, 160),    # 2
                    ("segnet", 192, 160)]            # 3
 
-    img, seg = data_augmentation('data/train_images/typification_v1/images_train/1.png',
-                                 'data/train_images/typification_v1/annotations_train/1.png')
-
-   save_file('data/train_images/dataset_panicum/images_train/', '1-Nova', 'png', img)
-                                                                              
-                                                                              
+    img, seg = data_augmentation('data/train_images/dataset_panicum/images_train/1.png',       ### caminho estava errado
+                                 'data/train_images/dataset_panicum/annotations_train/1.png')  ### caminho estava errado
+    image = Image.fromarray(img.astype(np.uint8))
+    image.show()
+    seg_image = Image.fromarray(seg.astype(np.uint8))
+    seg_image.show()
     '''if use_trained_model:
         model = load_trained_model(models_list[sel_model], num_classes)
     else:
