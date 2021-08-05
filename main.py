@@ -177,6 +177,10 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
     image.show()
     seg_image = Image.fromarray(seg.astype(np.uint8))
     seg_image.show()
+
+    save_file('data/train_images/dataset_panicum/images_train/', '1_aug1', 'png', image, '')
+    save_file('data/train_images/dataset_panicum/annotations_train/', '1_aug1', 'png', seg_image,'')
+
     '''if use_trained_model:
         model = load_trained_model(models_list[sel_model], num_classes)
     else:
