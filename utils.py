@@ -154,7 +154,11 @@ def data_augmentation(img_path, seg_path):
     # segmap_aug -> ANNOTATION -> 1-aug1.png
 
     return image_aug, segmap_aug
+###chame dataargumentation, salvar as imagens
+def data_all(data_argumantation):
 
+    save_file()
+    return
 '''im_col = cv2.imread("results/typification/" + result_desc + "_colored_" + f)
    im_col[np.where(im_col == 211)] = 255
    img_hsv = cv2.cvtColor(im_col, cv2.COLOR_RGB2HSV)
