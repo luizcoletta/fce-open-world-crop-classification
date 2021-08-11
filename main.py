@@ -10,7 +10,7 @@ from PIL import Image
 
 from keras_segmentation.models.unet import unet, vgg_unet, mobilenet_unet
 from keras_segmentation.models.segnet import segnet
-from utils import color_list, save_file, roi_extraction, matrix2augimage, iou_metric, create_dir, data_augmentation
+from utils import color_list, save_file, roi_extraction, matrix2augimage, iou_metric, create_dir, data_augmentation, data_all
 
 
 def train_model(model_settings, dataset_name, num_classes, epochs):
@@ -171,15 +171,14 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
                    ("mobilenet_unet", 192, 160),    # 2
                    ("segnet", 192, 160)]            # 3
 
-    img, seg = data_augmentation('data/train_images/dataset_panicum/images_train/1.png',       ### caminho estava errado
-                                 'data/train_images/dataset_panicum/annotations_train/1.png')  ### caminho estava errado
-    image = Image.fromarray(img.astype(np.uint8))
-    image.show()
-    seg_image = Image.fromarray(seg.astype(np.uint8))
-    seg_image.show()
+    data_all('data/train_images/dataset_panicum/images_train/',       ###caminho imagem
+             'data/train_images/dataset_panicum/annotations_train/',  ###caminho  anotação
+             "1.png", '1_teste')
+    ###nome para abrir   ###nome para salvar
 
-    save_file('data/train_images/dataset_panicum/images_train/', '1_aug1', 'png', image, '')
-    save_file('data/train_images/dataset_panicum/annotations_train/', '1_aug1', 'png', seg_image,'')
+            
+
+
 
     '''if use_trained_model:
         model = load_trained_model(models_list[sel_model], num_classes)

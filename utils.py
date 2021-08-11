@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pylab
 import random
-import cv2 # OpenCV (Open Source Computer Vision Library) is an open source computer vision and machine learning software library (https://opencv.org/)
+import \
+    cv2  # OpenCV (Open Source Computer Vision Library) is an open source computer vision and machine learning software library (https://opencv.org/)
 from PIL import Image
 from keras_segmentation.metrics import get_iou
 import os
@@ -32,12 +33,12 @@ def create_dir(filePath):
 def color_list(num_elements):
     random.seed(0)
     clist = [(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for _ in range(num_elements)]
-    clist[0] = (255, 255, 255) # BACKGROUND
-    clist[1] = (255, 0, 0) # CANA VERMELHO
-    clist[2] = (0, 255, 255) # ESTILHAÇO
-    clist[3] = (255, 51, 255)# RAIZ
-    clist[4] = (0, 255, 0) # TOCO VERDE
-    clist[5] = (0, 0, 255) # TOLETE AZUL
+    clist[0] = (255, 255, 255)  # BACKGROUND
+    clist[1] = (255, 0, 0)  # CANA VERMELHO
+    clist[2] = (0, 255, 255)  # ESTILHAÇO
+    clist[3] = (255, 51, 255)  # RAIZ
+    clist[4] = (0, 255, 0)  # TOCO VERDE
+    clist[5] = (0, 0, 255)  # TOLETE AZUL
     return clist
 
 
@@ -54,7 +55,7 @@ def matrix2augimage(matrix, size_tuple):
 
 def save_file(path, name_file, extension, data, num_format):
     if extension == 'txt':
-        np.savetxt(path + name_file + "." + extension, data, delimiter='', fmt=num_format) # '%.4f'
+        np.savetxt(path + name_file + "." + extension, data, delimiter='', fmt=num_format)  # '%.4f'
     else:
         if extension == 'csv':
             np.savetxt(path + name_file + "." + extension, data, delimiter=',', fmt=num_format)
@@ -68,14 +69,14 @@ def save_image(name_file, data):
     if show_graph:
         width = data.shape[1]
         height = data.shape[0]
-        plt.figure(figsize=(width/1000, height/1000), dpi=100)
+        plt.figure(figsize=(width / 1000, height / 1000), dpi=100)
         imgplot = plt.imshow(data)
         imgplot.set_cmap('RdYlGn')
-        #min1 = NDVIc[np.isfinite(map)].min()
-        #max1 = NDVIc[np.isfinite(map)].max()
-        #plt.clim(min1, max1)
+        # min1 = NDVIc[np.isfinite(map)].min()
+        # max1 = NDVIc[np.isfinite(map)].max()
+        # plt.clim(min1, max1)
         plt.colorbar()
-        #plt.axis('off')
+        # plt.axis('off')
         plt.title('NDVIc')
         pylab.show()
         plt.gca().set_axis_off()
@@ -84,17 +85,16 @@ def save_image(name_file, data):
         plt.savefig(name_file, dpi=1000)
     else:
         plt.imsave(name_file, data, dpi=1000)
-        #plt.imsave(name_file, data, dpi=1000, cmap='RdYlGn')
+        # plt.imsave(name_file, data, dpi=1000, cmap='RdYlGn')
 
 
 def roi_extraction(rgb, gt, labels):
-
     height = rgb.shape[0]
     width = rgb.shape[1]
 
     # Creating image with only interest regions
     img_roi = np.zeros([height, width, 3], dtype=np.uint8)
-    img_roi.fill(255) # or img[:] = 255
+    img_roi.fill(255)  # or img[:] = 255
 
     # Mask file: True = regions of interest
     mask = np.full((height, width), False, dtype=bool)
@@ -107,7 +107,6 @@ def roi_extraction(rgb, gt, labels):
         listOfCoordinates = list(zip(result[0], result[1]))
 
         for cord in listOfCoordinates:
-
             b = rgb[cord[0], cord[1], 0]
             g = rgb[cord[0], cord[1], 1]
             r = rgb[cord[0], cord[1], 2]
@@ -131,9 +130,9 @@ def iou_metric(gt, pred, num_classes):
     d_iou = np.std(iou)
     return [iou.tolist(), [m_iou, v_iou, d_iou]]
 
+
 ### https://github.com/aleju/imgaug
 def data_augmentation(img_path, seg_path):
-
     seq = iaa.Sequential([
         iaa.Crop(px=(0, 16)),  # crop images from each side by 0 to 16px (randomly chosen)
         iaa.Fliplr(0.5),  # horizontally flip 50% of the images
@@ -141,7 +140,7 @@ def data_augmentation(img_path, seg_path):
     ])
 
     img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
-    seg = cv2.cvtColor(cv2.imread(seg_path), cv2.COLOR_BGR2RGB)[:,:,0]
+    seg = cv2.cvtColor(cv2.imread(seg_path), cv2.COLOR_BGR2RGB)[:, :, 0]
 
     aug_det = seq.to_deterministic()
     image_aug = aug_det.augment_image(img)
@@ -154,11 +153,18 @@ def data_augmentation(img_path, seg_path):
     # segmap_aug -> ANNOTATION -> 1-aug1.png
 
     return image_aug, segmap_aug
-###chame dataargumentation, salvar as imagens
-def data_all(data_argumantation):
 
-    save_file()
-    return
+
+def data_all(img_route, seg_route, open_name, save_name):
+    img, seg = data_augmentation(img_route + open_name, seg_route + open_name)
+    image = Image.fromarray(img.astype(np.uint8))
+    image.show()
+    seg_image = Image.fromarray(seg.astype(np.uint8))
+    seg_image.show()
+    save_file(img_route, save_name, 'png', image, '')
+    save_file(seg_route, save_name, 'png', seg_image, '')
+
+
 '''im_col = cv2.imread("results/typification/" + result_desc + "_colored_" + f)
    im_col[np.where(im_col == 211)] = 255
    img_hsv = cv2.cvtColor(im_col, cv2.COLOR_RGB2HSV)
