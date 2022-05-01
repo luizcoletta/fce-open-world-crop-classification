@@ -3,17 +3,17 @@
 # > These functions are required in different places in the code
 # ------------------------------------------------------------------------------
 import numpy as np
+import pandas as pd
+from sklearn.model_selection import StratifiedKFold, KFold
+from itertools import combinations
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import plotly.express as px
 import matplotlib.pyplot as plt
 import pylab
 import random
-import \
-    cv2  # OpenCV (Open Source Computer Vision Library) is an open source computer vision and machine learning software library (https://opencv.org/)
-from PIL import Image
-from keras_segmentation.metrics import get_iou
-import os
-import imgaug as ia
-import imgaug.augmenters as iaa
 
+'''
 
 def file_exists(filePath):
     try:
@@ -164,7 +164,7 @@ def data_all(img_route, seg_route, open_name, save_name):
     save_file(img_route, save_name, 'png', image, '')
     save_file(seg_route, save_name, 'png', seg_image, '')
 
-
+'''
 '''im_col = cv2.imread("results/typification/" + result_desc + "_colored_" + f)
    im_col[np.where(im_col == 211)] = 255
    img_hsv = cv2.cvtColor(im_col, cv2.COLOR_RGB2HSV)
@@ -174,3 +174,433 @@ def data_all(img_route, seg_route, open_name, save_name):
    cl = clahe.apply(l)
    limg = cv2.merge((cl, a, b))
    final = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)'''
+
+class ST_functions:
+    # ------------------------------------------------------------------------------
+    # MAIN FUNCTIONS
+    # ------------------------------------------------------------------------------
+
+    def __init__(self):
+        pass
+
+    def class_error(self, pred, test_labels, classe):
+        c = 0
+        dflabels = pd.DataFrame(test_labels)
+        dfpred = pd.DataFrame(pred)
+
+        ind = dflabels.loc[dflabels[0] == classe].index
+        labels_val = dflabels.loc[dflabels[0] == classe].to_numpy()
+
+        pred_val = dfpred.iloc[ind].to_numpy()
+
+        if len(labels_val) == 0 or len(labels_val) == []:
+            error = -1
+        else:
+
+            for i in range(len(labels_val)):
+                if pred_val[i] == labels_val[i]:
+                    c += 1
+
+            error = 1 - (c / len(labels_val))
+
+        return round(error, 3)
+
+## ver depois como adequar essa função
+#---------------------------------------
+    '''
+    def save_file(name_file, data, extension):
+        if extension == 'txt':
+            np.savetxt(name_file, data, delimiter='', fmt='%.4f')
+            !cp  "$name_file" "/content/drive/MyDrive/MyFiles/PROJECTS/2021-Weed-Detection/Codes/data"
+        else:
+            if extension == 'csv':
+                np.savetxt(name_file, data, delimiter=',', fmt='%.4f')
+                !cp "$name_file" "/content/drive/MyDrive/MyFiles/PROJECTS/2021-Weed-Detection/Codes/data"
+            else:
+                if extension == 'png':
+                    save_map(data, name_file)
+                    !cp
+                    "$name_file" "/content/drive/MyDrive/MyFiles/PROJECTS/2021-Weed-Detection/Codes/data"
+
+    '''
+
+    def get_batch_data(self, train_data_path, test_data_path, class_index, join_data, size_batch, iter):
+        col1 = np.array([list(range(1, 9))])
+        # col2 = np.array([list(range(10,22))])
+        col3 = np.array([np.hstack([[0] * 5, [1] * 3])])
+
+        # train_data = np.concatenate((col1, col2), axis=0)
+        train_data = np.concatenate((col1, col3), axis=0).T
+        train_data = pd.DataFrame(train_data)
+
+        col1 = np.array([list(range(9, 13))])
+        # col2 = np.array([list(range(10,16))])
+        col3 = np.array([np.hstack([[0] * 3, [1] * 1])])
+
+        # test_data = np.concatenate((col1, col2), axis=0)
+        test_data = np.concatenate((col1, col3), axis=0).T
+        test_data = pd.DataFrame(test_data)
+
+        df_training = []
+        train = []
+        train_labels = []
+        if train_data_path:
+            df_training = pd.read_csv(train_data_path)  # , header=None)
+            # print(df_training)
+            # df_training = train_data
+            feat_index = list(range(df_training.shape[1]))
+            feat_index.remove(class_index)
+            train = df_training.iloc[:, feat_index].values
+            train_labels = df_training.iloc[:, class_index].values
+
+        df_test = []
+        test = []
+        test_labels = []
+        if test_data_path:
+            df_test = pd.read_csv(test_data_path)  # , header=None)
+            # print(df_test)
+            # df_test = test_data
+            feat_index = list(range(df_test.shape[1]))
+            feat_index.remove(class_index)
+            test = df_test.iloc[:, feat_index].values
+            test_labels = df_test.iloc[:, class_index].values
+
+        if join_data:
+            data = np.concatenate([train, test])
+            data_labels = np.concatenate([train_labels, test_labels])
+        else:
+            data = train
+            data_labels = train_labels
+        # print(data.shape)
+        # print(data_labels)
+
+        num_objects = data.shape[0]
+
+        folds = int(num_objects / size_batch)
+
+        print(folds)
+
+        '''skf = StratifiedKFold(n_splits=folds)
+        for train, test in skf.split(data, data_labels):
+        print(train)
+        print(test)
+        #print('train -  {}   |   test -  {}'.format(np.bincount(y[train]), np.bincount(y[test])))'''
+
+        i = 1
+        test_data_fold = []
+        test_labels_fold = []
+        train_data_fold = []
+        train_labels_fold = []
+        # X, y = data, data_labels
+        skf = StratifiedKFold(n_splits=folds, random_state=None, shuffle=False)
+
+        for train_index, test_index in skf.split(data, data_labels):
+            if (iter == i):
+                # print ("\nIteração = ", i)
+                # print("TEST-DATA:", data[test_index], "\nTEST-LABELS:", data_labels[test_index])
+                # print("TRAIN-DATA:", data[train_index], "\nTRAIN-LABELS:", data_labels[train_index])
+                test_data_fold = data[test_index]
+                test_labels_fold = data_labels[test_index]
+                train_data_fold = data[train_index]
+                train_labels_fold = data_labels[train_index]
+            i = i + 1
+
+        '''while (train_index, test_index in skf.split(X, y)) and (iter<i):
+            i= i+1
+            print ("\nIteração= ", i)
+            print("TRAIN:", data[train_index], "\nTEST:", data_labels[test_index])
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            #print("X_Test:", X_test)
+            #print("y_Test:", y_test)
+            #print (X_test.shape[0])
+            #print (y_test.shape[0])
+            print (data[train_index].shape[0])
+            break'''
+
+        '''for train_index, test_index in skf.split(X, y):
+            i= i+1
+            print ("\nIteração= ", i)
+            print("TRAIN:", data[train_index], "\nTEST:", data_labels[test_index])
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            #print("X_Test:", X_test)
+            #print("y_Test:", y_test)
+            #print (X_test.shape[0])
+            #print (y_test.shape[0])
+            print (data[train_index].shape[0])'''
+
+        return test_data_fold, test_labels_fold, train_data_fold, train_labels_fold
+
+
+
+    # def hyperparametersTuning(...):
+    # TO DO
+    # https://scikit-learn.org/stable/modules/grid_search.html
+    # https://www.kaggle.com/udaysa/svm-with-scikit-learn-svm-with-parameter-tuning
+
+
+    ### Generating subset of features randomly
+    def features_subset(self, tot_features, num_subsetfeat):
+        features_list = list(range(0, tot_features))
+        comb = combinations(features_list, num_subsetfeat)
+        # perm = permutations(features_list, num_subsetfeat) # order matters, e.g.: (0,1) <> (1,0)
+        subsetfeat_list = []
+        for i in list(comb):
+            subsetfeat_list.append(i)
+        # ----------------------------------------------------------------------------------------------
+        ### Versão baseada em sortear permutação e realizar um cortes na proporcao de 'size_subsetfeat'
+        # features_list = list(range(0, num_features))
+        #### INEFICIENTE, LISTA COM TODAS AS PERMUTAÇÕES POSSÍVEIS DE N FEATURES!!!
+        # feat_perm = [p for p in permutations(features_list)]
+        # size_feat_perm = len(list(feat_perm))
+        # num_feat_perm = randrange(size_feat_perm)
+        # sel_feat_perm = list(feat_perm)[num_feat_perm]
+        # print(sel_feat_perm)
+        # subsetfeat_list = []
+        # int_size_subsetfeat = floor(len(sel_feat_perm) * size_subsetfeat)
+        # for n in range(int_size_subsetfeat, num_features + 1, int_size_subsetfeat):
+        #    subsetfeat_list.append(sel_feat_perm[n - int_size_subsetfeat:n])
+        #    # print(sel_feat_perm[n-int_size_subsetfeat:n])
+        # ----------------------------------------------------------------------------------------------
+        return subsetfeat_list
+
+
+    def clusterEnsemble(self, data):
+        ssfeat_list = self.features_subset(data.shape[1], 2)
+        max_k = int(len(data) ** (1 / 3))  # equal to cubic root # int(math.sqrt(len(apat_iceds_norm)))
+        num_init = 5  # 20
+        range_n_clusters = list(range(2, max_k))
+
+        silhouette_list = []
+        clusterers_list = []
+        cluslabels_list = []
+        nuclusters_list = []
+
+        matDist = np.array(self.euclidean_distances(data, data))
+
+        for n_size_ssfeat in range(int(len(ssfeat_list))):
+
+            # Subconjunto de features
+            subset_feat = ssfeat_list[n_size_ssfeat]
+            X = data[:, subset_feat]
+
+            best_silhouette_avg = -1.0
+            best_clusterer = []
+            best_cluster_labels = []
+            best_num_clusters = -1
+
+            for n_clusters in range_n_clusters:
+                for n_init in range(num_init):
+
+                    # Initialize the clusterer with n_clusters value and a random generator
+                    # seed of 10 for reproducibility.
+                    clusterer = KMeans(n_clusters=n_clusters, init='random')
+                    cluster_labels = clusterer.fit_predict(X)
+
+                    # The silhouette_score gives the average value for all the samples.
+                    # This gives a perspective into the density and separation of the formed clusters
+                    silhouette_avg = silhouette_score(X, cluster_labels)
+
+                    if (silhouette_avg > best_silhouette_avg):
+                        best_silhouette_avg = silhouette_avg
+                        best_clusterer = clusterer
+                        best_cluster_labels = cluster_labels
+                        best_num_clusters = n_clusters
+
+                    # print("For n_clusters =", n_clusters, "The average silhouette_score is :", silhouette_avg)
+                    # clusterer_plots(X, cluster_labels, n_clusters, clusterer)
+
+            silhouette_list.append(best_silhouette_avg)
+            clusterers_list.append(best_clusterer)
+            cluslabels_list.append(best_cluster_labels)  ### vai usar para gera a matriz de similaridades abaixo
+            nuclusters_list.append(best_num_clusters)
+
+        ############# CONSENSO ###################
+        cluslabels_list = np.array(cluslabels_list)
+        caMatrix = np.array([[0] * cluslabels_list.shape[1]] * cluslabels_list.shape[1])
+
+        for i in range(cluslabels_list.shape[
+                           0]):  # for (int i = 0; i < cluEnsemble.length; i++) {  ### TAMANHO DA LISTA cluslabels_list
+            for j in range(cluslabels_list.shape[
+                               1]):  # for (int j = 0; j < data.numInstances(); j++) { ### len(cluslabels_list[0])
+                for k in range(cluslabels_list.shape[
+                                   1]):  # for (int k = 0; k < data.numInstances(); k++) { ### len(cluslabels_list[0])
+                    if cluslabels_list[i][j] == cluslabels_list[i][
+                        k]:  ######## cluslabels_list[i][j] == cluslabels_list[i][k]
+                        caMatrix[j][k] += 1
+                    if i == cluslabels_list.shape[0] - 1:
+                        caMatrix[j][k] = caMatrix[j][k] / cluslabels_list.shape[0]  ### TAMANHO DA LISTA cluslabels_list
+        # print("Best Silhoutte =", silhouette_list, " Number of Clusters =", nuclusters_list)
+        return [silhouette_list, clusterers_list, cluslabels_list, nuclusters_list, caMatrix, matDist]
+
+
+    def remove_class(self, hidden_class, train, train_labels):
+        train_labels.columns = ['Class']
+        labeled_data = pd.concat([train, train_labels], axis=1, sort=False)
+        labeled_data = labeled_data[labeled_data.Class != hidden_class]
+
+        t = labeled_data.iloc[:, :-1]
+        tl = labeled_data.iloc[:, -1:]
+
+        tl.columns = [0]
+
+        return [t, tl]
+
+
+    def increment_training_set(self, sel_objects, train, train_labels, test, test_labels):
+        self.visualize_data(test, test_labels, sel_objects)
+        test = pd.DataFrame(test)
+        test_labels = pd.DataFrame(test_labels)
+        objects = test.iloc[sel_objects, :]
+        objects_labels = test_labels.iloc[sel_objects, :]
+        # print("Selected Objects Classes: " + str(objects_labels.values.ravel()))
+        train = pd.DataFrame(train)
+        train_labels = pd.DataFrame(train_labels)
+        train.columns = objects.columns
+        train_labels.columns = objects_labels.columns
+        tr = pd.concat([train, objects], axis=0)
+        trl = pd.concat([train_labels, objects_labels], axis=0)
+        te = test.drop(test.index[sel_objects])
+        tel = test_labels.drop(test_labels.index[sel_objects])
+        return [tr.to_numpy(), trl.to_numpy(), te.to_numpy(), tel.to_numpy()]
+
+
+    def reduce_matrix(self, sel_objects, SSet):
+        sim_mat = np.delete(SSet, np.s_[sel_objects], axis=0)
+        sim_mat = np.delete(sim_mat, np.s_[sel_objects], axis=1)
+        return sim_mat
+
+
+    def calc_class_entropy(self, p):
+        e = [0] * p.shape[0]
+        c = len(p[0, :])
+        for i in range(p.shape[0]):
+            e[i] = - np.sum(p[i, :] * np.log2(p[i, :])) / np.log2(c)
+        return e
+
+
+    def calc_density(self, s):
+        h = 5
+        d = [0] * s.shape[0]
+        for i in range(s.shape[0]):
+            d[i] = np.sum(s[i, :][s[i, :].argsort()[h * (-1):]]) / h
+        return d
+
+
+    def calc_low_density(self, d):
+        h = 5
+        l = [0] * d.shape[0]
+        for i in range(d.shape[0]):
+            l[i] = np.sum(d[i, :][d[i, :].argsort()[h * (-1):]]) / h
+        return l
+
+
+    def c3e_sl(self, piSet, SSet, I, alpha):
+        N = len(piSet)
+        c = len(piSet[0, :])
+        # piSet = np.array(piSet)
+        y = [[1] * c] * N
+        y = np.divide(y, c)
+        labels = [-1] * N
+        # y = pd.DataFrame(y)
+        for k in range(0, I):
+            for j in range(0, N):
+                diffi = np.arange(0, N)
+                cond = diffi != j
+                t1 = np.array(SSet[j][cond])
+                # http://mathesaurus.sourceforge.net/matlab-numpy.html
+                # https://numpy.org/doc/stable/user/numpy-for-matlab-users.html
+                p1 = (np.transpose(t1 * np.ones([c, 1])) * y[cond, :]).sum(axis=0)
+                p2 = sum(t1)
+                y[j, :] = (piSet[j, :] + (2 * alpha * p1)) / (1 + 2 * alpha * p2)
+                labels[j] = int(np.where(y[j, :] == np.max(y[j, :]))[0])
+        return y, labels
+
+
+    def eds(self, train, test, y, SSet, DistMat):
+        ### entropy measuse
+        e = self.calc_class_entropy(y)
+        candidates = e > np.percentile(e, 75)
+        values = np.array(e)[candidates]
+
+        #### density measure - não funciona bem!
+        d = self.calc_density(SSet)
+        candidates = d > np.percentile(d, 75)
+        values = np.array(d)[candidates]
+
+        ### low density measure
+        l = self.calc_low_density(DistMat)
+        candidates = l > np.percentile(l, 75)
+        values = np.array(l)[candidates]
+
+        #### silhouette measure
+        from sklearn.metrics import silhouette_samples
+        sil_test = np.concatenate([train, test])
+        clabels = self.classAnnotation(sil_test)
+        sil_values = silhouette_samples(sil_test, clabels[0])
+        s = sil_values[len(test) * (-1):]
+        candidates = s > np.percentile(s, 25)
+        values = np.array(s)[candidates]
+
+        ### ensembles
+        el = np.multiply(e, l)
+        candidates = el > np.percentile(el, 75)
+        values = np.array(el)[candidates]
+
+        sc = 1 - s
+        esc = np.multiply(e, sc)
+        candidates = esc > np.percentile(esc, 75)
+        values = np.array(esc)[candidates]
+
+        return [candidates, values]
+
+
+    def ic(self, probs, SSet, train, train_labels, test, test_labels):
+        y = self.c3e_sl(probs, SSet, 5, 0.001)
+        for k in range(10):
+            e = self.calc_class_entropy(y)
+            d = self.calc_density(SSet)
+            w = self.eds(e, d, 5, SSet)
+            [train, train_labels, test, test_labels] = self.increment_training_set(w, train, train_labels, test, test_labels)
+            probs = self.svmClassification(train, train_labels, test, test_labels)
+            SSet = self.reduce_matrix(w, SSet)
+            y = self.c3e_sl(probs, SSet, 5, 0.001)
+            print("Iteration " + str(k + 1) + " - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)))
+
+
+    ### ====================================================================================================================
+    ### Functions for data visualization
+    ### --------------------------------------------------------------------------------------------------------------------
+
+
+    def visualize_data(self, X, labels, med_ind_list):
+        color_discrete_map = {'-3': 'rgb(255,255,0)',
+                              'Centers': 'rgb(0,0,0)',
+                              '-1': 'rgb(255,0,0)',
+                              'Cluster 0': 'rgb(0,138,0)',
+                              'Cluster 1': 'rgb(168, 2, 2)',
+                              'Cluster 2': 'rgb(0,0,133)',
+                              'Cluster 3': 'rgb(189,91,0)',
+                              'Cluster 4': 'rgb(130,0,156)'}
+
+        df_X = pd.DataFrame({'X': X[:, 0], 'Y': X[:, 1], 'Labels': [str(labels[i]) for i in range(len(labels))]})
+        if (med_ind_list != []):
+            med_labels = np.array([-1] * len(med_ind_list))
+            df_M = pd.DataFrame({'X': X[med_ind_list, 0], 'Y': X[med_ind_list, 1],
+                                 'Labels': med_labels.astype(str)})
+            df_X = pd.concat([df_X, df_M])
+
+        fig = px.scatter(df_X, x='X', y='Y', color='Labels',
+                         color_discrete_map=color_discrete_map, width=500, height=400)
+        fig.update_traces(marker=dict(size=8), line=dict(color='rgb(0,0,0)', width=4),
+                          selector=dict(mode='Masked'))
+        ### TENTE AI INVÉS DO FIG.SHOW() USAR UMA LINHA PARA SALVAR EM DISCO EM ALGUMA EXTENSÃO DE IMAGEM.
+        fig.show()
+        # fig.write_image("selection_"+str(k)+".png")
+        # drive.mount('drive')
+        # images_dir = '/content/drive/MyDrive/MyFiles/PROJECTS/2020-Self-Training/Codes/fce-self-training-graficos'
+        # plt.savefig(f"{images_dir}/abc.png")
+
+        # plt.savefig('name.png')
+        # files.download('name.png')

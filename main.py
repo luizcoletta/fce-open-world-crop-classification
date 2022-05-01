@@ -1,3 +1,4 @@
+'''
 import time
 import tensorflow as tf
 import cv2
@@ -96,21 +97,27 @@ def prediction(model, result_folder, num_classes, test_img_path, test_ann_path):
     files_list = [f for f in listdir(test_img_path) if isfile(join(test_img_path, f))]
 
     ### https://divamgupta.com/image-segmentation/2019/06/06/deep-learning-semantic-segmentation-keras.html
-    '''from keras_segmentation.predict import predict, predict_multiple'''
+    '''
 
-    '''predict(
+'''
+from keras_segmentation.predict import predict, predict_multiple
+'''
+
+'''
+predict(
     	checkpoints_path="checkpoints/vgg_unet_1",
     	inp="dataset_path/images_prepped_test/0016E5_07965.png",
     	out_fname="output.png"
-    )'''
+  )'''
 
-    '''predict_multiple(
+'''predict_multiple(
     	checkpoints_path="models/vgg_unet/vgg_unet_1",
     	inp_dir=test_img_path,
     	out_dir="outputs/",
         colors=cc
     )'''
 
+'''
     for f in files_list:
 
         test_img = test_img_path + f
@@ -180,7 +187,9 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
 
 
 
-    '''if use_trained_model:
+    '''
+'''
+    if use_trained_model:
         model = load_trained_model(models_list[sel_model], num_classes)
     else:
         model = train_model(models_list[sel_model], dataset_name, num_classes, epochs)
@@ -196,14 +205,51 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
 
     results.to_csv("results/results_" + models_list[sel_model][0] + ".csv", index=False, header=True)'''
 
+'''
+'''
+
+from install_req import install_missing_pkg
+from tensorflow import keras
+from ST_modules.Variational_Autoencoder import VAE
+from utils import ST_functions as functions
+from ST_modules.Classifiers import clfiers
+
+def load_dataset(dataset_name):
+    #inserir os outros datasets aqui
+    if dataset_name == 'mnist':
+        (train, train_labels), (test, test_labels) = keras.datasets.mnist.load_data()
+
+    return train, train_labels, test, test_labels
+
+
+def main(dataset_name, len_train, vae_epoch):
+    train, train_labels, test, test_labels = load_dataset(dataset_name)
+
+    vae = True # se True, então utiliza o VAE para reduzir a dimensionalidade
+
+    if vae:
+        print('\nRunning VAE to generate latent variables...\n')
+        vae_model = VAE(train, train_labels, test, test_labels, epoch=vae_epoch,
+                        len_train=len_train)  # len_train --> tamanho do conjunto de treino
+        data_train, data_test = vae_model.output
+
+        print('\nVAE has finished!!\n')
+
 
 if __name__ == "__main__":
+    check_pkg = install_missing_pkg()  # faz a instalação de pacotes faltantes, se houver
+    fs = functions() # cria objeto contendo funções diversas a serem usadas ao longo do código
 
     num_classes = 6
-    dataset_name = 'typification_v1'
+    dataset_name = 'mnist'
+    len_train = 60000  # tamanho do conjunto de treinamento do dataset
     validation_task = True
     use_trained_model = False
-    epochs = 5
+    vae_epochs = 2 #quantidade de épocas para a execução do VAE
     sel_model = 0
 
-    main(num_classes, dataset_name, validation_task, use_trained_model, epochs, sel_model)
+
+
+
+    # main(num_classes, dataset_name, validation_task, use_trained_model, epochs, sel_model)
+    main(dataset_name, len_train, vae_epochs)
