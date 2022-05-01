@@ -9,9 +9,8 @@ from itertools import combinations
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 import plotly.express as px
-import matplotlib.pyplot as plt
-import pylab
-import random
+from scipy.spatial import distance
+
 
 '''
 
@@ -472,13 +471,6 @@ class ST_functions:
         return sim_mat
 
 
-    def calc_class_entropy(self, p):
-        e = [0] * p.shape[0]
-        c = len(p[0, :])
-        for i in range(p.shape[0]):
-            e[i] = - np.sum(p[i, :] * np.log2(p[i, :])) / np.log2(c)
-        return e
-
 
     def calc_density(self, s):
         h = 5
@@ -604,3 +596,162 @@ class ST_functions:
 
         # plt.savefig('name.png')
         # files.download('name.png')
+
+    def find_novelties(self, data, data_labels, data_centers, data_dists, new_data, new_data_labels, new_data_centers,
+                       new_data_dists, kmeans_approach, thrs):
+
+        # the higher the value the greater the qualification to be a new cluster object
+        threshold = thrs
+
+        # 0: new obj center X nearest data obj
+        # 1: new obj center X nearest data center
+        # 2: new obj center * new objs density X nearest data center * data density
+        # 3: new obj center * (std new obj cluster / std near data cluster) X near data center * (std near data cluster / std new obj cluster)
+        approach = kmeans_approach
+
+        silhouette = [-1] * len(new_data_labels)
+        new_centers_kept = [-1] * len(new_data_centers)
+
+        nearest_data_object_position = list()
+        min_val = 0.0000000001
+        # print(new_data_labels)
+
+        for i in range(len(new_data_labels)):
+            #    if i%50 ==0: print(i)
+
+            ### new object distance to the center of its cluster
+            # dist_new_obj_center = new_data_dists[i, new_data_labels[i]]
+
+            dist_new_obj_center = np.min(new_data_dists[i])
+            #     print([i,new_data_labels[i]])
+
+            ### new object distance to the nearest center calculated from existing data
+            dist_data_centers = []
+            for j in range(len(data_centers)):
+                dist_data_centers.append(np.linalg.norm(new_data[i, :] - data_centers[j, :]))
+            nearest_data_cluster = np.argmin(dist_data_centers)  # label nearest data cluster
+            dist_nearest_data_center = dist_data_centers[nearest_data_cluster]
+
+            ### find distance of the new object to the nearest object belonging to the nearest data cluster
+            objects_nearest_data_cluster = data[data_labels == nearest_data_cluster, :]
+            dists_obs_nearest_data_cluster = distance.cdist(objects_nearest_data_cluster, np.array([new_data[i, :]]),
+                                                            'euclidean')
+            nearest_data_object = np.argmin(dists_obs_nearest_data_cluster)
+            nearest_data_object_position.append(objects_nearest_data_cluster[nearest_data_object])
+            distance_nearest_data_object = dists_obs_nearest_data_cluster[nearest_data_object][0]
+
+            # obtaining weights which can balance silhouette metric
+            num_new_objs = sum(list(new_data_labels == new_data_labels[i]))
+            num_data_objs = sum(list(data_labels == nearest_data_cluster))
+
+            # dists_new_objs = np.sum(new_data_dists[list(new_data_labels == new_data_labels[i]), new_data_labels[i]])
+            dists_new_objs = np.sum(
+                new_data_dists[list(new_data_labels == new_data_labels[i]), np.argmin(new_data_dists[i])])
+
+            for ob in range(len(data_labels)):
+                if data_labels[ob] == nearest_data_cluster:
+                    index = ob
+                    break
+
+            # dists_data = np.sum(data_dists[list(data_labels == nearest_data_cluster), nearest_data_cluster])
+            dists_data = np.sum(data_dists[list(data_labels == nearest_data_cluster), np.argmin(data_dists[index])])
+
+            density_new_objs = dists_new_objs / num_new_objs
+            density_data = dists_data / num_data_objs
+
+            # std_new_objs = np.std(new_data_dists[list(new_data_labels == new_data_labels[i]), new_data_labels[i]])
+            std_new_objs = np.std(
+                new_data_dists[list(new_data_labels == new_data_labels[i]), np.argmin(new_data_dists[i])])
+
+            # std_data = np.std(data_dists[list(data_labels == nearest_data_cluster), nearest_data_cluster])
+            std_data = np.std(data_dists[list(data_labels == nearest_data_cluster), np.argmin(data_dists[index])])
+
+            a0 = dist_new_obj_center * density_new_objs
+            b0 = distance_nearest_data_object * density_data
+
+            a1 = dist_new_obj_center
+            b1 = dist_nearest_data_center
+
+            a2 = dist_new_obj_center * density_new_objs
+            b2 = dist_nearest_data_center * density_data
+
+            a3 = dist_new_obj_center * (std_new_objs / (std_data + min_val))
+            b3 = dist_nearest_data_center * (std_data / (std_new_objs + min_val))
+
+            sil_calc_terms = np.array([[a0, b0], [a1, b1], [a2, b2], [a3, b3]])
+
+            # print(sil_calc_terms[approach, :])
+            silhouette[i] = (sil_calc_terms[approach, 1] - sil_calc_terms[approach, 0]) / np.max(
+                sil_calc_terms[approach, :])
+
+            if silhouette[i] < threshold:
+                new_data_labels[i] = nearest_data_cluster
+            else:
+                # when a new cluster is found (by keeping a new center)
+                # a new label higher than all already annotated is defined for its objects
+                # position p with -1 in new_centers_kept means that the p cluster in new data won't be kept
+                if new_centers_kept[new_data_labels[i]] < 0:
+                    new_centers_kept[new_data_labels[i]] = new_data_labels[i] + int(np.max(new_data_labels)) + 1
+                new_data_labels[i] = new_centers_kept[new_data_labels[i]]
+            # np.savetxt('silhouette.csv', silhouette, delimiter=',', fmt='%1.4f')
+            # np.savetxt('silhouette_density.csv', silhouette_density, delimiter=',', fmt='%1.4f')
+        # print(sum(silhouette)/len(silhouette))
+
+        return new_data_labels, new_centers_kept, silhouette, nearest_data_object_position
+
+        #
+        # Main function incorporating new data into the database by which novelties can be detected
+
+    def augment_data(self, num_ini_clu, data, data_labels, data_centers, data_dists, new_data, new_data_labels,
+                     new_data_centers, new_data_dists, kmeans_approach, threshold):
+
+        new_data_labels, new_centers_kept, silhouette, _ = self.find_novelties(data, data_labels, data_centers,
+                                                                               data_dists,
+                                                                               new_data,
+                                                                               new_data_labels, new_data_centers,
+                                                                               new_data_dists, kmeans_approach,
+                                                                               threshold)
+
+        # ------------------------------------------------------------------------------------------------------------------
+        # Incorporating new data
+        # ------------------------------------------------------------------------------------------------------------------
+        data = np.concatenate([data, new_data])
+
+        # ------------------------------------------------------------------------------------------------------------------
+        # Arranging existing data centers with those new ones (from the new data) assigning new ordered labels to them
+        # ------------------------------------------------------------------------------------------------------------------
+        for i in range(len(new_centers_kept)):
+
+            if new_centers_kept[i] >= 0:  # if higher than 0 means the new data cluster was kept (it is a new pattern!)
+                data_centers = np.concatenate([data_centers, [new_data_centers[i, :]]])
+                new_label = (data_centers.shape[
+                                 0] - 1)  # finding its new label after joining it to existing data partition
+                new_data_labels[new_data_labels == new_centers_kept[i]] = new_label
+
+        # ------------------------------------------------------------------------------------------------------------------
+        # Incorporating the new data labels to database labels structure
+        # ------------------------------------------------------------------------------------------------------------------
+        data_labels = np.concatenate([data_labels, new_data_labels])
+
+        # ------------------------------------------------------------------------------------------------------------------
+        # Recalculating centers, distances, and labels
+        # ------------------------------------------------------------------------------------------------------------------
+        data_centers, data_dists = self.recalc_centers(data_centers, data, data_labels)
+        data_labels = self.recalc_labels(data_dists)
+
+        # visualize_data(data, data_labels, [], data_centers, [])
+        # visualize_graph(data_labels, num_ini_clu, data_centers)
+
+        return data, data_labels, data_centers, data_dists, silhouette
+
+    def recalc_centers(self, centers, data, labels):
+        for j in range(len(centers)):
+            centers[j, :] = data[labels == j].mean(0)
+        dists = distance.cdist(data, centers, 'euclidean')
+        return centers, dists
+
+    def recalc_labels(self, dists):
+        data_labels = []
+        for i in range(dists.shape[0]):
+            data_labels.append(np.argmin(dists[i]))
+        return np.array(data_labels)

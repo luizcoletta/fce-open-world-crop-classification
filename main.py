@@ -212,7 +212,7 @@ from install_req import install_missing_pkg
 from tensorflow import keras
 from ST_modules.Variational_Autoencoder import VAE
 from utils import ST_functions as functions
-from ST_modules.Classifiers import clfiers
+from ST_modules.Algorithms import alghms
 
 def load_dataset(dataset_name):
     #inserir os outros datasets aqui
