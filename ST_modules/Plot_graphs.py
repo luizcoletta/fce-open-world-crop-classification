@@ -17,9 +17,7 @@ class ST_graphics:
             cl_erro  = np.array(j).transpose()
             class_errors.append(cl_erro.copy())
 
-
-
-        for i in range(class_errors[0].shape(0)):
+        for i in range(class_errors[0].shape[0]):
             plt.figure()
             for j in range(len(name_metrics)):
 
@@ -28,11 +26,11 @@ class ST_graphics:
             plt.legend()
             plt.xlabel('Iteração', fontsize=15)
             plt.ylabel('Erro', fontsize=15)
-            plt.title('Erro da classe ' + str(i), fontsize=15)
+            plt.title('Erro da classe ' + str(i+1), fontsize=15)
             plt.rcParams['xtick.labelsize'] = 13
             plt.rcParams['ytick.labelsize'] = 13
-
             #plt.savefig('Erro da classe_' + str(i) + '.png')
+            plt.show()
 
     # gráfico de acurácia da função self_training
     # ---------------------------------------------
@@ -54,3 +52,4 @@ class ST_graphics:
         plt.rcParams['xtick.labelsize'] = 12
         plt.rcParams['ytick.labelsize'] = 12
         #plt.savefig('acurácia_do_self_training.png')
+        plt.show()

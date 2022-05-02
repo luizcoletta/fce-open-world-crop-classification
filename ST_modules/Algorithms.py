@@ -11,7 +11,7 @@ func = ST_functions()
 class alghms:
 
     def __init__(self, model_name, train, train_labels, test, test_labels, metric,
-                 nclusters_train=9, nclusters_test=10, kmeans_iter = None, kmeans_graph = False):
+                 nclusters_test=10, iter_graph = None, kmeans_graph = False):
 
         #interaction --> usado para gerar os gráficos a cada iteração
         #graph --> habilita a exibição de gráficos se True
@@ -25,13 +25,15 @@ class alghms:
 
         if metric == 'silhouette0':
 
-            self.e = self.kmeans_for_new_class(train, test, 0, kmeans_iter, kmeans_graph,
-                                               nclusters_train, nclusters_test)
+            self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph,
+                                               len(np.unique(train_labels)), nclusters_test)
+
 
         if metric == 'silhouette1':
 
-            self.e = self.kmeans_for_new_class(train, test, 1, kmeans_iter, kmeans_graph,
-                                               nclusters_train, nclusters_test)
+            self.e = self.kmeans_for_new_class(train, test, 1, iter_graph, kmeans_graph,
+                                               len(np.unique(train_labels)), nclusters_test)
+
 
 
     def svmClassification(self, train, train_labels, test):
@@ -49,7 +51,9 @@ class alghms:
             e[i] = - np.sum(p[i, :] * np.log2(p[i, :])) / np.log2(c)
         return e
 
-    def kmeans_for_new_class(self, train, test, kmeans_approach, int, graph, nclusters_train, nclusters_test=10, threshold=0.8):
+    def kmeans_for_new_class(self, train, test, kmeans_approach, int, graph,
+                             nclusters_train, nclusters_test=10, threshold=0.8):
+
         kmeans = KMeans(n_clusters=nclusters_train,  # numero de clusters
                         init='k-means++', n_init=10,
                         # método de inicialização dos centróides que permite convergencia mais rápida
@@ -64,8 +68,7 @@ class alghms:
 
         pred_train = kmeans.fit_predict(train)
         kmeans_train_center = kmeans.cluster_centers_
-        objs_train_to_center_clusters = kmeans.fit_transform(
-            train)  # calcula a distancia de cada ponto até os centros de cada cluster
+        objs_train_to_center_clusters = kmeans.fit_transform(train)  # calcula a distancia de cada ponto até os centros de cada cluster
 
         pred_test = kmeans_test.fit_predict(test)
         kmeans_test_center = kmeans_test.cluster_centers_
@@ -83,7 +86,7 @@ class alghms:
             plt.scatter(kmeans_train_center[:, 0], kmeans_train_center[:, 1], s=70,
                         c='red')  # posição de cada centroide no gráfico
             plt.title('Conjunto de treinamento')
-            plt.savefig('kmeans_train_' + str(int))
+            #plt.savefig('kmeans_train_' + str(int))
             plt.show()
 
             plt.figure()
@@ -95,7 +98,7 @@ class alghms:
             plt.scatter(kmeans_test_center[:, 0], kmeans_test_center[:, 1], s=70,
                         c='red')  # posição de cada centroide no gráfico
             plt.title('Conjunto de teste')
-            plt.savefig('kmeans_test_' + str(int))
+            #plt.savefig('kmeans_test_' + str(int))
             plt.show()
 
             #------------------------------------------
