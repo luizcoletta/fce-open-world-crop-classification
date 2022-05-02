@@ -2,10 +2,10 @@ import pandas as pd
 from install_req import install_missing_pkg
 from tensorflow import keras
 from ST_modules.Variational_Autoencoder import VAE
-from utils import ST_functions as functions
 from sklearn.metrics import accuracy_score
 from ST_modules.Algorithms import alghms
-from utils import ST_functions
+from ST_modules.Plot_graphs import ST_graphics as graph
+from utils import ST_functions as ft
 
 '''
 import time
@@ -246,19 +246,41 @@ def load_dataset(dataset_name, vae):
         test = df_test.iloc[:, feat_index].values
         test_labels = df_test.iloc[:, class_index].values
 
+    if dataset_name == 'iris' and vae == False:
+
+        train_data_path= 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/iris2d-train.csv'
+        test_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/iris2d-test.csv'
+
+        class_index = 2
+        df_training = pd.read_csv(train_data_path)
+        feat_index = list(range(df_training.shape[1]))
+        feat_index.remove(class_index)
+        train = df_training.iloc[:, feat_index].values
+        train_labels = df_training.iloc[:, class_index].values
+
+        df_test = pd.read_csv(test_data_path)
+        feat_index = list(range(df_test.shape[1]))
+        feat_index.remove(class_index)
+        test = df_test.iloc[:, feat_index].values
+        test_labels = df_test.iloc[:, class_index].values
+
     return train, train_labels, test, test_labels
 
 
 # Algoritmo de self-training para o MNIST
 
 def self_training(iter, model_name, train, train_labels, test, test_labels, metric,
-                  n_train_class=9, n_test_class=10, kmeans_iter=None, graph=False):
+                  n_train_class=9, n_test_class=10, kmeans_iter=None, kmeans_graph=False):
     # x_axis.clear()
     # y_axis.clear()
     # erro_das_classes.clear()
     # erro_da_classe_por_rodada.clear()
 
-    x_axis = [], y_axis = [], erro_das_classes = [], erro_da_classe_por_rodada = []
+    x_axis = []
+    y_axis = []
+    erro_das_classes = []
+    erro_da_classe_por_rodada = []
+
     test_original = test
     labels_original = test_labels
 
@@ -275,7 +297,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
             # https://scikit-learn.org/stable/modules/svm.html
             classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric,
-                                        n_train_class, n_test_class, kmeans_iter,graph)
+                                        n_train_class, n_test_class, kmeans_iter, kmeans_graph)
 
             preds = classifier_results.pred, probs = classifier_results.probs, e = classifier_results.e
 
@@ -297,7 +319,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
             posicoes = df_e.index.values
             posicoes = posicoes.tolist()
-            p = 1250  # 96
+            p = 15  # 96
 
             w = posicoes[
                 0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
@@ -334,7 +356,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
 
 def main(dataset_name, model_name, metric, use_vae , vae_epoch, len_train, n_int,
-         n_train_class=9, n_test_class=10, kmeans_iter=None, graph=False):
+         n_train_class=9, n_test_class=10, kmeans_iter=None, kmeans_graph=False):
 
     train, train_labels, test, test_labels = load_dataset(dataset_name, use_vae)
 
@@ -350,22 +372,26 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, len_train, n_int
 
     x_ent, y_ent, erros_ent = self_training(n_int, model_name, train, train_labels, test,
                                             test_labels, metric, n_train_class, n_test_class,
-                                            kmeans_iter, graph)
+                                            kmeans_iter, kmeans_graph)
 
+    graph.class_error_graph(x_ent, erros_ent, metric)
+    graph.accuracy_graph(x_ent, y_ent, metric)
 
 if __name__ == "__main__":
-    ft = ST_functions()
 
     check_pkg = install_missing_pkg()  # faz a instalação de pacotes faltantes, se houver
-    fs = functions()  # cria objeto contendo funções diversas a serem usadas ao longo do código
+    #ft = ST_functions() # cria objeto contendo funções diversas a serem usadas ao longo do código
 
-    num_classes = 6
-    dataset_name = 'mnist'
-    len_train = 60000  # tamanho do conjunto de treinamento do dataset
-    validation_task = True
-    use_trained_model = False
-    vae_epochs = 2  # quantidade de épocas para a execução do VAE
-    sel_model = 0
+    # PARÂMETROS:
+    num_classes = 2
+    dataset_name = 'iris'
+    use_vae = False     # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
+    len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
+    vae_epochs = 2      # quantidade de épocas para a execução do VAE
+    sel_model = 'svm'   # define o classificador a ser usado
+    metric = 'entropy'  # define a metrica para descobrir classes novas
+    n_iter = 8          # numero de iterações da rotina de self-training
 
     # main(num_classes, dataset_name, validation_task, use_trained_model, epochs, sel_model)
-    main(dataset_name, len_train, vae_epochs)
+    main(dataset_name, sel_model, metric, use_vae , vae_epochs, len_train, n_iter,
+         num_classes, n_test_class=3, kmeans_iter=None, kmeans_graph=False)

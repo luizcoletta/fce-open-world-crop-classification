@@ -11,7 +11,7 @@ func = ST_functions()
 class alghms:
 
     def __init__(self, model_name, train, train_labels, test, test_labels, metric,
-                 nclusters_train=9, nclusters_test=10, kmeans_iter = None, graph = False):
+                 nclusters_train=9, nclusters_test=10, kmeans_iter = None, kmeans_graph = False):
 
         #interaction --> usado para gerar os gráficos a cada iteração
         #graph --> habilita a exibição de gráficos se True
@@ -25,12 +25,12 @@ class alghms:
 
         if metric == 'silhouette0':
 
-            self.e = self.kmeans_for_new_class(train, test, 0, kmeans_iter, graph,
+            self.e = self.kmeans_for_new_class(train, test, 0, kmeans_iter, kmeans_graph,
                                                nclusters_train, nclusters_test)
 
         if metric == 'silhouette1':
 
-            self.e = self.kmeans_for_new_class(train, test, 1, kmeans_iter, graph,
+            self.e = self.kmeans_for_new_class(train, test, 1, kmeans_iter, kmeans_graph,
                                                nclusters_train, nclusters_test)
 
 
