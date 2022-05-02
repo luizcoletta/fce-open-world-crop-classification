@@ -1,3 +1,12 @@
+import pandas as pd
+from install_req import install_missing_pkg
+from tensorflow import keras
+from ST_modules.Variational_Autoencoder import VAE
+from utils import ST_functions as functions
+from sklearn.metrics import accuracy_score
+from ST_modules.Algorithms import alghms
+from utils import ST_functions
+
 '''
 import time
 import tensorflow as tf
@@ -208,48 +217,155 @@ def main(num_classes, dataset_name, validation_task, use_trained_model, epochs, 
 '''
 '''
 
-from install_req import install_missing_pkg
-from tensorflow import keras
-from ST_modules.Variational_Autoencoder import VAE
-from utils import ST_functions as functions
-from ST_modules.Algorithms import alghms
 
-def load_dataset(dataset_name):
-    #inserir os outros datasets aqui
-    if dataset_name == 'mnist':
+def load_dataset(dataset_name, vae):
+    # inserir os outros datasets aqui
+    if dataset_name == 'mnist' and vae == True:
         (train, train_labels), (test, test_labels) = keras.datasets.mnist.load_data()
+
+    if dataset_name == 'mnist' and vae == False:
+        train_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/mnist_lalent_features/main/mnist_train'
+        test_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/mnist_lalent_features/main/mnist_test'
+
+        class_index = 4
+        df_training = pd.read_csv(train_data_path, header=None,
+                                  names=['z_mean1', 'z_mean2', 'z_log_var1', 'z_log_var2', 'labels'])
+        # df_training.sort_values(by=[4],inplace = 'True',Ascending = 'True')
+        df_valores = df_training.loc[df_training['labels'] == 0]
+        df_training.drop(df_valores.index, inplace=True)
+
+        feat_index = list(range(df_training.shape[1]))
+        feat_index.remove(class_index)
+        train = df_training.iloc[:, feat_index].values
+        train_labels = df_training.iloc[:, class_index].values
+
+        df_test = pd.read_csv(test_data_path, header=None,
+                              names=['z_mean1', 'z_mean2', 'z_log_var1', 'z_log_var2', 'labels'])
+        feat_index = list(range(df_test.shape[1]))
+        feat_index.remove(class_index)
+        test = df_test.iloc[:, feat_index].values
+        test_labels = df_test.iloc[:, class_index].values
 
     return train, train_labels, test, test_labels
 
 
-def main(dataset_name, len_train, vae_epoch):
-    train, train_labels, test, test_labels = load_dataset(dataset_name)
+# Algoritmo de self-training para o MNIST
 
-    vae = True # se True, então utiliza o VAE para reduzir a dimensionalidade
+def self_training(iter, model_name, train, train_labels, test, test_labels, metric,
+                  n_train_class=9, n_test_class=10, kmeans_iter=None, graph=False):
+    # x_axis.clear()
+    # y_axis.clear()
+    # erro_das_classes.clear()
+    # erro_da_classe_por_rodada.clear()
 
-    if vae:
+    x_axis = [], y_axis = [], erro_das_classes = [], erro_da_classe_por_rodada = []
+    test_original = test
+    labels_original = test_labels
+
+    # [0.1, 0.1, 0.8]         [3]
+
+    # treinar um classificador com o train, train_labels
+    # e testar a classificação dele no 'test'
+    # vamos usar o probs para saber quais objetos nós vamos levar para training set
+    # saida é: probs e preds
+
+    for k in range(1, iter + 1):  # 11):
+
+        if len(test) > 0:
+
+            # https://scikit-learn.org/stable/modules/svm.html
+            classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric,
+                                        n_train_class, n_test_class, kmeans_iter,graph)
+
+            preds = classifier_results.pred, probs = classifier_results.probs, e = classifier_results.e
+
+            acuracia = accuracy_score(test_labels, preds)
+            erro_das_classes.append(erro_da_classe_por_rodada.copy())
+            erro_da_classe_por_rodada.clear()
+            x_axis.append(k)
+            y_axis.append(acuracia)
+
+            for i in range(n_test_class):
+                erro = ft.class_error(preds, test_labels, i)
+                erro_da_classe_por_rodada.append(erro)
+
+            df_e = pd.DataFrame(e)
+            df_e.sort_values(by=[0], inplace=True, ascending=False)
+
+            # print(df_e)
+
+            # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
+            posicoes = df_e.index.values
+            posicoes = posicoes.tolist()
+            p = 1250  # 96
+
+            w = posicoes[
+                0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
+
+            # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html
+            # IMPRIMIR A ACURÁCIA
+
+            # print("#------Gráfico de predição-------#")
+            # print("#--------------------------------#")
+            # [probs, preds] = svmClassification(train, train_labels, test_original)
+            # visualize_data(test_original, preds, [])
+            # print(str(accuracy_score(labels_original, preds))+"\n") #acurácia da classificação do conjunto de teste original
+
+            [train, train_labels, test, test_labels] = ft.increment_training_set(w, train, train_labels, test,
+                                                                                 test_labels)
+
+            #  ft.visualize_data(train, train_labels,[])
+
+            # https://scikit-learn.org/stable/modules/svm.html
+
+            print(
+                "Iteration " + str(k) + " - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)) +
+                "Accuracy: " + str(acuracia) + '\n')
+
+            # print(pd.crosstab(pd.Series(test_labels.ravel(), name='Real'), pd.Series(preds, name='Predicted'), margins=True))
+            # classes = ['wilt', 'rest']
+            # print(metrics.classification_report(test_labels, preds, target_names=classes))
+
+    erros = erro_das_classes.copy()
+    x = x_axis.copy()
+    y = y_axis.copy()
+
+    return x, y, erros
+
+
+def main(dataset_name, model_name, metric, use_vae , vae_epoch, len_train, n_int,
+         n_train_class=9, n_test_class=10, kmeans_iter=None, graph=False):
+
+    train, train_labels, test, test_labels = load_dataset(dataset_name, use_vae)
+
+    # se use_vae é True, então utiliza o VAE para reduzir a dimensionalidade
+
+    if use_vae:
         print('\nRunning VAE to generate latent variables...\n')
         vae_model = VAE(train, train_labels, test, test_labels, epoch=vae_epoch,
                         len_train=len_train)  # len_train --> tamanho do conjunto de treino
-        data_train, data_test = vae_model.output
+        train, train_labels, test, test_labels = vae_model.output
 
         print('\nVAE has finished!!\n')
 
+    x_ent, y_ent, erros_ent = self_training(n_int, model_name, train, train_labels, test,
+                                            test_labels, metric, n_train_class, n_test_class,
+                                            kmeans_iter, graph)
+
 
 if __name__ == "__main__":
+    ft = ST_functions()
+
     check_pkg = install_missing_pkg()  # faz a instalação de pacotes faltantes, se houver
-    fs = functions() # cria objeto contendo funções diversas a serem usadas ao longo do código
+    fs = functions()  # cria objeto contendo funções diversas a serem usadas ao longo do código
 
     num_classes = 6
     dataset_name = 'mnist'
     len_train = 60000  # tamanho do conjunto de treinamento do dataset
     validation_task = True
     use_trained_model = False
-    vae_epochs = 2 #quantidade de épocas para a execução do VAE
+    vae_epochs = 2  # quantidade de épocas para a execução do VAE
     sel_model = 0
-
-
-
 
     # main(num_classes, dataset_name, validation_task, use_trained_model, epochs, sel_model)
     main(dataset_name, len_train, vae_epochs)

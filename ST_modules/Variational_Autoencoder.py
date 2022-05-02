@@ -97,10 +97,14 @@ class VAE:
         dataset_labels.transpose()
 
         data = np.column_stack((latent_features, dataset_labels))
+
         data_train = data[0:len_train, :]
         data_teste = data[len_train:, :]
+
+        train = latent_features[0:len_train,:]
+        test = latent_features[len_train:, :]
 
         # save_file('mnist_train', data_train, 'csv')
         # save_file('mnist_test', data_teste, 'csv')
 
-        return data_train, data_teste
+        return train, y_train, test, y_test
