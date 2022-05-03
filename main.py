@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score
 from ST_modules.Algorithms import alghms
 from ST_modules.Plot_graphs import ST_graphics
 from utils import ST_functions
+import os
 
 '''
 import time
@@ -272,20 +273,25 @@ def load_dataset(dataset_name, vae):
 
 def self_training(iter, model_name, train, train_labels, test, test_labels, metric,
                   n_test_class=10, kmeans_graph=False):
-    # x_axis.clear()
-    # y_axis.clear()
-    # erro_das_classes.clear()
-    # erro_da_classe_por_rodada.clear()
 
+    # cria variáveis para execução do self-training e gera a pasta para armazenar os resultados
+    #----------------------------------------------------------------
     x_axis = []
     y_axis = []
     erro_das_classes = []
     erro_da_classe_por_rodada = []
 
+    script_dir = os.path.dirname(__file__)
+    results_dir = os.path.join(script_dir, 'results/' + dataset_name+ '/'+metric+'_objects_selected')
+
+    if not os.path.isdir(results_dir):
+        os.makedirs(results_dir)
+
     test_original = test
     labels_original = test_labels
+    #--------------------------------------------------------------
 
-    classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric,
+    classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
                                 n_test_class, 0, kmeans_graph)
 
     preds = classifier_results.pred
@@ -336,12 +342,12 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # print(str(accuracy_score(labels_original, preds))+"\n") #acurácia da classificação do conjunto de teste original
 
             [train, train_labels, test, test_labels] = ft.increment_training_set(w, train, train_labels, test,
-                                                                                 test_labels)
+                                                                                 test_labels, k, results_dir)
 
             #  ft.visualize_data(train, train_labels,[])
             if len(test) > 0:
                 # https://scikit-learn.org/stable/modules/svm.html
-                classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric,
+                classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
                                             n_test_class, k, kmeans_graph)
 
                 preds = classifier_results.pred
@@ -379,8 +385,14 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 def main(dataset_name, model_name, metric, use_vae , vae_epoch, len_train, n_int,
          n_test_class=10, kmeans_graph=False):
 
+    script_dir = os.path.dirname(__file__)
+    results_dir = os.path.join(script_dir, 'results/'+dataset_name)
+
+    if not os.path.isdir(results_dir):
+        os.makedirs(results_dir)
+
     train, train_labels, test, test_labels = load_dataset(dataset_name, use_vae)
-    print(np.unique(test_labels))
+
     all_errors = []
     all_x_axis = []
     all_y_axis = []
@@ -407,8 +419,8 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, len_train, n_int
         all_y_axis.append(y_ent)
         all_metrics.append(metric[i])
 
-    graph.class_error_graph(all_x_axis, all_errors, all_metrics, test_labels)
-    graph.accuracy_graph(all_x_axis, all_y_axis, all_metrics)
+    graph.class_error_graph(all_x_axis, all_errors, all_metrics, test_labels, results_dir, dataset_name)
+    graph.accuracy_graph(all_x_axis, all_y_axis, all_metrics, results_dir, dataset_name)
 
 if __name__ == "__main__":
 

@@ -447,8 +447,8 @@ class ST_functions:
         return [t, tl]
 
 
-    def increment_training_set(self, sel_objects, train, train_labels, test, test_labels):
-        self.visualize_data(test, test_labels, sel_objects)
+    def increment_training_set(self, sel_objects, train, train_labels, test, test_labels, iter, save_dir):
+        self.visualize_data(test, test_labels, sel_objects, iter, save_dir)
         test = pd.DataFrame(test)
         test_labels = pd.DataFrame(test_labels)
         objects = test.iloc[sel_objects, :]
@@ -566,7 +566,7 @@ class ST_functions:
     ### --------------------------------------------------------------------------------------------------------------------
 
 
-    def visualize_data(self, X, labels, med_ind_list):
+    def visualize_data(self, X, labels, med_ind_list, k, save_dir):
         color_discrete_map = {'-3': 'rgb(255,255,0)',
                               'Centers': 'rgb(0,0,0)',
                               '-1': 'rgb(255,0,0)',
@@ -588,7 +588,8 @@ class ST_functions:
         fig.update_traces(marker=dict(size=8), line=dict(color='rgb(0,0,0)', width=4),
                           selector=dict(mode='Masked'))
         ### TENTE AI INVÉS DO FIG.SHOW() USAR UMA LINHA PARA SALVAR EM DISCO EM ALGUMA EXTENSÃO DE IMAGEM.
-        fig.show()
+        #fig.show()
+        fig.write_image(save_dir+"/selection_"+str(k)+".png")
         # fig.write_image("selection_"+str(k)+".png")
         # drive.mount('drive')
         # images_dir = '/content/drive/MyDrive/MyFiles/PROJECTS/2020-Self-Training/Codes/fce-self-training-graficos'

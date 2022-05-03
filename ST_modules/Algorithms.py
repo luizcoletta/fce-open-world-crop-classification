@@ -10,7 +10,7 @@ func = ST_functions()
 
 class alghms:
 
-    def __init__(self, model_name, train, train_labels, test, test_labels, metric,
+    def __init__(self, model_name, train, train_labels, test, test_labels, metric, results_path,
                  nclusters_test=10, iter_graph = None, kmeans_graph = False):
 
         #interaction --> usado para gerar os gráficos a cada iteração
@@ -25,13 +25,13 @@ class alghms:
 
         if metric == 'silhouette0':
 
-            self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph,
+            self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
 
 
         if metric == 'silhouette1':
 
-            self.e = self.kmeans_for_new_class(train, test, 1, iter_graph, kmeans_graph,
+            self.e = self.kmeans_for_new_class(train, test, 1, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
 
 
@@ -51,7 +51,7 @@ class alghms:
             e[i] = - np.sum(p[i, :] * np.log2(p[i, :])) / np.log2(c)
         return e
 
-    def kmeans_for_new_class(self, train, test, kmeans_approach, int, graph,
+    def kmeans_for_new_class(self, train, test, kmeans_approach, int, graph, results_path,
                              nclusters_train, nclusters_test=10, threshold=0.8):
 
         kmeans = KMeans(n_clusters=nclusters_train,  # numero de clusters
@@ -77,7 +77,7 @@ class alghms:
         if graph:
             # Visualização do K-means para os dois conjuntos de dados
             # -------------------------------------------------------
-
+            plt.figure()
             plt.scatter(train[:, 0], train[:, 1], c=pred_train)  # posicionamento dos eixos x e y
 
             # plt.xlim(-75, -30) #range do eixo x
@@ -86,8 +86,10 @@ class alghms:
             plt.scatter(kmeans_train_center[:, 0], kmeans_train_center[:, 1], s=70,
                         c='red')  # posição de cada centroide no gráfico
             plt.title('Conjunto de treinamento')
-            #plt.savefig('kmeans_train_' + str(int))
-            plt.show()
+            plt.savefig(results_path+'/kmeans_train_' + str(int)+'.jpg')
+            #print(results_path)
+            #plt.savefig('kmeans_train_' + str(int) + '.jpg')
+            #plt.show()
 
             plt.figure()
 
@@ -98,8 +100,8 @@ class alghms:
             plt.scatter(kmeans_test_center[:, 0], kmeans_test_center[:, 1], s=70,
                         c='red')  # posição de cada centroide no gráfico
             plt.title('Conjunto de teste')
-            #plt.savefig('kmeans_test_' + str(int))
-            plt.show()
+            plt.savefig(results_path+'/kmeans_test_' + str(int)+'.jpg')
+            #plt.show()
 
             #------------------------------------------
 
