@@ -285,38 +285,34 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     test_original = test
     labels_original = test_labels
 
-    # [0.1, 0.1, 0.8]         [3]
+    classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric,
+                                n_test_class, 0, kmeans_graph)
 
-    # treinar um classificador com o train, train_labels
-    # e testar a classificação dele no 'test'
-    # vamos usar o probs para saber quais objetos nós vamos levar para training set
-    # saida é: probs e preds
+    preds = classifier_results.pred
+    probs = classifier_results.probs
+    e = classifier_results.e
 
-    for k in range(0, iter + 1):  # 11):
+    acuracia = accuracy_score(test_labels, preds)
+
+    for i in np.unique(labels_original):
+        erro = ft.class_error(preds, test_labels, i)
+        erro_da_classe_por_rodada.append(erro)
+
+    erro_das_classes.append(erro_da_classe_por_rodada.copy())
+    erro_da_classe_por_rodada.clear()
+    x_axis.append(0)
+    y_axis.append(acuracia)
+
+    print(
+        "Iteration " + str(0) + " - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)) +
+        " - Accuracy: " + str(acuracia) + '\n')
+
+    for k in range(1, iter + 1):  # 11):
 
         if len(test) > 0:
 
             # https://scikit-learn.org/stable/modules/svm.html
-            classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric,
-                                        n_test_class, k, kmeans_graph)
 
-
-            preds = classifier_results.pred
-            probs = classifier_results.probs
-            e = classifier_results.e
-
-            acuracia = accuracy_score(test_labels, preds)
-
-
-            for i in np.unique(labels_original):
-
-                erro = ft.class_error(preds, test_labels, i)
-                erro_da_classe_por_rodada.append(erro)
-
-            erro_das_classes.append(erro_da_classe_por_rodada.copy())
-            erro_da_classe_por_rodada.clear()
-            x_axis.append(k)
-            y_axis.append(acuracia)
 
             df_e = pd.DataFrame(e)
             df_e.sort_values(by=[0], inplace=True, ascending=False)
@@ -343,8 +339,25 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                                                                                  test_labels)
 
             #  ft.visualize_data(train, train_labels,[])
+            if len(test) > 0:
+                # https://scikit-learn.org/stable/modules/svm.html
+                classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric,
+                                            n_test_class, k, kmeans_graph)
 
-            # https://scikit-learn.org/stable/modules/svm.html
+                preds = classifier_results.pred
+                probs = classifier_results.probs
+                e = classifier_results.e
+
+                acuracia = accuracy_score(test_labels, preds)
+
+                for i in np.unique(labels_original):
+                    erro = ft.class_error(preds, test_labels, i)
+                    erro_da_classe_por_rodada.append(erro)
+
+                erro_das_classes.append(erro_da_classe_por_rodada.copy())
+                erro_da_classe_por_rodada.clear()
+                x_axis.append(k)
+                y_axis.append(acuracia)
 
             print(
                 "Iteration " + str(k) + " - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)) +
@@ -367,7 +380,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, len_train, n_int
          n_test_class=10, kmeans_graph=False):
 
     train, train_labels, test, test_labels = load_dataset(dataset_name, use_vae)
-
+    print(np.unique(test_labels))
     all_errors = []
     all_x_axis = []
     all_y_axis = []
@@ -394,7 +407,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, len_train, n_int
         all_y_axis.append(y_ent)
         all_metrics.append(metric[i])
 
-    graph.class_error_graph(all_x_axis, all_errors, all_metrics)
+    graph.class_error_graph(all_x_axis, all_errors, all_metrics, test_labels)
     graph.accuracy_graph(all_x_axis, all_y_axis, all_metrics)
 
 if __name__ == "__main__":
@@ -404,17 +417,17 @@ if __name__ == "__main__":
     graph = ST_graphics()
 
     # PARÂMETROS:
-    num_classes = 2
-    dataset_name = 'mnist'
-    use_vae = True     # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
+    n_test_class = 3
+    dataset_name = 'iris'
+    use_vae = False     # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
     len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 2      # quantidade de épocas para a execução do VAE
-    #sel_model = ['svm','svm','svm']  # define o classificador a ser usado
-    #metric = ['entropy','silhouette0', 'silhouette1']  # define a metrica para descobrir classes novas
-    sel_model = ['svm']  # define o classificador a ser usado
-    metric = ['entropy']  # define a metrica para descobrir classes novas
-    n_iter = 2          # numero de iterações da rotina de self-training
+    sel_model = ['svm','svm','svm']  # define o classificador a ser usado
+    metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
+    #sel_model = ['svm']  # define o classificador a ser usado
+    #metric = ['entropy']  # define a metrica para descobrir classes novas
+    n_iter = 7          # numero de iterações da rotina de self-training
 
     # main(num_classes, dataset_name, validation_task, use_trained_model, epochs, sel_model)
     main(dataset_name, sel_model, metric, use_vae , vae_epochs, len_train, n_iter,
-         n_test_class=3, kmeans_graph=False)
+         n_test_class, kmeans_graph=True)

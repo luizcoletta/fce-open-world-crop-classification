@@ -9,7 +9,7 @@ class ST_graphics:
 
     # gráfico da evolução do erro associada a cada classe
     # ---------------------------------------------
-    def class_error_graph (self, X, errors, name_metrics) :
+    def class_error_graph (self, X, errors, name_metrics, test_labels) :
         class_errors = []
         style = ['ro--', 'ko--', 'bo--']
 
@@ -26,7 +26,7 @@ class ST_graphics:
             plt.legend()
             plt.xlabel('Iteração', fontsize=15)
             plt.ylabel('Erro', fontsize=15)
-            plt.title('Erro da classe ' + str(i+1), fontsize=15)
+            plt.title('Erro da classe ' + str(np.unique(test_labels)[i]), fontsize=15)
             plt.rcParams['xtick.labelsize'] = 13
             plt.rcParams['ytick.labelsize'] = 13
             #plt.savefig('Erro da classe_' + str(i) + '.png')
