@@ -32,7 +32,8 @@ class install_missing_pkg:
                                  'plotly',
                                  'scikit-learn',
                                  'tensorflow',
-                                 'kaleido'}
+                                 'kaleido',
+                                 'psutil'}
 
         installed = {pkg.key for pkg in pkg_resources.working_set}
 

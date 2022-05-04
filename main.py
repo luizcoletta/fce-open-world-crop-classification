@@ -249,6 +249,5 @@ if __name__ == "__main__":
     metric = ['silhouette0']  # define a metrica para descobrir classes novas
     n_iter = 7          # numero de iterações da rotina de self-training
 
-    # main(num_classes, dataset_name, validation_task, use_trained_model, epochs, sel_model)
     main(dataset_name, sel_model, metric, use_vae , vae_epochs, lat_dim, len_train, n_iter,
          n_test_class, kmeans_graph=True)
