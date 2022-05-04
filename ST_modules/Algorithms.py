@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import ST_functions
 func = ST_functions()
+import time
 
 
 class alghms:
@@ -18,23 +19,37 @@ class alghms:
         #nclusters_train e nclusters_test --> aplicados na obtenção do kmeans para cálculo da silhueta
 
         if model_name == 'svm':
+            start = time.time()
+
             self.probs, self.pred = self.svmClassification(train,train_labels, test)
 
+            finish = time.time()
+            total_time = finish-start
+            self.classifier_time = total_time
+
         if metric == 'entropy':
+            start = time.time()
             self.e = self.calc_class_entropy(self.probs)
+            finish = time.time()
+            total_time = finish - start
+            self.metric_time = total_time
 
         if metric == 'silhouette0':
-
+            start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
-
+            finish = time.time()
+            total_time = finish - start
+            self.metric_time = total_time
 
         if metric == 'silhouette1':
-
+            start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 1, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
 
-
+            finish = time.time()
+            total_time = finish - start
+            self.metric_time = total_time
 
     def svmClassification(self, train, train_labels, test):
         SVM = svm.SVC(tol=1.5, probability=True)
