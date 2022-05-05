@@ -1,7 +1,8 @@
 import subprocess
 import os
-import pip
+#import pip
 
+'''
 def install(package):
     pip.main(['install', package])
 
@@ -18,6 +19,7 @@ def install_all_packages(modules_to_try):
 
 
 install_pkg = False
+'''
 processes = ([
     "main.py",
     #"exp2_training_unet_mini.py",
@@ -29,7 +31,7 @@ processes = ([
     #"exp8_training_resnet50_segnet.py",
     #"exp9_training_mobilenet_segnet.py"
 ])
-
+'''
 if (install_pkg):
     required_pkg_list = [('numpy', 'numpy'),
                      ('scipy', 'scipy'),
@@ -55,6 +57,7 @@ if (install_pkg):
                      ('pylab', 'pylab'),
                      ('keras_segmentation', 'git+https://github.com/luizfsc/ext-semantic-segmentation')] # https://github.com/divamgupta/image-segmentation-keras
     install_all_packages(required_pkg_list)
+'''
 
 procs = []
 for pname in processes:

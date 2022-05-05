@@ -6,10 +6,6 @@ class install_missing_pkg:
     ### https://stackoverflow.com/questions/48097428/how-to-check-and-install-missing-modules-in-python-at-time-of-execution
 
     #https://stackoverflow.com/questions/12332975/installing-python-module-within-code
-    '''
-        if __name__ == "__main__":
-            main()
-    '''
 
     def __init__(self):
 

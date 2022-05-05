@@ -16,15 +16,13 @@ def load_dataset(dataset_name, vae):
     if dataset_name == 'mnist' and vae == True:
         (train, train_labels), (test, test_labels) = keras.datasets.mnist.load_data()
 
-    if dataset_name == 'mnist' and vae == False:
-        train_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/mnist_lalent_features/main/mnist_train'
-        test_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/mnist_lalent_features/main/mnist_test'
+    if dataset_name == 'mnist2D' and vae == False:
+        train_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/weka-dataset/main/mnist_train_2d_weka.csv'
+        test_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/weka-dataset/main/mnist_test_2d_weka.csv'
 
-        class_index = 4
-        df_training = pd.read_csv(train_data_path, header=None,
-                                  names=['z_mean1', 'z_mean2', 'z_log_var1', 'z_log_var2', 'labels'])
-        # df_training.sort_values(by=[4],inplace = 'True',Ascending = 'True')
-        df_valores = df_training.loc[df_training['labels'] == 0]
+        class_index = 2
+        df_training = pd.read_csv(train_data_path)
+        df_valores = df_training.loc[df_training['class'] == 0]
         df_training.drop(df_valores.index, inplace=True)
 
         feat_index = list(range(df_training.shape[1]))
@@ -32,8 +30,7 @@ def load_dataset(dataset_name, vae):
         train = df_training.iloc[:, feat_index].values
         train_labels = df_training.iloc[:, class_index].values
 
-        df_test = pd.read_csv(test_data_path, header=None,
-                              names=['z_mean1', 'z_mean2', 'z_log_var1', 'z_log_var2', 'labels'])
+        df_test = pd.read_csv(test_data_path)
         feat_index = list(range(df_test.shape[1]))
         feat_index.remove(class_index)
         test = df_test.iloc[:, feat_index].values
@@ -129,7 +126,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
             posicoes = df_e.index.values
             posicoes = posicoes.tolist()
-            p = 15  # 96
+            p = 1250  # 96
 
             w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
 
@@ -237,8 +234,8 @@ if __name__ == "__main__":
     graph = ST_graphics()
 
     # PARÂMETROS:
-    n_test_class = 3
-    dataset_name = 'iris'
+    n_test_class = 10
+    dataset_name = 'mnist2D'
     use_vae = False     # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
     len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 2      # quantidade de épocas para a execução do VAE
@@ -246,8 +243,8 @@ if __name__ == "__main__":
     #sel_model = ['svm','svm','svm']  # define o classificador a ser usado
     #metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
     sel_model = ['svm']  # define o classificador a ser usado
-    metric = ['silhouette0']  # define a metrica para descobrir classes novas
-    n_iter = 7          # numero de iterações da rotina de self-training
+    metric = ['entropy']  # define a metrica para descobrir classes novas
+    n_iter = 8          # numero de iterações da rotina de self-training
 
     main(dataset_name, sel_model, metric, use_vae , vae_epochs, lat_dim, len_train, n_iter,
          n_test_class, kmeans_graph=True)
