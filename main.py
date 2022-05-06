@@ -36,6 +36,30 @@ def load_dataset(dataset_name, vae):
         test = df_test.iloc[:, feat_index].values
         test_labels = df_test.iloc[:, class_index].values
 
+    if dataset_name == 'mnist4D' and vae == False:
+        train_data_path= 'https://raw.githubusercontent.com/Mailson-Silva/mnist_lalent_features/main/mnist_train'
+        test_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/mnist_lalent_features/main/mnist_test'
+
+        class_index = 4
+        df_training = pd.read_csv(train_data_path, header=None,
+                                  names=['z_mean1', 'z_mean2', 'z_log_var1', 'z_log_var2', 'labels'])
+        df_training.head()
+
+        df_valores = df_training.loc[df_training['labels'] == 0]
+        df_training.drop(df_valores.index, inplace=True)
+
+        feat_index = list(range(df_training.shape[1]))
+        feat_index.remove(class_index)
+        train = df_training.iloc[:, feat_index].values
+        train_labels = df_training.iloc[:, class_index].values
+
+        df_test = pd.read_csv(test_data_path, header=None,
+                              names=['z_mean1', 'z_mean2', 'z_log_var1', 'z_log_var2', 'labels'])
+        feat_index = list(range(df_test.shape[1]))
+        feat_index.remove(class_index)
+        test = df_test.iloc[:, feat_index].values
+        test_labels = df_test.iloc[:, class_index].values
+
     if dataset_name == 'iris' and vae == False:
 
         train_data_path= 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/iris2d-train.csv'
@@ -68,12 +92,17 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     y_axis = []
     erro_das_classes = []
     erro_da_classe_por_rodada = []
+    time_classifier = []
+    time_metric = []
 
-    script_dir = os.path.dirname(__file__)
-    results_dir = os.path.join(script_dir, 'results/' + dataset_name+ '/'+metric+'_objects_selected')
+    if len(train[0]) == 2:
+        script_dir = os.path.dirname(__file__)
+        results_dir = os.path.join(script_dir, 'results/' + dataset_name+ '/'+metric+'_objects_selected')
 
-    if not os.path.isdir(results_dir):
-        os.makedirs(results_dir)
+        if not os.path.isdir(results_dir):
+            os.makedirs(results_dir)
+    else:
+        results_dir = ''
 
     test_original = test
     labels_original = test_labels
@@ -107,7 +136,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
     print('Elapsed time (seg) of metric ' + str(metric)+' :' + str(round(classifier_results.metric_time, 4)))
 
-
+    time_metric.append(round(classifier_results.metric_time, 4))
+    time_classifier.append(round(classifier_results.classifier_time, 4))
 
     for k in range(1, iter + 1):  # 11):
 
@@ -126,7 +156,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
             posicoes = df_e.index.values
             posicoes = posicoes.tolist()
-            p = 1250  # 96
+            p = 15  # 96
 
             w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
 
@@ -172,6 +202,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
             print('Elapsed time (seg) of metric ' + str(metric) + ' :' + str(round(classifier_results.metric_time, 4)) +'\n')
 
+            time_metric.append(round(classifier_results.metric_time, 4))
+            time_classifier.append(round(classifier_results.classifier_time, 4))
 
 
             # print(pd.crosstab(pd.Series(test_labels.ravel(), name='Real'), pd.Series(preds, name='Predicted'), margins=True))
@@ -184,17 +216,35 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     x = x_axis.copy()
     y = y_axis.copy()
 
+    #Salva arquivo csv na pasta logs contendo o tempo gasto em cada iteração
+    steps = list(range(0, iter+1))
+    time_data = {'steps': steps, 'classifier_time (s)': time_classifier, 'metric_time (s)': time_metric}
+    elapsed_time = pd.DataFrame(time_data)
+    elapsed_time.to_csv('logs/'+dataset_name+'/'+model_name+'&'+metric+'_elapsed_time.csv', index=False)
+
+
     return x, y, erros
 
 
 def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_train, n_int,
          n_test_class=10, kmeans_graph=False):
 
+    #cria pastas para armazenar os resultados
     script_dir = os.path.dirname(__file__)
     results_dir = os.path.join(script_dir, 'results/'+dataset_name)
 
     if not os.path.isdir(results_dir):
         os.makedirs(results_dir)
+
+    dataset_logs_dir = os.path.join(script_dir, 'logs/' + dataset_name)
+
+    if not os.path.isdir(dataset_logs_dir):
+        os.makedirs(dataset_logs_dir)
+
+    data_graphs = os.path.join(script_dir, 'results/' + dataset_name+'/graphics_data')
+
+    if not os.path.isdir(data_graphs):
+        os.makedirs(data_graphs)
 
     train, train_labels, test, test_labels = load_dataset(dataset_name, use_vae)
 
@@ -235,7 +285,7 @@ if __name__ == "__main__":
 
     # PARÂMETROS:
     n_test_class = 10
-    dataset_name = 'mnist2D'
+    dataset_name = 'mnist4D'
     use_vae = False     # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
     len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 2      # quantidade de épocas para a execução do VAE
@@ -244,7 +294,7 @@ if __name__ == "__main__":
     #metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
     sel_model = ['svm']  # define o classificador a ser usado
     metric = ['entropy']  # define a metrica para descobrir classes novas
-    n_iter = 8          # numero de iterações da rotina de self-training
+    n_iter = 2          # numero de iterações da rotina de self-training
 
     main(dataset_name, sel_model, metric, use_vae , vae_epochs, lat_dim, len_train, n_iter,
-         n_test_class, kmeans_graph=True)
+         n_test_class)

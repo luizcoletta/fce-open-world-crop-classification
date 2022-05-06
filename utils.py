@@ -448,7 +448,9 @@ class ST_functions:
 
 
     def increment_training_set(self, sel_objects, train, train_labels, test, test_labels, iter, save_dir):
-        self.visualize_data(test, test_labels, sel_objects, iter, save_dir)
+        if len(train[0]) <= 2:
+            self.visualize_data(test, test_labels, sel_objects, iter, save_dir)
+
         test = pd.DataFrame(test)
         test_labels = pd.DataFrame(test_labels)
         objects = test.iloc[sel_objects, :]

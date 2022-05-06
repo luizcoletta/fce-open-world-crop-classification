@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import os
 '''
 script_dir = os.path.dirname(__file__)
@@ -23,15 +24,23 @@ class ST_graphics:
         file_name = "/" + dataset_name + "_error_class_"
         style = ['ro--', 'ko--', 'bo--']
 
+
         for j in errors:
             cl_erro  = np.array(j).transpose()
             class_errors.append(cl_erro.copy())
 
         for i in range(class_errors[0].shape[0]):
             plt.figure()
+            error_data = {'iter': X[0]}  # usado para criar arquivo csv com pandas
             for j in range(len(name_metrics)):
 
                 plt.plot(X[j], class_errors[j][i], style[j], label=name_metrics[j])
+                info = {name_metrics[j]: class_errors[j][i]}
+                error_data.update(info.copy())
+
+            error_class = pd.DataFrame(error_data)
+            error_class.to_csv('results/' + dataset_name + '/graphics_data/' + 'error_class_'+str(np.unique(test_labels)[i])
+                               +'.csv', index=False)
 
             plt.legend()
             plt.xlabel('Iteração', fontsize=15)
@@ -52,6 +61,7 @@ class ST_graphics:
         #print('SIlhoueta 1:' + str(y_axis_kmeans1))
         #print('Entropia:' + str(y_axis_svm))
 
+        accuracy_data = {'iter' : X[0]}
         file_name = "/accuracy_"+ dataset_name +".jpg"
 
         style = ['ro--', 'ko--', 'bo--']
@@ -60,6 +70,8 @@ class ST_graphics:
 
         for i in range(len(X)):
             plt.plot(X[i], Y[i], style[i], label=name_metrics[i])  # approach 0
+            info = {name_metrics[i] : Y[i]}
+            accuracy_data.update(info.copy())
 
         plt.legend()
         plt.ylabel('Acurácia', fontsize=14)
@@ -69,3 +81,6 @@ class ST_graphics:
         #plt.savefig('acurácia_do_self_training.png')
         plt.savefig(results_dir+file_name)
         #plt.show()
+
+        accuracy_data = pd.DataFrame(accuracy_data)
+        accuracy_data.to_csv('results/' + dataset_name + '/graphics_data/'+'accuracy_data.csv', index=False)

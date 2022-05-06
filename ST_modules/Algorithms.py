@@ -89,7 +89,7 @@ class alghms:
         kmeans_test_center = kmeans_test.cluster_centers_
         objs_test_to_center_clusters = kmeans_test.fit_transform(test)
 
-        if graph:
+        if len(train[0]) == 2:
             # Visualização do K-means para os dois conjuntos de dados
             # -------------------------------------------------------
             plt.figure()
