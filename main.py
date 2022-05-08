@@ -13,13 +13,54 @@ import os
 def load_dataset(dataset_name, vae):
     # inserir os outros datasets aqui
 
+    if dataset_name == 'dp_ceratocystis1' and vae == False:
+
+        script_dir = os.path.dirname(__file__)
+        data_path = os.path.join(script_dir, 'data/'+dataset_name+'_train.csv')
+
+        if os.path.exists(data_path):
+            print('Arquivos csv para '+dataset_name+' já existem!')
+        else:
+            data = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/dp_features/ceratocystis1.csv'
+            ft.train_and_test_set_generator(data, dataset_name, 3, 8, 0.2)
+
+        '''
+        class_index = 8
+        df_training = pd.read_csv('data/ceratocystis1_train.csv')
+        feat_index = list(range(df_training.shape[1]))
+        feat_index.remove(class_index)
+        train = df_training.iloc[:, feat_index].values
+        train_labels = df_training.iloc[:, class_index].values
+
+        df_test = pd.read_csv('data/ceratocystis1_test.csv')
+        feat_index = list(range(df_test.shape[1]))
+        feat_index.remove(class_index)
+        test = df_test.iloc[:, feat_index].values
+        test_labels = df_test.iloc[:, class_index].values
+
+        print(len(train), len(train[0]))
+        print(len(test), len(test[0]))
+        '''
+        train_path = 'data/'+dataset_name+'_train.csv'
+        test_path = 'data/'+dataset_name+'_test.csv'
+        train, train_labels, test, test_labels = ft.separate_features_and_labels(train_path,
+                                                                             test_path,
+                                                                             class_index = 8)
+
+
+
     if dataset_name == 'mnist' and vae == True:
         (train, train_labels), (test, test_labels) = keras.datasets.mnist.load_data()
 
     if dataset_name == 'mnist2D' and vae == False:
-        train_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/weka-dataset/main/mnist_train_2d_weka.csv'
-        test_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/weka-dataset/main/mnist_test_2d_weka.csv'
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/weka-dataset/main/mnist_train_2d_weka.csv'
+        test_path = 'https://raw.githubusercontent.com/Mailson-Silva/weka-dataset/main/mnist_test_2d_weka.csv'
 
+        train, train_labels, test, test_labels = ft.separate_features_and_labels(train_path,
+                                                                                test_path,
+                                                                                class_index=2,
+                                                                                class2drop= 0)
+        '''
         class_index = 2
         df_training = pd.read_csv(train_data_path)
         df_valores = df_training.loc[df_training['class'] == 0]
@@ -35,6 +76,7 @@ def load_dataset(dataset_name, vae):
         feat_index.remove(class_index)
         test = df_test.iloc[:, feat_index].values
         test_labels = df_test.iloc[:, class_index].values
+        '''
 
     if dataset_name == 'mnist4D' and vae == False:
         train_data_path= 'https://raw.githubusercontent.com/Mailson-Silva/mnist_lalent_features/main/mnist_train'
@@ -43,7 +85,6 @@ def load_dataset(dataset_name, vae):
         class_index = 4
         df_training = pd.read_csv(train_data_path, header=None,
                                   names=['z_mean1', 'z_mean2', 'z_log_var1', 'z_log_var2', 'labels'])
-        df_training.head()
 
         df_valores = df_training.loc[df_training['labels'] == 0]
         df_training.drop(df_valores.index, inplace=True)
@@ -65,6 +106,7 @@ def load_dataset(dataset_name, vae):
         train_data_path= 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/iris2d-train.csv'
         test_data_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/iris2d-test.csv'
 
+        '''        
         class_index = 2
         df_training = pd.read_csv(train_data_path)
         feat_index = list(range(df_training.shape[1]))
@@ -77,6 +119,12 @@ def load_dataset(dataset_name, vae):
         feat_index.remove(class_index)
         test = df_test.iloc[:, feat_index].values
         test_labels = df_test.iloc[:, class_index].values
+        '''
+
+        train, train_labels, test, test_labels = ft.separate_features_and_labels(train_data_path,
+                                                                                test_data_path,
+                                                                                class_index=2)
+
 
     return train, train_labels, test, test_labels
 
@@ -156,7 +204,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
             posicoes = df_e.index.values
             posicoes = posicoes.tolist()
-            p = 15  # 96
+            p = 68  # 96
 
             w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
 
@@ -211,6 +259,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # print(metrics.classification_report(test_labels, preds, target_names=classes))
         else:
             print('\n Iteraction ' + str(k) + '--> Test set empty, self-training is done!\n')
+            time_metric.append(-1)
+            time_classifier.append(-1)
 
     erros = erro_das_classes.copy()
     x = x_axis.copy()
@@ -229,6 +279,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_train, n_int,
          n_test_class=10, kmeans_graph=False):
 
+    train, train_labels, test, test_labels = load_dataset(dataset_name, use_vae)
+
     #cria pastas para armazenar os resultados
     script_dir = os.path.dirname(__file__)
     results_dir = os.path.join(script_dir, 'results/'+dataset_name)
@@ -245,8 +297,6 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
     if not os.path.isdir(data_graphs):
         os.makedirs(data_graphs)
-
-    train, train_labels, test, test_labels = load_dataset(dataset_name, use_vae)
 
     all_errors = []
     all_x_axis = []
@@ -284,8 +334,8 @@ if __name__ == "__main__":
     graph = ST_graphics()
 
     # PARÂMETROS:
-    n_test_class = 10
-    dataset_name = 'mnist4D'
+    n_test_class = 3
+    dataset_name = 'dp_ceratocystis1'
     use_vae = False     # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
     len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 2      # quantidade de épocas para a execução do VAE
@@ -294,7 +344,8 @@ if __name__ == "__main__":
     #metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
     sel_model = ['svm']  # define o classificador a ser usado
     metric = ['entropy']  # define a metrica para descobrir classes novas
-    n_iter = 2          # numero de iterações da rotina de self-training
+    n_iter = 10         # numero de iterações da rotina de self-training
 
-    main(dataset_name, sel_model, metric, use_vae , vae_epochs, lat_dim, len_train, n_iter,
-         n_test_class)
+    main(dataset_name, sel_model, metric, use_vae , vae_epochs, lat_dim, len_train, n_iter, n_test_class)
+
+

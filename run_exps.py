@@ -21,15 +21,13 @@ def install_all_packages(modules_to_try):
 install_pkg = False
 '''
 processes = ([
-    "main.py",
-    #"exp2_training_unet_mini.py",
-    #"exp3_training_unet.py",
-    #"exp4_training_resnet50_unet.py",
-    #"exp5_training_mobilenet_unet.py",
-    #"exp6_training_segnet.py",
-    #"exp7_training_vgg_segnet.py",
-    #"exp8_training_resnet50_segnet.py",
-    #"exp9_training_mobilenet_segnet.py"
+    #"main.py",
+    "exp_dp_ceratocystis1.py",
+    "exp_dp_ceratocystis2.py",
+    "exp_dp_ceratocystis5.py",
+    "exp_dp_ceratocystis10.py",
+    "exp_dp_ceratocystis20.py",
+
 ])
 '''
 if (install_pkg):
