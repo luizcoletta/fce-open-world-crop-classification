@@ -2,6 +2,7 @@ import subprocess
 import os
 #import pip
 
+
 '''
 def install(package):
     pip.main(['install', package])
@@ -21,7 +22,7 @@ def install_all_packages(modules_to_try):
 install_pkg = False
 '''
 processes = ([
-    #"main.py",
+    #"main.py"
     "exp_dp_ceratocystis1.py",
     "exp_dp_ceratocystis2.py",
     "exp_dp_ceratocystis5.py",
@@ -61,6 +62,7 @@ if (install_pkg):
                      ('keras_segmentation', 'git+https://github.com/luizfsc/ext-semantic-segmentation')] # https://github.com/divamgupta/image-segmentation-keras
     install_all_packages(required_pkg_list)
 '''
+
 
 procs = []
 for pname in processes:
