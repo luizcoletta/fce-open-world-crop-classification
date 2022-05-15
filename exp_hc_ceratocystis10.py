@@ -45,7 +45,8 @@ def load_dataset(dataset_name, vae):
         test_path = 'data/'+dataset_name+'_test.csv'
         train, train_labels, test, test_labels = ft.separate_features_and_labels(train_path,
                                                                              test_path,
-                                                                             class_index = 8)
+                                                                             class_index = 8,
+                                                                                 scale = True)
 
     return train, train_labels, test, test_labels
 
@@ -125,7 +126,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
             posicoes = df_e.index.values
             posicoes = posicoes.tolist()
-            p = 408  # 96
+            p = 5  # 96
 
             w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
 

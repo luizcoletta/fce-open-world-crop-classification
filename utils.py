@@ -11,6 +11,7 @@ from sklearn.metrics import silhouette_score
 import plotly.express as px
 from scipy.spatial import distance
 import random
+from sklearn.preprocessing import MinMaxScaler
 
 
 class ST_functions:
@@ -21,10 +22,12 @@ class ST_functions:
     def __init__(self):
         pass
 
-    def separate_features_and_labels(self,train_path, test_path, class_index, class2drop = None):
+    def separate_features_and_labels(self,train_path, test_path, class_index, class2drop = None, scale = False):
 
         class_index = class_index
         df_training = pd.read_csv(train_path)
+        scaler = MinMaxScaler()
+
 
         if class2drop != None:
             df_valores = df_training.loc[df_training['class'] == class2drop]
@@ -34,12 +37,18 @@ class ST_functions:
         feat_index.remove(class_index)
         train = df_training.iloc[:, feat_index].values
         train_labels = df_training.iloc[:, class_index].values
+        if scale == True:
+            train_scaler = scaler.fit(train)
+            train = train_scaler.transform(train)
 
         df_test = pd.read_csv(test_path)
         feat_index = list(range(df_test.shape[1]))
         feat_index.remove(class_index)
         test = df_test.iloc[:, feat_index].values
         test_labels = df_test.iloc[:, class_index].values
+        if scale == True:
+            test_scaler = scaler.fit(test)
+            test = test_scaler.transform(test)
 
         return train, train_labels, test, test_labels
 

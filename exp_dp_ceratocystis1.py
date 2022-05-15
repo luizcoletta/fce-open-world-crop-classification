@@ -204,7 +204,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
             posicoes = df_e.index.values
             posicoes = posicoes.tolist()
-            p = 68  # 96
+            p = 5  # 96
 
             w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
 
