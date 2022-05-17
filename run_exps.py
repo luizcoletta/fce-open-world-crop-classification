@@ -23,7 +23,7 @@ install_pkg = False
 '''
 processes = ([
     #"main.py"
-    "exp_dp_ceratocystis1.py",
+    "exp_dp_ceratocystis1.py"
     "exp_dp_ceratocystis2.py",
     "exp_dp_ceratocystis5.py",
     "exp_dp_ceratocystis10.py",

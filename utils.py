@@ -22,6 +22,7 @@ class ST_functions:
     def __init__(self):
         pass
 
+    '''
     def separate_features_and_labels(self,train_path, test_path, class_index, class2drop = None, scale = False):
 
         class_index = class_index
@@ -74,38 +75,12 @@ class ST_functions:
         train_set = pd.concat(train_classes, axis=0)
         test_set = pd.concat(test_classes, axis=0)
 
-        '''
-        class_1 = data.loc[data[num_features] == 1]
-        class_2 = data.loc[data[num_features] == 2]
-        class_3 = data.loc[data[num_features] == 3]
-
-
-        n_obj_class_1 = int(class_1.shape[0]*prop_train_data)
-        n_obj_class_2 = int(class_2.shape[0] * prop_train_data)
-        n_obj_class_3 = int(class_3.shape[0] * prop_train_data)
-
-        sort_class_1 = random.sample(range(class_1.index[0], class_1.index[-1]+1), n_obj_class_1)
-        sort_class_2 = random.sample(range(class_2.index[0], class_2.index[-1]+1), n_obj_class_2)
-        sort_class_3 = random.sample(range(class_3.index[0], class_3.index[-1]+1), n_obj_class_3)
-
-        train_class_1 = class_1.loc[sort_class_1]
-        test_class_1 = class_1.drop(sort_class_1)
-
-        train_class_2 = class_2.loc[sort_class_2]
-        test_class_2 = class_2.drop(sort_class_2)
-
-        train_class_3 = class_3.loc[sort_class_3]
-        test_class_3 = class_3.drop(sort_class_3)                
-        
-        train_set = pd.concat([train_class_1,train_class_2,train_class_3],axis=0)
-        test_set = pd.concat([test_class_1, test_class_2, test_class_3], axis=0)
-        '''
-
         df_val = train_set.loc[train_set[num_features] == class2drop]
         train_set.drop(df_val.index, inplace=True)
 
         train_set.to_csv('data/'+dataset_name+'_train.csv', index = False)
         test_set.to_csv('data/'+dataset_name+'_test.csv', index=False)
+    '''
 
     def class_error(self, pred, test_labels, classe):
         c = 0
@@ -148,30 +123,14 @@ class ST_functions:
 
     '''
 
-    def get_batch_data(self, train_data_path, test_data_path, class_index, join_data, size_batch, iter):
-        col1 = np.array([list(range(1, 9))])
-        # col2 = np.array([list(range(10,22))])
-        col3 = np.array([np.hstack([[0] * 5, [1] * 3])])
-
-        # train_data = np.concatenate((col1, col2), axis=0)
-        train_data = np.concatenate((col1, col3), axis=0).T
-        train_data = pd.DataFrame(train_data)
-
-        col1 = np.array([list(range(9, 13))])
-        # col2 = np.array([list(range(10,16))])
-        col3 = np.array([np.hstack([[0] * 3, [1] * 1])])
-
-        # test_data = np.concatenate((col1, col2), axis=0)
-        test_data = np.concatenate((col1, col3), axis=0).T
-        test_data = pd.DataFrame(test_data)
+    def get_batch_data(self, train_data_path, test_data_path, class_index, join_data, size_batch, iter, class2drop=-1):
 
         df_training = []
         train = []
         train_labels = []
         if train_data_path:
             df_training = pd.read_csv(train_data_path)  # , header=None)
-            # print(df_training)
-            # df_training = train_data
+            # print(df_training.shape)
             feat_index = list(range(df_training.shape[1]))
             feat_index.remove(class_index)
             train = df_training.iloc[:, feat_index].values
@@ -182,8 +141,7 @@ class ST_functions:
         test_labels = []
         if test_data_path:
             df_test = pd.read_csv(test_data_path)  # , header=None)
-            # print(df_test)
-            # df_test = test_data
+            # print(df_test.shape)
             feat_index = list(range(df_test.shape[1]))
             feat_index.remove(class_index)
             test = df_test.iloc[:, feat_index].values
@@ -195,14 +153,10 @@ class ST_functions:
         else:
             data = train
             data_labels = train_labels
-        # print(data.shape)
-        # print(data_labels)
 
         num_objects = data.shape[0]
 
         folds = int(num_objects / size_batch)
-
-        print(folds)
 
         '''skf = StratifiedKFold(n_splits=folds)
         for train, test in skf.split(data, data_labels):
@@ -218,16 +172,33 @@ class ST_functions:
         # X, y = data, data_labels
         skf = StratifiedKFold(n_splits=folds, random_state=None, shuffle=False)
 
-        for train_index, test_index in skf.split(data, data_labels):
+        for test_index, train_index in skf.split(data, data_labels):
+            # print(len(train_index))
+            # print(len(test_index))
+
             if (iter == i):
                 # print ("\nIteração = ", i)
                 # print("TEST-DATA:", data[test_index], "\nTEST-LABELS:", data_labels[test_index])
                 # print("TRAIN-DATA:", data[train_index], "\nTRAIN-LABELS:", data_labels[train_index])
-                test_data_fold = data[test_index]
-                test_labels_fold = data_labels[test_index]
+                #print('train: ', len(np.unique(train_index)))
+                #print(train_index)
+                #print('test: ', len(np.unique(test_index)))
+                #print(test_index)
                 train_data_fold = data[train_index]
                 train_labels_fold = data_labels[train_index]
+                test_data_fold = data[test_index]
+                test_labels_fold = data_labels[test_index]
+
             i = i + 1
+
+        # aqui tinha que ter uma forma de remover todos de uma certa classe no conjunto de treino
+        # com opção de remover ou não (tipo um parâmetro = -1 não remove, mas se for um valor positivo remove essa classe)
+        if class2drop != -1:
+            indexes = np.where(train_labels_fold == class2drop)
+            train_data_fold = np.delete(train_data_fold, indexes, axis=0)
+            train_labels_fold = np.delete(train_labels_fold, indexes)
+
+        #print('\ntrain objs: ', train_data_fold.shape, train_labels_fold)
 
         '''while (train_index, test_index in skf.split(X, y)) and (iter<i):
             i= i+1
@@ -254,7 +225,7 @@ class ST_functions:
             #print (y_test.shape[0])
             print (data[train_index].shape[0])'''
 
-        return test_data_fold, test_labels_fold, train_data_fold, train_labels_fold
+        return train_data_fold, train_labels_fold, test_data_fold, test_labels_fold
 
 
 
@@ -683,3 +654,4 @@ class ST_functions:
         for i in range(dists.shape[0]):
             data_labels.append(np.argmin(dists[i]))
         return np.array(data_labels)
+

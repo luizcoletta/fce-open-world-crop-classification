@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -98,13 +99,16 @@ class VAE:
 
         data = np.column_stack((latent_features, dataset_labels))
 
-        data_train = data[0:len_train, :]
-        data_teste = data[len_train:, :]
+        #data_train = data[0:len_train, :]
+        #data_teste = data[len_train:, :]
 
-        train = latent_features[0:len_train,:]
-        test = latent_features[len_train:, :]
+        #train = latent_features[0:len_train,:]
+        #test = latent_features[len_train:, :]
 
         # save_file('mnist_train', data_train, 'csv')
         # save_file('mnist_test', data_teste, 'csv')
 
-        return train, y_train, test, y_test
+        df_dataset = pd.DataFrame(data)
+
+
+        return df_dataset
