@@ -123,8 +123,9 @@ class ST_functions:
 
     '''
 
-    def get_batch_data(self, train_data_path, test_data_path, class_index, join_data, size_batch, iter, class2drop=-1):
+    def get_batch_data(self, train_data_path, test_data_path, class_index, join_data, size_batch, iter, class2drop=-1, scale = False):
 
+        scaler = MinMaxScaler()
         df_training = []
         train = []
         train_labels = []
@@ -134,6 +135,10 @@ class ST_functions:
             feat_index = list(range(df_training.shape[1]))
             feat_index.remove(class_index)
             train = df_training.iloc[:, feat_index].values
+            if scale == True:
+                train_scaler = scaler.fit(train)
+                train = train_scaler.transform(train)
+
             train_labels = df_training.iloc[:, class_index].values
 
         df_test = []
@@ -145,6 +150,9 @@ class ST_functions:
             feat_index = list(range(df_test.shape[1]))
             feat_index.remove(class_index)
             test = df_test.iloc[:, feat_index].values
+            if scale == True:
+                test_scaler = scaler.fit(test)
+                test = test_scaler.transform(test)
             test_labels = df_test.iloc[:, class_index].values
 
         if join_data:
