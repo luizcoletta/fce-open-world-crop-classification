@@ -17,6 +17,32 @@ class ST_graphics:
 
         pass
 
+    def accuracy_all_class_graph(self, metrics, results_dir, test_labels):
+
+        for k in metrics:
+
+            plt.figure()
+
+
+            for i in np.unique(test_labels):
+                data = pd.read_csv(results_dir+'/graphics_data/error_class_'+str(i)+'.csv')
+
+                iter = list(data.iloc[:, 0])
+
+                acc = np.ones(len(iter)) - np.array(data.loc[:, k])
+
+                plt.plot(iter, acc, 'o--', label='class '+str(i))
+
+            plt.legend()
+            plt.xlabel('Iteração', fontsize=15)
+            plt.ylabel('Acurácia', fontsize=15)
+            plt.title('Acurácia em cada classe para  ' + str(k), fontsize=15)
+            plt.rcParams['xtick.labelsize'] = 13
+            plt.rcParams['ytick.labelsize'] = 13
+            # plt.savefig('./teste/Erro da classe_' + str(i) + '.png')
+            plt.savefig(results_dir + '/acur_classes_' + str(k) + '.png')
+            # plt.show()
+
     # gráfico da evolução do erro associada a cada classe
     # ---------------------------------------------
     def class_error_graph (self, X, errors, name_metrics, test_labels, results_dir, dataset_name) :

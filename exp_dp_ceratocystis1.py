@@ -419,6 +419,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
     graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, results_dir, dataset_name)
     graph.accuracy_graph(x_axis, y_axis, all_metrics, results_dir, dataset_name)
+    graph.accuracy_all_class_graph(metric, results_dir, test_labels)
 
 if __name__ == "__main__":
 
@@ -439,5 +440,6 @@ if __name__ == "__main__":
 
     n_iter = 10         # numero de iterações da rotina de self-training
 
-    main(dataset_name, sel_model, metric, use_vae , vae_epochs, lat_dim, len_train, n_iter, n_test_class)
+    main(dataset_name, sel_model, metric, use_vae, vae_epochs, lat_dim, len_train, n_iter, n_test_class)
+
 

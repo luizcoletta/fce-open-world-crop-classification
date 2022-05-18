@@ -164,7 +164,9 @@ class ST_functions:
 
         num_objects = data.shape[0]
 
-        folds = int(num_objects / size_batch)
+
+        folds = round(num_objects / size_batch)
+
 
         '''skf = StratifiedKFold(n_splits=folds)
         for train, test in skf.split(data, data_labels):

@@ -414,6 +414,7 @@ def main(dataset_name, model_name, metric, use_vae, vae_epoch, lat_dim, len_trai
 
     graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, results_dir, dataset_name)
     graph.accuracy_graph(x_axis, y_axis, all_metrics, results_dir, dataset_name)
+    graph.accuracy_all_class_graph(metric, results_dir, test_labels)
 
 
 if __name__ == "__main__":

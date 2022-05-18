@@ -176,6 +176,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     time_classifier = []
     time_metric = []
 
+
+
     if len(train[0]) == 2:
         script_dir = os.path.dirname(__file__)
         results_dir = os.path.join(script_dir, 'results/' + dataset_name + '/' + metric + '_objects_selected')
@@ -370,6 +372,8 @@ def main(dataset_name, model_name, metric, use_vae, vae_epoch, lat_dim, len_trai
             train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data,
                                                                        size_batch, j, class2drop)
 
+
+
             x_ent, y_ent, erros_ent, time_classifier, time_metric = self_training(n_int, model_name[i], train,
                                                                                   train_labels, test,
                                                                                   test_labels, metric[i], n_test_class,
@@ -414,6 +418,7 @@ def main(dataset_name, model_name, metric, use_vae, vae_epoch, lat_dim, len_trai
 
     graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, results_dir, dataset_name)
     graph.accuracy_graph(x_axis, y_axis, all_metrics, results_dir, dataset_name)
+    graph.accuracy_all_class_graph(metric, results_dir, test_labels)
 
 
 if __name__ == "__main__":
@@ -434,4 +439,5 @@ if __name__ == "__main__":
     n_iter = 10  # numero de iterações da rotina de self-training
 
     main(dataset_name, sel_model, metric, use_vae, vae_epochs, lat_dim, len_train, n_iter, n_test_class)
+
 
