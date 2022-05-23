@@ -1,2 +1,2 @@
 # fce-weed-detection
-Python code for semantic segmentation to detect weeds from aerial images
+Python code for detecting and learning new classes of threats present in crops
