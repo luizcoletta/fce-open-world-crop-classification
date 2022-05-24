@@ -29,7 +29,8 @@ class install_missing_pkg:
                                  'scikit-learn',
                                  'tensorflow',
                                  'kaleido',
-                                 'psutil'}
+                                 'psutil',
+                                 'scikit-image'}
 
         installed = {pkg.key for pkg in pkg_resources.working_set}
 

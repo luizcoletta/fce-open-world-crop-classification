@@ -1,6 +1,8 @@
+
+from install_req import install_missing_pkg
+check_pkg = install_missing_pkg()  # faz a instalação de pacotes faltantes, se houver
 import numpy as np
 import pandas as pd
-from install_req import install_missing_pkg
 from tensorflow import keras
 from ST_modules.Variational_Autoencoder import VAE
 from sklearn.metrics import accuracy_score
@@ -8,6 +10,8 @@ from ST_modules.Algorithms import alghms
 from ST_modules.Plot_graphs import ST_graphics
 from utils import ST_functions
 from statistics import mean
+import skimage.io
+from skimage.io import imread_collection
 import os
 
 
@@ -19,25 +23,6 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
     if dataset_name == 'dp_ceratocystis1' and vae == False:
 
-        '''
-        script_dir = os.path.dirname(__file__)
-        data_path = os.path.join(script_dir, 'data/'+dataset_name+'_train.csv')
-
-        if os.path.exists(data_path):
-            print('Arquivos csv para '+dataset_name+' já existem!')
-        else:
-            data = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/dp_features/ceratocystis1.csv'
-            ft.train_and_test_set_generator(data, dataset_name, 3, 8, 0.2)
-
-        
-    
-        train_path = 'data/'+dataset_name+'_train.csv'
-        test_path = 'data/'+dataset_name+'_test.csv'
-        train, train_labels, test, test_labels = ft.separate_features_and_labels(train_path,
-                                                                             test_path,
-                                                                             class_index = 8)
-
-        '''
 
         train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/dp_features/ceratocystis1.csv'
         test_path = ''
@@ -46,9 +31,21 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         size_batch = int(689*0.2)
         class2drop = 3
 
+    if dataset_name == 'dp_ceratocystis1' and vae == True:
+        dir_path = 'data/train_images/dataset_eucapytus/dataset-1/*.png'
+        dataset = []
+        col = imread_collection(dir_path)
+        print('teste')
+        print(type(col))
+        print(np.shape(col))
+        print(col[0].shape, type(col[0]))
+
+
+
 
     if dataset_name == 'mnist' and vae == True:
         (train, train_labels), (test, test_labels) = keras.datasets.mnist.load_data()
+        print(train.shape)
 
         print('\nRunning VAE to generate latent variables...\n')
         vae_model = VAE(train, train_labels, test, test_labels, epoch=vae_epoch, lat_dim= lat_dim,
@@ -263,9 +260,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
 
             if len(objects_labels) > 0 or objects_labels != []:
-
-
-                pro = ft.class_proportion_objects(objects_labels, train_labels)
+                all_labels = np.concatenate((train_labels, test_labels), axis=0)
+                pro = ft.class_proportion_objects(objects_labels, all_labels)
 
                 prop_por_rodada.append(pro.copy())
 
@@ -443,14 +439,14 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
 if __name__ == "__main__":
 
-    check_pkg = install_missing_pkg()  # faz a instalação de pacotes faltantes, se houver
+    #check_pkg = install_missing_pkg()  # faz a instalação de pacotes faltantes, se houver
     ft = ST_functions() # cria objeto contendo funções diversas a serem usadas ao longo do código
     graph = ST_graphics()
 
     # PARÂMETROS:
     n_test_class = 3
     dataset_name = 'dp_ceratocystis1'
-    use_vae = False     # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
+    use_vae = False    # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
     len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 2      # quantidade de épocas para a execução do VAE
     lat_dim = 2         # quantidade de variaveis latentes do VAE
@@ -462,5 +458,6 @@ if __name__ == "__main__":
     n_iter = 10         # numero de iterações da rotina de self-training
 
     main(dataset_name, sel_model, metric, use_vae, vae_epochs, lat_dim, len_train, n_iter, n_test_class)
+
 
 

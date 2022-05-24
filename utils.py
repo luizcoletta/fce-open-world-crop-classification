@@ -376,6 +376,7 @@ class ST_functions:
     def class_proportion_objects(self, objs_labels, labels):
 
         classes = np.unique(labels)
+
         props = []
         for u in classes:
             r = np.count_nonzero(objs_labels == u)/len(objs_labels)

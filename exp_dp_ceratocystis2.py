@@ -260,8 +260,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
             if len(objects_labels) > 0 or objects_labels != []:
 
-
-                pro = ft.class_proportion_objects(objects_labels, train_labels)
+                all_labels = np.concatenate((train_labels, test_labels),axis=0)
+                pro = ft.class_proportion_objects(objects_labels, all_labels)
 
                 prop_por_rodada.append(pro.copy())
 
@@ -311,6 +311,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     x = x_axis.copy()
     y = y_axis.copy()
     prop_por_classe = prop_por_rodada.copy()
+
+
 
 
     '''
@@ -451,6 +453,7 @@ if __name__ == "__main__":
     lat_dim = 2  # quantidade de variaveis latentes do VAE
     sel_model = ['svm', 'svm', 'svm']  # define o classificador a ser usado
     metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
+
     
 
     n_iter = 10  # numero de iterações da rotina de self-training

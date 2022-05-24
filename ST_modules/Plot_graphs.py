@@ -31,6 +31,7 @@ class ST_graphics:
 
             cp = np.transpose(cp)
 
+
             for i in np.unique(test_labels):
                 data = pd.read_csv(results_dir+'/graphics_data/error_class_'+str(i)+'.csv')
 
@@ -41,6 +42,7 @@ class ST_graphics:
                 if i == np.unique(test_labels)[-1]:
                     prop_bars = np.concatenate((np.array([0]), cp[i-1]))
                     bars_iter = np.array(iter)
+
                     plt.bar(bars_iter, prop_bars, ec= 'k',  color = 'green', alpha = 0.3, hatch= '//', width=0.3)
                 '''
                 if z == 0:

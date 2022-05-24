@@ -259,9 +259,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
 
             if len(objects_labels) > 0 or objects_labels != []:
-
-
-                pro = ft.class_proportion_objects(objects_labels, train_labels)
+                all_labels = np.concatenate((train_labels, test_labels), axis=0)
+                pro = ft.class_proportion_objects(objects_labels, all_labels)
 
                 prop_por_rodada.append(pro.copy())
 
