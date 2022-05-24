@@ -180,6 +180,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     erro_da_classe_por_rodada = []
     time_classifier = []
     time_metric = []
+    prop_por_rodada = []
+    #prop_por_classe = []
 
     if len(train[0]) == 2:
         script_dir = os.path.dirname(__file__)
@@ -256,8 +258,16 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             # visualize_data(test_original, preds, [])
             # print(str(accuracy_score(labels_original, preds))+"\n") #acurácia da classificação do conjunto de teste original
 
-            [train, train_labels, test, test_labels] = ft.increment_training_set(w, train, train_labels, test,
+            [train, train_labels, test, test_labels, objects_labels] = ft.increment_training_set(w, train, train_labels, test,
                                                                                  test_labels, k, results_dir)
+
+
+            if len(objects_labels) > 0 or objects_labels != []:
+
+
+                pro = ft.class_proportion_objects(objects_labels, train_labels)
+
+                prop_por_rodada.append(pro.copy())
 
             #  ft.visualize_data(train, train_labels,[])
             if len(test) > 0:
@@ -304,6 +314,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     erros = erro_das_classes.copy()
     x = x_axis.copy()
     y = y_axis.copy()
+    prop_por_classe = prop_por_rodada.copy()
+
 
     '''
     #Salva arquivo csv na pasta logs contendo o tempo gasto em cada iteração
@@ -313,7 +325,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     elapsed_time.to_csv('logs/'+dataset_name+'/'+model_name+'&'+metric+'_elapsed_time.csv', index=False)
     '''
 
-    return x, y, erros, time_classifier, time_metric
+    return x, y, erros, time_classifier, time_metric, prop_por_classe
 
 
 def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_train, n_int,
@@ -346,10 +358,12 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
     all_metrics = []
     all_time_classifier = []
     all_time_metric = []
+    all_props = []
 
     class_errors = []
     x_axis = []
     y_axis = []
+    class_proportion = []
 
     '''
     # se use_vae é True, então utiliza o VAE para reduzir a dimensionalidade
@@ -371,7 +385,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
             train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
 
-            x_ent, y_ent, erros_ent, time_classifier, time_metric = self_training(n_int, model_name[i], train, train_labels, test,
+            x_ent, y_ent, erros_ent, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,
                                                     test_labels, metric[i], n_test_class,
                                                     kmeans_graph)
 
@@ -381,6 +395,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             all_y_axis.append(y_ent)
             all_time_classifier.append(time_classifier)
             all_time_metric.append(time_metric)
+            all_props.append(prop_por_classe)
 
 
 
@@ -389,6 +404,10 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
         mean_errors = [np.mean(values,axis=0) for values in zip(*all_errors)]
         class_errors.append(mean_errors)
         all_errors.clear()
+
+        mean_props = [np.mean(values, axis=0) for values in zip(*all_props)]
+        class_proportion.append(mean_props)
+        all_props.clear()
 
         mean_x_axis = [mean(values) for values in zip(*all_x_axis)]
         x_axis.append(mean_x_axis)
@@ -417,9 +436,10 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
 
 
+
     graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, results_dir, dataset_name)
     graph.accuracy_graph(x_axis, y_axis, all_metrics, results_dir, dataset_name)
-    graph.accuracy_all_class_graph(metric, results_dir, test_labels)
+    graph.accuracy_all_class_graph(metric, results_dir, test_labels, class_proportion)
 
 if __name__ == "__main__":
 
@@ -436,7 +456,8 @@ if __name__ == "__main__":
     lat_dim = 2         # quantidade de variaveis latentes do VAE
     sel_model = ['svm','svm','svm']  # define o classificador a ser usado
     metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
-
+    #sel_model = ['svm']  # define o classificador a ser usado
+    #metric = ['entropy']  # define a metrica para descobrir classes novas
 
     n_iter = 10         # numero de iterações da rotina de self-training
 

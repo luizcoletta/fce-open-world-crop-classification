@@ -361,6 +361,7 @@ class ST_functions:
         test_labels = pd.DataFrame(test_labels)
         objects = test.iloc[sel_objects, :]
         objects_labels = test_labels.iloc[sel_objects, :]
+
         # print("Selected Objects Classes: " + str(objects_labels.values.ravel()))
         train = pd.DataFrame(train)
         train_labels = pd.DataFrame(train_labels)
@@ -370,7 +371,19 @@ class ST_functions:
         trl = pd.concat([train_labels, objects_labels], axis=0)
         te = test.drop(test.index[sel_objects])
         tel = test_labels.drop(test_labels.index[sel_objects])
-        return [tr.to_numpy(), trl.to_numpy(), te.to_numpy(), tel.to_numpy()]
+        return [tr.to_numpy(), trl.to_numpy(), te.to_numpy(), tel.to_numpy(), objects_labels.to_numpy()]
+
+    def class_proportion_objects(self, objs_labels, labels):
+
+        classes = np.unique(labels)
+        props = []
+        for u in classes:
+            r = np.count_nonzero(objs_labels == u)/len(objs_labels)
+            props.append(r)
+
+        return props
+
+
 
 
     def reduce_matrix(self, sel_objects, SSet):

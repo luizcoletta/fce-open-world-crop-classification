@@ -17,28 +17,54 @@ class ST_graphics:
 
         pass
 
-    def accuracy_all_class_graph(self, metrics, results_dir, test_labels):
+    def accuracy_all_class_graph(self, metrics, results_dir, test_labels, class_proportion):
+
+        w = 0
+
 
         for k in metrics:
+            z = 0
+            plt.figure(figsize=(10,6))
 
-            plt.figure()
 
+            cp = class_proportion[w]
+
+            cp = np.transpose(cp)
 
             for i in np.unique(test_labels):
                 data = pd.read_csv(results_dir+'/graphics_data/error_class_'+str(i)+'.csv')
 
                 iter = list(data.iloc[:, 0])
-
                 acc = np.ones(len(iter)) - np.array(data.loc[:, k])
+                #prop_bars = np.concatenate((np.array([0]),cp[z]))
+
+                if i == np.unique(test_labels)[-1]:
+                    prop_bars = np.concatenate((np.array([0]), cp[i-1]))
+                    bars_iter = np.array(iter)
+                    plt.bar(bars_iter, prop_bars, ec= 'k',  color = 'green', alpha = 0.3, hatch= '//', width=0.3)
+                '''
+                if z == 0:
+                    bars_iter = np.array(iter) - 0.3
+                if z == 1:
+                    bars_iter = np.array(iter)
+                if z == 2:
+                    bars_iter = np.array(iter) + 0.3
+                '''
 
                 plt.plot(iter, acc, 'o--', label='class '+str(i))
 
+                #z = z+1
+
+            w = w+1
+            #plt.bar(iter, [0,1, 1,1,1,1,1,1,1,1,1])
             plt.legend()
             plt.xlabel('Iteração', fontsize=15)
-            plt.ylabel('Acurácia', fontsize=15)
-            plt.title('Acurácia em cada classe para  ' + str(k), fontsize=15)
+            plt.ylabel('Acurácia e objetos selecionados da classe 3', fontsize=15)
+            plt.title('Resultados obtidos para  ' + str(k), fontsize=15)
             plt.rcParams['xtick.labelsize'] = 13
             plt.rcParams['ytick.labelsize'] = 13
+            plt.rcParams["figure.figsize"] = [10.00, 3.50]
+            plt.xticks(iter)
             # plt.savefig('./teste/Erro da classe_' + str(i) + '.png')
             plt.savefig(results_dir + '/acur_classes_' + str(k) + '.png')
             # plt.show()
@@ -56,8 +82,13 @@ class ST_graphics:
             class_errors.append(cl_erro.copy())
 
         for i in range(class_errors[0].shape[0]):
-            plt.figure()
+            plt.figure(figsize=(10,6))
             error_data = {'iter': X[0]}  # usado para criar arquivo csv com pandas
+
+            plt.rcParams['xtick.labelsize'] = 13
+            plt.rcParams['ytick.labelsize'] = 13
+            plt.xticks(X[0])
+
             for j in range(len(name_metrics)):
 
                 plt.plot(X[j], class_errors[j][i], style[j], label=name_metrics[j])
@@ -72,8 +103,7 @@ class ST_graphics:
             plt.xlabel('Iteração', fontsize=15)
             plt.ylabel('Erro', fontsize=15)
             plt.title('Erro da classe ' + str(np.unique(test_labels)[i]), fontsize=15)
-            plt.rcParams['xtick.labelsize'] = 13
-            plt.rcParams['ytick.labelsize'] = 13
+
             #plt.savefig('./teste/Erro da classe_' + str(i) + '.png')
             plt.savefig(results_dir+file_name+str(np.unique(test_labels)[i])+'.png')
             #plt.show()
@@ -92,7 +122,7 @@ class ST_graphics:
 
         style = ['ro--', 'ko--', 'bo--']
 
-        plt.figure()
+        plt.figure(figsize=(10,6))
 
         for i in range(len(X)):
             plt.plot(X[i], Y[i], style[i], label=name_metrics[i])  # approach 0
@@ -100,10 +130,11 @@ class ST_graphics:
             accuracy_data.update(info.copy())
 
         plt.legend()
-        plt.ylabel('Acurácia', fontsize=14)
-        plt.xlabel('Iteração', fontsize=14)
-        plt.rcParams['xtick.labelsize'] = 12
-        plt.rcParams['ytick.labelsize'] = 12
+        plt.ylabel('Acurácia', fontsize=15)
+        plt.xlabel('Iteração', fontsize=15)
+        plt.rcParams['xtick.labelsize'] = 13
+        plt.rcParams['ytick.labelsize'] = 13
+        plt.xticks(X[0])
         #plt.savefig('acurácia_do_self_training.png')
         plt.savefig(results_dir+file_name)
         #plt.show()
