@@ -454,8 +454,6 @@ if __name__ == "__main__":
     sel_model = ['svm', 'svm', 'svm']  # define o classificador a ser usado
     metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
 
-    
-
     n_iter = 10  # numero de iterações da rotina de self-training
 
     main(dataset_name, sel_model, metric, use_vae, vae_epochs, lat_dim, len_train, n_iter, n_test_class)
