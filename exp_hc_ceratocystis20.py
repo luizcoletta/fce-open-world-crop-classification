@@ -378,7 +378,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             print('\n*******************************************')
             print("TRAINING SET AND TEST SET - fold " + str(j))
 
-            train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
+            train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop, scale = True)
 
             x_ent, y_ent, erros_ent, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,
                                                     test_labels, metric[i], n_test_class,
