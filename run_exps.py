@@ -23,16 +23,21 @@ install_pkg = False
 '''
 processes = ([
     #"main.py"
-    "exp_dp_ceratocystis1.py",
-    "exp_dp_ceratocystis2.py",
-    "exp_dp_ceratocystis5.py",
-    "exp_dp_ceratocystis10.py",
-    "exp_dp_ceratocystis20.py",
-    "exp_hc_ceratocystis1.py",
-    "exp_hc_ceratocystis2.py",
-    "exp_hc_ceratocystis5.py",
-    "exp_hc_ceratocystis10.py",
-    "exp_hc_ceratocystis20.py"
+    #"exp_dp_ceratocystis1.py",
+    #"exp_dp_ceratocystis2.py",
+    #"exp_dp_ceratocystis5.py",
+    #"exp_dp_ceratocystis10.py",
+    #"exp_dp_ceratocystis20.py",
+    #"exp_hc_ceratocystis1.py",
+    #"exp_hc_ceratocystis2.py",
+    #"exp_hc_ceratocystis5.py",
+    #"exp_hc_ceratocystis10.py",
+    #"exp_hc_ceratocystis20.py",
+    "exp_vae_ceratocystis1",
+    "exp_vae_ceratocystis2",
+    "exp_vae_ceratocystis5",
+    "exp_vae_ceratocystis10",
+    "exp_vae_ceratocystis20"
 
 ])
 '''

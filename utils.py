@@ -559,6 +559,7 @@ class ST_functions:
             objects_nearest_data_cluster = data[data_labels == nearest_data_cluster, :]
             dists_obs_nearest_data_cluster = distance.cdist(objects_nearest_data_cluster, np.array([new_data[i, :]]),
                                                             'euclidean')
+            #print(dists_obs_nearest_data_cluster)
             nearest_data_object = np.argmin(dists_obs_nearest_data_cluster)
             nearest_data_object_position.append(objects_nearest_data_cluster[nearest_data_object])
             distance_nearest_data_object = dists_obs_nearest_data_cluster[nearest_data_object][0]

@@ -9,12 +9,53 @@ from ST_modules.Plot_graphs import ST_graphics
 from utils import ST_functions
 from statistics import mean
 import os
+from skimage.io import imread_collection
 
 
 def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
     script_dir = os.path.dirname(__file__)
 
     # inserir os outros datasets aqui
+
+    if dataset_name == 'vae_ceratocystis2' and vae == True:
+        dir_path = 'data/train_images/dataset_eucapytus/dataset-2/*.png'
+        images_path = 'data/train_images/dataset_eucapytus/dataset-2'
+
+        files = os.listdir(images_path)
+        files = np.sort(files)
+        img_labels = []
+        for txt in files:
+            n = int(txt.split('.')[0][-1])  # obtem a classe da imagem pelo ultimo caracter do nome do arquivo
+            img_labels.append(int(n + 1))
+
+        img_labels = np.array(img_labels)
+        col_img = imread_collection(dir_path)
+
+        col_img = col_img.concatenate()
+
+
+
+        print('\nRunning VAE to generate latent variables...\n')
+        vae_model = VAE(col_img, img_labels, epoch=vae_epoch, lat_dim=lat_dim, shape=np.shape(col_img[0]),
+                        len_train=len_train)  # len_train --> tamanho do conjunto de treino
+        data = vae_model.output
+
+        print('\nVAE has finished!!\n')
+
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+
+        if not os.path.isdir(data_dir):
+            os.makedirs(data_dir)
+
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+            lat_dim * 2) + 'D.csv'
+        data.to_csv(train_path, index=False)
+
+        test_path = ''
+        class_index = (lat_dim * 2)
+        join_data = False
+        size_batch = int(len(img_labels) * 0.2)
+        class2drop = 3
 
     if dataset_name == 'dp_ceratocystis2' and vae == False:
         '''
@@ -449,10 +490,12 @@ if __name__ == "__main__":
     dataset_name = 'dp_ceratocystis2'
     use_vae = False  # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
     len_train = 60000  # tamanho do conjunto de treinamento do dataset para uso do VAE
-    vae_epochs = 2  # quantidade de épocas para a execução do VAE
-    lat_dim = 2  # quantidade de variaveis latentes do VAE
+    vae_epochs = 100  # quantidade de épocas para a execução do VAE
+    lat_dim = 4  # quantidade de variaveis latentes do VAE
     sel_model = ['svm', 'svm', 'svm']  # define o classificador a ser usado
     metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
+    #sel_model = ['svm']  # define o classificador a ser usado
+    #metric = ['silhouette0']  # define a metrica para descobrir classes novas
 
     n_iter = 10  # numero de iterações da rotina de self-training
 

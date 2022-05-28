@@ -40,7 +40,8 @@ class ST_graphics:
                 #prop_bars = np.concatenate((np.array([0]),cp[z]))
 
                 if i == np.unique(test_labels)[-1]:
-                    prop_bars = np.concatenate((np.array([0]), cp[i-1]))
+
+                    prop_bars = np.concatenate((np.array([0]), cp[int(i)-1]))
                     bars_iter = np.array(iter)
 
                     plt.bar(bars_iter, prop_bars, ec= 'k',  color = 'green', alpha = 0.3, hatch= '//', width=0.3)

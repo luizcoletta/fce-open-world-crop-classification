@@ -40,6 +40,7 @@ class alghms:
                                                len(np.unique(train_labels)), nclusters_test)
             finish = time.time()
             total_time = finish - start
+            #print(np.unique(train_labels))
             self.metric_time = total_time
 
         if metric == 'silhouette1':
@@ -67,7 +68,7 @@ class alghms:
         return e
 
     def kmeans_for_new_class(self, train, test, kmeans_approach, int, graph, results_path,
-                             nclusters_train, nclusters_test=10, threshold=0.8):
+                             nclusters_train, nclusters_test=3, threshold=0.8):
 
         kmeans = KMeans(n_clusters=nclusters_train,  # numero de clusters
                         init='k-means++', n_init=10,
