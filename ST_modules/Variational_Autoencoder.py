@@ -5,6 +5,11 @@ import tensorflow
 from tensorflow import keras
 import numpy
 from tensorflow.keras import layers
+import random
+random.seed(42)
+np.random.seed(42)
+tf.random.set_seed(42)
+#tf.keras.utils.set_random_seed(42)
 
 class VAE:
 
@@ -184,6 +189,7 @@ class VAE:
                     total_loss = reconstruction_loss + kl_loss
                 grads = tape.gradient(total_loss, self.trainable_weights)
                 self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
+                print()
                 return {
                     "loss": total_loss,
                     "reconstruction_loss": reconstruction_loss,
@@ -199,8 +205,6 @@ class VAE:
 
         vae.compile(optimizer=keras.optimizers.Adam(lr=0.0005))
         dataset_features = dataset_features.astype("float32")/255
-        print('antes')
-        print(dataset_features)
         vae.fit(dataset_features,  epochs=epoch, batch_size=15)
         z_mean, z_log_var, z = vae.encoder(dataset_features)
 
@@ -208,7 +212,7 @@ class VAE:
         #dataset_labels = np.concatenate([y_train, y_test], axis=0)
 
         dataset_labels.transpose()
-        print('depois')
+
         print(latent_features)
 
         data = np.column_stack((latent_features, dataset_labels))

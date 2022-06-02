@@ -13,6 +13,7 @@ from statistics import mean
 import skimage.io
 from skimage.io import imread_collection
 import os
+from sklearn.metrics import precision_recall_fscore_support
 
 
 def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
@@ -186,7 +187,10 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     # cria variáveis para execução do self-training e gera a pasta para armazenar os resultados
     #----------------------------------------------------------------
     x_axis = []
-    y_axis = []
+    y_acc = []
+    y_precisao = []
+    y_recall = []
+    y_fscore = []
     erro_das_classes = []
     erro_da_classe_por_rodada = []
     time_classifier = []
@@ -219,6 +223,9 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     e = classifier_results.e
 
     acuracia = accuracy_score(test_labels, preds)
+    precisao = precision_recall_fscore_support(test_labels, preds, average='weighted')[0]
+    recall = precision_recall_fscore_support(test_labels, preds, average='weighted')[1]
+    f_score = precision_recall_fscore_support(test_labels, preds, average='weighted')[2]
 
     for i in np.unique(labels_original):
         erro = ft.class_error(preds, test_labels, i)
@@ -227,7 +234,10 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     erro_das_classes.append(erro_da_classe_por_rodada.copy())
     erro_da_classe_por_rodada.clear()
     x_axis.append(0)
-    y_axis.append(acuracia)
+    y_acc.append(acuracia)
+    y_precisao.append(precisao)
+    y_recall.append(recall)
+    y_fscore.append(f_score)
 
     print("\nIteration " + str(0) + " (before train set increment) - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)) +
           " - Accuracy: " + str(round(acuracia,4)) )
@@ -290,6 +300,9 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 e = classifier_results.e
 
                 acuracia = accuracy_score(test_labels, preds)
+                precisao = precision_recall_fscore_support(test_labels, preds, average='weighted')[0]
+                recall = precision_recall_fscore_support(test_labels, preds, average='weighted')[1]
+                f_score = precision_recall_fscore_support(test_labels, preds, average='weighted')[2]
 
                 for i in np.unique(labels_original):
                     erro = ft.class_error(preds, test_labels, i)
@@ -298,7 +311,10 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 erro_das_classes.append(erro_da_classe_por_rodada.copy())
                 erro_da_classe_por_rodada.clear()
                 x_axis.append(k)
-                y_axis.append(acuracia)
+                y_acc.append(acuracia)
+                y_precisao.append(precisao)
+                y_recall.append(recall)
+                y_fscore.append(f_score)
 
             print(
                 "\nIteration " + str(k) + " - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)) +
@@ -323,7 +339,12 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
     erros = erro_das_classes.copy()
     x = x_axis.copy()
-    y = y_axis.copy()
+    y = []
+    y.append(y_acc.copy())
+
+    y.append(y_precisao.copy())
+    y.append(y_recall.copy())
+    y.append(y_fscore.copy())
     prop_por_classe = prop_por_rodada.copy()
 
 
@@ -423,7 +444,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
         x_axis.append(mean_x_axis)
         all_x_axis.clear()
 
-        mean_y_axis = [mean(values) for values in zip(*all_y_axis)]
+        mean_y_axis = [np.mean(values,axis = 0) for values in zip(*all_y_axis)]
         y_axis.append(mean_y_axis)
         all_y_axis.clear()
 

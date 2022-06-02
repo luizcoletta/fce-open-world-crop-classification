@@ -82,6 +82,8 @@ class ST_functions:
         test_set.to_csv('data/'+dataset_name+'_test.csv', index=False)
     '''
 
+
+
     def class_error(self, pred, test_labels, classe):
         c = 0
         dflabels = pd.DataFrame(test_labels)
@@ -140,6 +142,7 @@ class ST_functions:
                 train = train_scaler.transform(train)
 
             train_labels = df_training.iloc[:, class_index].values
+
 
         df_test = []
         test = []

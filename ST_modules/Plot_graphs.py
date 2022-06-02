@@ -116,31 +116,38 @@ class ST_graphics:
 
     def accuracy_graph(self, X, Y, name_metrics, results_dir, dataset_name):
 
+
         #print('SIlhoueta 0:' + str(y_axis_kmeans))
         #print('SIlhoueta 1:' + str(y_axis_kmeans1))
         #print('Entropia:' + str(y_axis_svm))
 
-        accuracy_data = {'iter' : X[0]}
-        file_name = "/accuracy_"+ dataset_name +".jpg"
+
+
 
         style = ['ro--', 'ko--', 'bo--']
+        ind = ['accuracy', 'precision', 'Recall', 'F1-score']
+        #file_name = "/accuracy_" + dataset_name + ".jpg"
 
-        plt.figure(figsize=(10,6))
+        for x in range(np.shape(Y)[1]):
 
-        for i in range(len(X)):
-            plt.plot(X[i], Y[i], style[i], label=name_metrics[i])  # approach 0
-            info = {name_metrics[i] : Y[i]}
-            accuracy_data.update(info.copy())
+            _data = {'iter': X[0]}
 
-        plt.legend()
-        plt.ylabel('Acurácia', fontsize=15)
-        plt.xlabel('Iteração', fontsize=15)
-        plt.rcParams['xtick.labelsize'] = 13
-        plt.rcParams['ytick.labelsize'] = 13
-        plt.xticks(X[0])
-        #plt.savefig('acurácia_do_self_training.png')
-        plt.savefig(results_dir+file_name)
-        #plt.show()
+            plt.figure(figsize=(10,6))
 
-        accuracy_data = pd.DataFrame(accuracy_data)
-        accuracy_data.to_csv('results/' + dataset_name + '/graphics_data/'+'accuracy_data.csv', index=False)
+            for i in range(len(X)):
+                plt.plot(X[i], Y[i][x], style[i], label=name_metrics[i])  # approach 0
+                info = {name_metrics[i] : Y[i][x]}
+                _data.update(info.copy())
+
+            plt.legend()
+            plt.ylabel(ind[x], fontsize=15)
+            plt.xlabel('Iteração', fontsize=15)
+            plt.rcParams['xtick.labelsize'] = 13
+            plt.rcParams['ytick.labelsize'] = 13
+            plt.xticks(X[0])
+            #plt.savefig('acurácia_do_self_training.png')
+            plt.savefig(results_dir+'/'+ind[x]+'_'+dataset_name + ".jpg")
+            #plt.show()
+
+            pd_data = pd.DataFrame(_data)
+            pd_data.to_csv('results/' + dataset_name + '/graphics_data/'+ind[x]+'_data.csv', index=False)
