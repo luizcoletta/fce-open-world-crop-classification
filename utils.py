@@ -12,6 +12,7 @@ import plotly.express as px
 from scipy.spatial import distance
 import random
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics.pairwise import euclidean_distances
 
 
 class ST_functions:
@@ -285,7 +286,7 @@ class ST_functions:
         cluslabels_list = []
         nuclusters_list = []
 
-        matDist = np.array(self.euclidean_distances(data, data))
+        matDist = np.array(euclidean_distances(data, data))
 
         for n_size_ssfeat in range(int(len(ssfeat_list))):
 
