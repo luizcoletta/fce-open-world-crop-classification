@@ -7,6 +7,7 @@ from sklearn.metrics import silhouette_score
 from utils import ST_functions
 from sklearn import svm
 from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics import accuracy_score
 import plotly.express as px
 from scipy.spatial import distance
 import random
@@ -15,6 +16,7 @@ import random
 def c3e_sl(piSet, SSet, I, alpha):
     N = len(piSet)
     c = len(piSet[0, :])
+
     # piSet = np.array(piSet)
     y = [[1] * c] * N
     y = np.divide(y, c)
@@ -36,6 +38,8 @@ def c3e_sl(piSet, SSet, I, alpha):
 
 def eds(train, test, y, SSet, DistMat):
     ### entropy measuse
+
+    y=y[0]
     e = calc_class_entropy(y)
     candidates = e > np.percentile(e, 75)
     values = np.array(e)[candidates]
@@ -50,6 +54,7 @@ def eds(train, test, y, SSet, DistMat):
     candidates = l > np.percentile(l, 75)
     values = np.array(l)[candidates]
 
+    '''
     #### silhouette measure
     from sklearn.metrics import silhouette_samples
     sil_test = np.concatenate([train, test])
@@ -58,16 +63,18 @@ def eds(train, test, y, SSet, DistMat):
     s = sil_values[len(test) * (-1):]
     candidates = s > np.percentile(s, 25)
     values = np.array(s)[candidates]
-
+    '''
     ### ensembles
     el = np.multiply(e, l)
     candidates = el > np.percentile(el, 75)
     values = np.array(el)[candidates]
 
+    '''
     sc = 1 - s
     esc = np.multiply(e, sc)
     candidates = esc > np.percentile(esc, 75)
     values = np.array(esc)[candidates]
+    '''
 
     return [candidates, values]
 
@@ -75,15 +82,23 @@ def eds(train, test, y, SSet, DistMat):
 def ic(probs, SSet, train, train_labels, test, test_labels):
     y = c3e_sl(probs, SSet, 5, 0.001)
     for k in range(10):
-        e = calc_class_entropy(y)
+
+        e = calc_class_entropy(y[0])
         d = calc_density(SSet)
-        w = eds(e, d, 5, SSet)
-        [train, train_labels, test, test_labels] = increment_training_set(w, train, train_labels, test,
-                                                                               test_labels)
-        probs = svmClassification(train, train_labels, test, test_labels)
-        SSet = reduce_matrix(w, SSet)
-        y = c3e_sl(probs, SSet, 5, 0.001)
-        print("Iteration " + str(k + 1) + " - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)))
+        #w = eds(e, d, 5, SSet)
+        w = eds(train,test,y,SSet,SSet)
+
+        w = np.where(w[0])
+        p=w[0][0:15] # seleciona 15 objetos para incrementar treino
+
+        [train, train_labels, test, test_labels] = increment_training_set(p, train, train_labels, test, test_labels)
+        probs = svmClassification(train, train_labels, test)
+        SSet = reduce_matrix(p, SSet)
+        y = c3e_sl(probs[0], SSet, 5, 0.001)
+        acc = accuracy_score(test_labels,probs[1])
+
+        print("Iteration " + str(k + 1) + " - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test))
+              + " - Acc: " +str(acc))
 
 def clusterEnsemble(data):
     ssfeat_list = ft.features_subset(data.shape[1], 2)
@@ -167,9 +182,9 @@ def remove_class(hidden_class, train, train_labels):
     return [t, tl]
 
 
-def increment_training_set(sel_objects, train, train_labels, test, test_labels, iter, save_dir):
-    if len(train[0]) <= 2:
-        ft.visualize_data(test, test_labels, sel_objects, iter, save_dir)
+def increment_training_set(sel_objects, train, train_labels, test, test_labels, iter = 0,save_dir= ''):
+ #   if len(train[0]) <= 2:
+#        ft.visualize_data(test, test_labels, sel_objects, iter, save_dir)
 
     test = pd.DataFrame(test)
     test_labels = pd.DataFrame(test_labels)
@@ -245,7 +260,8 @@ if __name__ == "__main__":
     test_labels = df_test.iloc[:, class_index].values
 
     probs = svmClassification(train, train_labels, test)
+
     [silhouette_list, clusterers_list, cluslabels_list, nuclusters_list, caMatrix, matDist] = clusterEnsemble(test)
-    ic(probs, matDist, train, train_labels, test, test_labels)
+    ic(probs[0], matDist, train, train_labels, test, test_labels)
 
 
