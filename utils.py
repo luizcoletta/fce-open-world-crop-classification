@@ -424,6 +424,7 @@ class ST_functions:
         # y = pd.DataFrame(y)
         for k in range(0, I):
             for j in range(0, N):
+
                 diffi = np.arange(0, N)
                 cond = diffi != j
                 t1 = np.array(SSet[j][cond])
@@ -432,46 +433,31 @@ class ST_functions:
                 p1 = (np.transpose(t1 * np.ones([c, 1])) * y[cond, :]).sum(axis=0)
                 p2 = sum(t1)
                 y[j, :] = (piSet[j, :] + (2 * alpha * p1)) / (1 + 2 * alpha * p2)
-                labels[j] = int(np.where(y[j, :] == np.max(y[j, :]))[0])
+                #labels[j] = int(np.where(y[j, :] == np.max(y[j, :]))[0])
+                labels[j] = np.argmax(y[j, :])+1 #As classes do problema são 1,2 e 3
         return y, labels
 
 
-    def eds(self, train, test, y, SSet, DistMat):
+    def eds(self, e, d, p, SSet):
         ### entropy measuse
-        e = self.calc_class_entropy(y)
-        candidates = e > np.percentile(e, 75)
-        values = np.array(e)[candidates]
+        w = []
+        for i in range(1, p + 1):
 
-        #### density measure - não funciona bem!
-        d = self.calc_density(SSet)
-        candidates = d > np.percentile(d, 75)
-        values = np.array(d)[candidates]
+            ed = np.multiply(e, d)
 
-        ### low density measure
-        l = self.calc_low_density(DistMat)
-        candidates = l > np.percentile(l, 75)
-        values = np.array(l)[candidates]
+            if i == 1:
+                res = ed
+                w.append(np.argmax(res))
+            else:
+                S_ir = SSet[:, w]
+                S_ir = np.sum(S_ir, axis=1)
+                S_mean = np.divide(S_ir, (i - 1))
+                res = np.multiply(ed, (1 - S_mean))
+                w.append(np.argmax(res))
 
-        #### silhouette measure
-        from sklearn.metrics import silhouette_samples
-        sil_test = np.concatenate([train, test])
-        clabels = self.classAnnotation(sil_test)
-        sil_values = silhouette_samples(sil_test, clabels[0])
-        s = sil_values[len(test) * (-1):]
-        candidates = s > np.percentile(s, 25)
-        values = np.array(s)[candidates]
+            e[np.argmax(res)] = -1.E12
 
-        ### ensembles
-        el = np.multiply(e, l)
-        candidates = el > np.percentile(el, 75)
-        values = np.array(el)[candidates]
-
-        sc = 1 - s
-        esc = np.multiply(e, sc)
-        candidates = esc > np.percentile(esc, 75)
-        values = np.array(esc)[candidates]
-
-        return [candidates, values]
+        return w
 
 
     def ic(self, probs, SSet, train, train_labels, test, test_labels):

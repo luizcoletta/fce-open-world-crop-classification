@@ -12,6 +12,7 @@ from utils import ST_functions
 from statistics import mean
 import os
 from sklearn.metrics import precision_recall_fscore_support
+import time
 
 
 def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
@@ -178,6 +179,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     y_precisao = []
     y_recall = []
     y_fscore = []
+
     erro_das_classes = []
     erro_da_classe_por_rodada = []
     time_classifier = []
@@ -202,12 +204,22 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     print('   Classifier: ' + str(model_name) + ' - Metric: ' + str(metric) )
     print('*********************************************')
 
+
+    if (model_name == 'ic_eds'):
+        [silhouette_list, clusterers_list, cluslabels_list, nuclusters_list, SSet, matDist] = ft.clusterEnsemble(test)
+
+    else:
+        SSet = []
+
+
     classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
-                                n_test_class, 0, kmeans_graph)
+                                    n_test_class, 0, kmeans_graph, SSet)
 
     preds = classifier_results.pred
+
     probs = classifier_results.probs
     e = classifier_results.e
+
 
     acuracia = accuracy_score(test_labels, preds)
     precisao = precision_recall_fscore_support(test_labels, preds, average='weighted')[0]
@@ -244,27 +256,23 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
             # https://scikit-learn.org/stable/modules/svm.html
 
+            if(model_name != 'ic_eds'):
 
-            df_e = pd.DataFrame(e)
-            df_e.sort_values(by=[0], inplace=True, ascending=False)
+                df_e = pd.DataFrame(e)
+                df_e.sort_values(by=[0], inplace=True, ascending=False)
 
-            # print(df_e)
+                # print(df_e)
 
-            # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
-            posicoes = df_e.index.values
-            posicoes = posicoes.tolist()
-            p = 5  # 96
+                # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
+                posicoes = df_e.index.values
+                posicoes = posicoes.tolist()
+                p = 5  # 96
 
-            w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
-
+                w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
+            else:
+                w = ft.eds(e[0],e[1],5,SSet)
             # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html
-            # IMPRIMIR A ACURÁCIA
 
-            # print("#------Gráfico de predição-------#")
-            # print("#--------------------------------#")
-            # [probs, preds] = svmClassification(train, train_labels, test_original)
-            # visualize_data(test_original, preds, [])
-            # print(str(accuracy_score(labels_original, preds))+"\n") #acurácia da classificação do conjunto de teste original
 
             [train, train_labels, test, test_labels, objects_labels] = ft.increment_training_set(w, train, train_labels, test,
                                                                                  test_labels, k, results_dir)
@@ -279,8 +287,12 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             #  ft.visualize_data(train, train_labels,[])
             if len(test) > 0:
                 # https://scikit-learn.org/stable/modules/svm.html
+
+                if(model_name=='ic_eds'):
+                    SSet = ft.reduce_matrix(w, SSet)
+
                 classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
-                                            n_test_class, k, kmeans_graph)
+                                            n_test_class, k, kmeans_graph,SSet)
 
                 preds = classifier_results.pred
                 probs = classifier_results.probs
@@ -332,6 +344,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     y.append(y_precisao.copy())
     y.append(y_recall.copy())
     y.append(y_fscore.copy())
+
+    #y = y_acc.copy()
     prop_por_classe = prop_por_rodada.copy()
 
 
@@ -394,8 +408,9 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
         print('\nVAE has finished!!\n')
     '''
-
+    time_per_model = []
     for i in range(len(model_name)):
+        start = time.time()
 
         for j in range(1,6):
             print('\n*******************************************')
@@ -406,6 +421,8 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             x_ent, y_ent, erros_ent, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,
                                                     test_labels, metric[i], n_test_class,
                                                     kmeans_graph)
+
+
 
 
             all_errors.append(erros_ent)
@@ -420,6 +437,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
         # Faz a média dos resultados obtidos em cada fold e armazena em uma lista para plotagem em gráficos:
 
         mean_errors = [np.mean(values,axis=0) for values in zip(*all_errors)]
+
         class_errors.append(mean_errors)
         all_errors.clear()
 
@@ -428,10 +446,12 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
         all_props.clear()
 
         mean_x_axis = [mean(values) for values in zip(*all_x_axis)]
+
         x_axis.append(mean_x_axis)
         all_x_axis.clear()
 
         mean_y_axis = [np.mean(values,axis = 0) for values in zip(*all_y_axis)]
+
         y_axis.append(mean_y_axis)
         all_y_axis.clear()
 
@@ -451,13 +471,22 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
         elapsed_time = pd.DataFrame(time_data)
         elapsed_time.to_csv('logs/' + dataset_name + '/' + model_name[i] + '&' + metric[i] + '_elapsed_time.csv', index=False)
 
+        finish = time.time()
+        total_time = (finish - start)/60
+        time_per_model.append(total_time)
 
 
 
 
     graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, results_dir, dataset_name)
+
     graph.accuracy_graph(x_axis, y_axis, all_metrics, results_dir, dataset_name)
     graph.accuracy_all_class_graph(metric, results_dir, test_labels, class_proportion)
+
+    for i in range(len(model_name)):
+        print('Elapsed time (min) for '+str(model_name[i])+' and '+str(metric[i])+' : ' + str(time_per_model[i]))
+
+
 
 if __name__ == "__main__":
     check_pkg = install_missing_pkg()  # faz a instalação de pacotes faltantes, se houver
@@ -471,8 +500,8 @@ if __name__ == "__main__":
     len_train = 60000  # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 2  # quantidade de épocas para a execução do VAE
     lat_dim = 2  # quantidade de variaveis latentes do VAE
-    sel_model = ['svm', 'svm', 'svm']  # define o classificador a ser usado
-    metric = ['silhouette0', 'silhouette1', 'entropy']  # define a metrica para descobrir classes novas
+    sel_model = ['svm', 'svm', 'svm', 'ic_eds']  # define o classificador a ser usado
+    metric = ['silhouette0', 'silhouette1', 'entropy', 'ent&dens']  # define a metrica para descobrir classes novas
 
     n_iter = 10  # numero de iterações da rotina de self-training
 

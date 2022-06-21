@@ -77,7 +77,7 @@ class ST_graphics:
     def class_error_graph (self, X, errors, name_metrics, test_labels, results_dir, dataset_name) :
         class_errors = []
         file_name = "/" + dataset_name + "_error_class_"
-        style = ['ro--', 'ko--', 'bo--']
+        style = ['ro--', 'ko--', 'bo--','go--']
 
 
         for j in errors:
@@ -124,7 +124,7 @@ class ST_graphics:
 
 
 
-        style = ['ro--', 'ko--', 'bo--']
+        style = ['ro--', 'ko--', 'bo--','go--']
         ind = ['accuracy', 'precision', 'Recall', 'F1-score']
         #file_name = "/accuracy_" + dataset_name + ".jpg"
 

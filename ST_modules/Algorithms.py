@@ -5,18 +5,36 @@ from sklearn.cluster import KMeans
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import ST_functions
-func = ST_functions()
+ft = ST_functions()
 import time
 
 
 class alghms:
 
     def __init__(self, model_name, train, train_labels, test, test_labels, metric, results_path,
-                 nclusters_test=10, iter_graph = None, kmeans_graph = False):
+                 nclusters_test=10, iter_graph = None, kmeans_graph = False, SSet = None):
 
         #interaction --> usado para gerar os gráficos a cada iteração
         #graph --> habilita a exibição de gráficos se True
         #nclusters_train e nclusters_test --> aplicados na obtenção do kmeans para cálculo da silhueta
+        #SSet -> usado no algoritmo IC_EDS (matriz de similaridade)
+
+        if model_name == 'ic_eds':
+            start = time.time()
+
+            self.probs, self.pred = self.ic_eds(train,train_labels, test,SSet)
+
+            finish = time.time()
+            total_time = finish - start
+            self.classifier_time = total_time
+
+        if metric =='ent&dens':
+            start = time.time()
+            self.e = self.ed(self.probs, SSet)
+            finish = time.time()
+            total_time = finish - start
+            self.metric_time = total_time
+
 
         if model_name == 'svm':
             start = time.time()
@@ -51,6 +69,21 @@ class alghms:
             finish = time.time()
             total_time = finish - start
             self.metric_time = total_time
+
+    #algoritmo IC_EDS
+    #----------------------------------------------------------------
+    def ic_eds(self,train, train_labels, test,SSet):
+        probs = self.svmClassification(train, train_labels, test)
+        y = ft.c3e_sl(probs[0], SSet, 5, 0.001)
+
+        return [y[0], y[1]]
+        #return [probs[0], probs[1]]
+
+    def ed(self, p, SSet):
+        e = self.calc_class_entropy(p)
+        d = ft.calc_density(SSet)
+        return [e,d]
+    #----------------------------------------------------------------
 
     def svmClassification(self, train, train_labels, test):
         SVM = svm.SVC(tol=1.5, probability=True)
@@ -121,7 +154,7 @@ class alghms:
 
             #------------------------------------------
 
-        data, data_labels, data_centers, data_dists, silhouette = func.augment_data(2, train, pred_train,
+        data, data_labels, data_centers, data_dists, silhouette = ft.augment_data(2, train, pred_train,
                                                                                kmeans_train_center,
                                                                                objs_train_to_center_clusters, test,
                                                                                pred_test, kmeans_test_center,
