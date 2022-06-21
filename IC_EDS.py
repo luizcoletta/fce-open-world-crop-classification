@@ -109,9 +109,7 @@ def ic(probs, SSet, train, train_labels, test, test_labels):
 
         e = calc_class_entropy(y[0])
         d = calc_density(SSet)
-
         w = eds(e, d, 5, SSet)
-
         [train, train_labels, test, test_labels] = increment_training_set(w, train, train_labels, test, test_labels,k)
         probs = svmClassification(train, train_labels, test)
         SSet = reduce_matrix(w, SSet)
