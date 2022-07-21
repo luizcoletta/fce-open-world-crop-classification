@@ -502,8 +502,8 @@ if __name__ == "__main__":
     len_train = 60000  # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 2  # quantidade de épocas para a execução do VAE
     lat_dim = 2  # quantidade de variaveis latentes do VAE
-    sel_model = ['svm', 'svm', 'svm', 'ic_eds']  # define o classificador a ser usado
-    metric = ['silhouette0', 'silhouette1', 'entropy', 'ent&dens']  # define a metrica para descobrir classes novas
+    sel_model = ['svm', 'svm', 'svm']#, 'ic_eds']  # define o classificador a ser usado
+    metric = ['silhouette0', 'silhouette1', 'entropy']#, 'ent&dens']  # define a metrica para descobrir classes novas
 
     n_iter = 10  # numero de iterações da rotina de self-training
 

@@ -57,17 +57,17 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
         print('\nVAE has finished!!\n')
 
-        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_'+ str(lat_dim * 2) + 'D')
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_'+ str(lat_dim*2) + 'D')
 
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
-        train_path = 'data/' + dataset_name + '_'+str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_' + str(
-            lat_dim * 2) + 'D.csv'
-        data.to_csv(train_path, index=False)
+        train_path = 'data/' + dataset_name + '_'+str(lat_dim*2) + 'D' + '/' + dataset_name+ '_' + str(
+            lat_dim*2) + 'D.csv'
+        data.to_csv(train_path, index=False, header=False)
 
         test_path = ''
-        class_index = (lat_dim * 2)
+        class_index = (lat_dim*2)
         join_data = False
         size_batch = int(len(img_labels) * 0.2)
         class2drop = 3
@@ -512,9 +512,9 @@ if __name__ == "__main__":
     use_vae = True   # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
     len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 100     # quantidade de épocas para a execução do VAE
-    lat_dim = 4         # quantidade de variaveis latentes do VAE
-    sel_model = ['svm', 'svm', 'svm', 'ic_eds']  # define o classificador a ser usado
-    metric = ['silhouette0', 'silhouette1', 'entropy', 'ent&dens']  # define a metrica para descobrir classes novas
+    lat_dim = 4        # quantidade de variaveis latentes do VAE
+    sel_model = ['svm', 'svm', 'svm'] #, 'ic_eds'] # define o classificador a ser usado
+    metric = ['silhouette0', 'silhouette1', 'entropy'] #, 'ent&dens'] # define a metrica para descobrir classes novas
     #sel_model = ['svm']  # define o classificador a ser usado
     #metric = ['entropy']  # define a metrica para descobrir classes novas
 

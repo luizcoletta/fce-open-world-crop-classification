@@ -42,7 +42,7 @@ class VAE:
         x = layers.Conv2D(32, 3, activation="relu", strides=2, padding="same")(encoder_inputs)
         x = layers.Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
         x = layers.Flatten()(x)
-        x = layers.Dense(16, activation="relu")(x)
+        x = layers.Dense(32, activation="relu")(x) #16
         z_mean = layers.Dense(latent_dim, name="z_mean")(x)
         z_log_var = layers.Dense(latent_dim, name="z_log_var")(x)
         z = Sampling()([z_mean, z_log_var])
@@ -209,11 +209,10 @@ class VAE:
         z_mean, z_log_var, z = vae.encoder(dataset_features)
 
         latent_features = np.concatenate([z_mean.numpy(), z_log_var.numpy()], axis=1)
+        #latent_features = z.numpy()
         #dataset_labels = np.concatenate([y_train, y_test], axis=0)
 
         dataset_labels.transpose()
-
-        print(latent_features)
 
         data = np.column_stack((latent_features, dataset_labels))
 

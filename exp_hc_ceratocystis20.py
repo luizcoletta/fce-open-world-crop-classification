@@ -417,7 +417,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             print('\n*******************************************')
             print("TRAINING SET AND TEST SET - fold " + str(j))
 
-            train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
+            train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop, scale = True)
 
             x_ent, y_ent, erros_ent, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,
                                                     test_labels, metric[i], n_test_class,
@@ -501,8 +501,8 @@ if __name__ == "__main__":
     len_train = 60000  # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 2  # quantidade de épocas para a execução do VAE
     lat_dim = 2  # quantidade de variaveis latentes do VAE
-    sel_model = ['svm', 'svm', 'svm', 'ic_eds']  # define o classificador a ser usado
-    metric = ['silhouette0', 'silhouette1', 'entropy', 'ent&dens']  # define a metrica para descobrir classes novas
+    sel_model = ['svm', 'svm', 'svm']#, 'ic_eds']  # define o classificador a ser usado
+    metric = ['silhouette0', 'silhouette1', 'entropy']#, 'ent&dens']  # define a metrica para descobrir classes novas
 
     n_iter = 10  # numero de iterações da rotina de self-training
 

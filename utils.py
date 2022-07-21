@@ -133,8 +133,8 @@ class ST_functions:
         train = []
         train_labels = []
         if train_data_path:
-            df_training = pd.read_csv(train_data_path)  # , header=None)
-            # print(df_training.shape)
+            df_training = pd.read_csv(train_data_path, header=None)
+
             feat_index = list(range(df_training.shape[1]))
             feat_index.remove(class_index)
             train = df_training.iloc[:, feat_index].values

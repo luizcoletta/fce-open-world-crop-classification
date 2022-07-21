@@ -21,6 +21,7 @@ def install_all_packages(modules_to_try):
 
 install_pkg = False
 '''
+
 processes = ([
     #"main.py"
     "exp_dp_ceratocystis1.py",
@@ -31,7 +32,7 @@ processes = ([
     "exp_hc_ceratocystis1.py",
     "exp_hc_ceratocystis2.py",
     "exp_hc_ceratocystis5.py",
-    "exp_hc_ceratocystis10.py",
+   "exp_hc_ceratocystis10.py",
     "exp_hc_ceratocystis20.py",
     "exp_vae_ceratocystis1.py",
     "exp_vae_ceratocystis2.py",
@@ -40,6 +41,9 @@ processes = ([
     "exp_vae_ceratocystis20.py"
 
 ])
+
+
+
 '''
 if (install_pkg):
     required_pkg_list = [('numpy', 'numpy'),
