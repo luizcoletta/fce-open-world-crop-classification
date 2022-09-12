@@ -17,10 +17,9 @@ class ST_graphics:
 
         pass
 
-    def accuracy_all_class_graph(self, metrics, results_dir, test_labels, class_proportion):
+    def accuracy_all_class_graph(self, metrics, results_dir, test_labels, class_proportion, list_new_class_labels):
 
         w = 0
-
 
         for k in metrics:
             z = 0
@@ -37,6 +36,7 @@ class ST_graphics:
 
                 iter = list(data.iloc[:, 0])
                 acc = np.ones(len(iter)) - np.array(data.loc[:, k])
+
                 #prop_bars = np.concatenate((np.array([0]),cp[z]))
 
                 if i == np.unique(test_labels)[-1]:
@@ -55,6 +55,9 @@ class ST_graphics:
                 '''
 
                 plt.plot(iter, acc, 'o--', label='class '+str(i))
+
+                for i in list_new_class_labels:
+                    plt.vlines(i[0],ymin=0, ymax=1, colors='r',linestyles ='dashed')
 
                 #z = z+1
 
@@ -102,6 +105,7 @@ class ST_graphics:
             error_class.to_csv('results/' + dataset_name + '/graphics_data/' + 'error_class_'+str(np.unique(test_labels)[i])
                                +'.csv', index=False)
 
+            plt.ylim([0,1.1])
             plt.legend()
             plt.xlabel('Iteração', fontsize=15)
             plt.ylabel('Erro', fontsize=15)

@@ -83,7 +83,38 @@ class ST_functions:
         test_set.to_csv('data/'+dataset_name+'_test.csv', index=False)
     '''
 
+    # Ordena os dados de teste de acordo com a classe
+    def sort_testset(x_test, y_test):
+        list_labels_test = y_test[:]
+        ind = []
+        ordered_y_test = []
 
+        list_labels_test = list(enumerate(list_labels_test))
+        list_labels_test.sort(key=lambda x: x[1])
+
+        for x in list_labels_test:
+            ind.append(x[0])
+            ordered_y_test.append(x[1])
+
+        ordered_x_test = x_test[ind]
+
+        return ordered_x_test, np.array(ordered_y_test)
+
+    def draw_new_classes(list_new_class_labels, ordered_x_test, ordered_y_test):
+
+        new_classes_objs = []
+        for nc in list_new_class_labels:
+            # print(nc, ordered_y_test)
+            ind = np.where(ordered_y_test == nc[1])
+            nc_objs = ordered_x_test[ind, :]
+            nc_labels = ordered_y_test[ind]
+
+            ordered_x_test = np.delete(ordered_x_test, ind, axis=0)
+            ordered_y_test = np.delete(ordered_y_test, ind, axis=0)
+
+            new_classes_objs.append([nc_objs.copy(), nc_labels.copy()])
+
+        return new_classes_objs, ordered_x_test, ordered_y_test
 
     def class_error(self, pred, test_labels, classe):
         c = 0
@@ -96,7 +127,7 @@ class ST_functions:
         pred_val = dfpred.iloc[ind].to_numpy()
 
         if len(labels_val) == 0 or len(labels_val) == []:
-            error = -1
+            error = 1
         else:
 
             for i in range(len(labels_val)):

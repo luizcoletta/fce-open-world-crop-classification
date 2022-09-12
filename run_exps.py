@@ -32,7 +32,7 @@ processes = ([
     "exp_hc_ceratocystis1.py",
     "exp_hc_ceratocystis2.py",
     "exp_hc_ceratocystis5.py",
-   "exp_hc_ceratocystis10.py",
+    "exp_hc_ceratocystis10.py",
     "exp_hc_ceratocystis20.py",
     "exp_vae_ceratocystis1.py",
     "exp_vae_ceratocystis2.py",

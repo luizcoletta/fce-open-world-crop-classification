@@ -1,8 +1,11 @@
 #inserir a definição dos classificadores aqui
 
 from sklearn import svm
+import tensorflow as tf
 from sklearn.cluster import KMeans
 import numpy as np
+from scipy.stats import norm
+from scipy.special import logsumexp
 import matplotlib.pyplot as plt
 from utils import ST_functions
 ft = ST_functions()
@@ -18,6 +21,8 @@ class alghms:
         #graph --> habilita a exibição de gráficos se True
         #nclusters_train e nclusters_test --> aplicados na obtenção do kmeans para cálculo da silhueta
         #SSet -> usado no algoritmo IC_EDS (matriz de similaridade)
+
+
 
         if model_name == 'ic_eds':
             start = time.time()
@@ -70,6 +75,8 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
+
+
     #algoritmo IC_EDS
     #----------------------------------------------------------------
     def ic_eds(self,train, train_labels, test,SSet):
@@ -85,14 +92,19 @@ class alghms:
         return [e,d]
     #----------------------------------------------------------------
 
+
+    #SVM Classifier
+    #-----------------------------------------------------------------
     def svmClassification(self, train, train_labels, test):
         SVM = svm.SVC(tol=1.5, probability=True)
-        SVM.fit(train, train_labels)
+        SVM.fit(train, train_labels.ravel())
         probs = SVM.predict_proba(test)
         pred = SVM.predict(test)
         # print(np.around(probs,2))
         return [probs, pred]
 
+    # entropy
+    #-------------------------------------------------------------------
     def calc_class_entropy(self, p):
         e = [0] * p.shape[0]
         c = len(p[0, :])
@@ -100,6 +112,8 @@ class alghms:
             e[i] = - np.sum(p[i, :] * np.log2(p[i, :])) / np.log2(c)
         return e
 
+    # silhouette
+    #-------------------------------------------------------------------
     def kmeans_for_new_class(self, train, test, kmeans_approach, int, graph, results_path,
                              nclusters_train, nclusters_test=3, threshold=0.8):
 

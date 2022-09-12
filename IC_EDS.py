@@ -245,7 +245,7 @@ def calc_low_density(d):
 
 def svmClassification(train, train_labels, test):
     SVM = svm.SVC(tol=1.5, probability=True)
-    SVM.fit(train, train_labels)
+    SVM.fit(train, train_labels.ravel())
     probs = SVM.predict_proba(test)
     pred = SVM.predict(test)
     # print(np.around(probs,2))
