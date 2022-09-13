@@ -50,14 +50,14 @@ class alghms:
             total_time = finish-start
             self.classifier_time = total_time
 
-        if metric == 'entropy':
+        if metric == 'entropy' or metric == 'entropia':
             start = time.time()
             self.e = self.calc_class_entropy(self.probs)
             finish = time.time()
             total_time = finish - start
             self.metric_time = total_time
 
-        if metric == 'silhouette0':
+        if metric == 'silhouette0' or metric == 'silhueta0':
             start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
@@ -66,7 +66,7 @@ class alghms:
             #print(np.unique(train_labels))
             self.metric_time = total_time
 
-        if metric == 'silhouette1':
+        if metric == 'silhouette1' or metric == 'silhueta1':
             start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 1, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)

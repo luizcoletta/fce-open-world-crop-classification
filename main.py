@@ -183,7 +183,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
 # Algoritmo de self-training
 def self_training(iter, model_name, train, train_labels, test, test_labels, metric,
-                  list_new_class_labels, n_test_class=10, kmeans_graph=False):
+                  list_new_class_labels, results_path, n_test_class=10,  kmeans_graph=False):
 
     # cria variáveis para execução do self-training e gera a pasta para armazenar os resultados
     #----------------------------------------------------------------
@@ -198,6 +198,8 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     time_classifier = []
     time_metric = []
     prop_por_rodada = []
+    curva_sel_por_rodada = []
+    curva_sel = []
     #prop_por_classe = []
 
     if len(train[0]) == 2:
@@ -267,11 +269,18 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     time_metric.append(-1)#round(classifier_results.metric_time, 4))
     time_classifier.append(round(classifier_results.classifier_time, 4))
 
+
     for k in range(1, iter + 1):  # 11):
         count_nc = 0
+
         if len(test) > 0:
 
             print('\nIteraction: ' + str(k) +' | Running train set increment...')
+
+            curva_sel.append(e.copy())
+            #graph.plot_metric_sel(e, metric, results_path, k)
+
+            curva_sel_por_rodada.append(e.copy())
 
             # https://scikit-learn.org/stable/modules/svm.html
 
@@ -298,6 +307,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             [train, train_labels, test, test_labels, objects_labels] = ft.increment_training_set(w, train, train_labels, test,
                                                                                  test_labels, k, results_dir)
 
+            test, test_labels = ft.sort_testset(test, test_labels)
 
             if len(objects_labels) > 0 or objects_labels != []:
                 #all_labels = np.concatenate((train_labels, test_labels), axis=0)
@@ -385,11 +395,11 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     elapsed_time.to_csv('logs/'+dataset_name+'/'+model_name+'&'+metric+'_elapsed_time.csv', index=False)
     '''
 
-    return x, y, erros, time_classifier, time_metric, prop_por_classe
+    return x, y, erros, curva_sel_por_rodada, time_classifier, time_metric, prop_por_classe
 
 
 def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_train, n_int, list_new_class_labels,
-         n_test_class=10, kmeans_graph=False):
+         linguagem, n_test_class=10,  kmeans_graph=False):
 
     train_path, test_path, class_index, join_data, size_batch, class2drop = load_dataset(dataset_name, use_vae,
                                                                                          vae_epoch=vae_epoch, lat_dim= lat_dim,
@@ -419,11 +429,13 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
     all_time_classifier = []
     all_time_metric = []
     all_props = []
+    all_curvas_sel = []
 
     class_errors = []
     x_axis = []
     y_axis = []
     class_proportion = []
+    curv_sel = []
 
     '''
     # se use_vae é True, então utiliza o VAE para reduzir a dimensionalidade
@@ -446,8 +458,8 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
             train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
 
-            x_ent, y_ent, erros_ent, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,
-                                                    test_labels, metric[i], list_new_class_labels,  n_test_class,
+            x_ent, y_ent, erros_ent,curva_sel, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,
+                                                    test_labels, metric[i], list_new_class_labels, results_dir,  n_test_class,
                                                     kmeans_graph)
 
 
@@ -460,12 +472,22 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             all_time_metric.append(time_metric)
             all_props.append(prop_por_classe)
 
-
-
+        all_curvas_sel.append(curva_sel.copy())
+        print(np.shape(all_curvas_sel))
         # Faz a média dos resultados obtidos em cada fold e armazena em uma lista para plotagem em gráficos:
 
-        mean_errors = [np.mean(values,axis=0) for values in zip(*all_errors)]
+        #print(np.shape(all_curvas_sel[0][-1]))
+        #[print(values) for values in zip(*all_errors)]
 
+        '''
+        mean_curves = [np.mean(values) for values in zip(*all_curvas_sel)]
+
+        curv_sel.append(mean_curves)
+        print(np.shape(mean_curves[0]))
+        all_curvas_sel.clear()
+        '''
+        mean_errors = [np.mean(values,axis=0) for values in zip(*all_errors)]
+        #print(np.shape(mean_errors))
         class_errors.append(mean_errors)
         all_errors.clear()
 
@@ -505,11 +527,11 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
 
 
-
-    graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, results_dir, dataset_name)
-
-    graph.accuracy_graph(x_axis, y_axis, all_metrics, results_dir, dataset_name)
-    graph.accuracy_all_class_graph(metric, results_dir, test_labels, class_proportion, list_new_class_labels)
+    #print(curv_sel)
+    graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, results_dir, dataset_name, linguagem)
+    graph.plot_metric_sel(all_curvas_sel, all_metrics, results_dir, dataset_name, linguagem)
+    graph.accuracy_graph(x_axis, y_axis, all_metrics, results_dir, dataset_name, linguagem)
+    graph.accuracy_all_class_graph(metric, results_dir, test_labels, class_proportion, list_new_class_labels, linguagem)
 
     for i in range(len(model_name)):
         print('Elapsed time (min) for '+str(model_name[i])+' and '+str(metric[i])+' : ' + str(time_per_model[i]))
@@ -530,12 +552,13 @@ if __name__ == "__main__":
     vae_epochs = 100     # quantidade de épocas para a execução do VAE
     lat_dim = 4        # quantidade de variaveis latentes do VAE
     #sel_model = ['svm'] #, 'ic_eds'] # define o classificador a ser usado
-    #metric = ['entropy'] #, 'ent&dens'] # define a metrica para descobrir classes novas
+    #metric = ['entropia'] #, 'ent&dens'] # define a metrica para descobrir classes novas
     sel_model = ['svm','svm','svm']#,'ic_eds']  # define o classificador a ser usado
-    metric = ['silhouette0', 'silhouette1', 'entropy']
+    metric = ['silhueta0', 'silhueta1', 'entropia']
     list_new_class_labels = [[2, 3]]
     n_iter = 10         # numero de iterações da rotina de self-training
+    linguagem = 'pt' # idioma dos resultados (pt ou en)
 
-    main(dataset_name, sel_model, metric, use_vae, vae_epochs, lat_dim, len_train, n_iter, list_new_class_labels, n_test_class)
+    main(dataset_name, sel_model, metric, use_vae, vae_epochs, lat_dim, len_train, n_iter, list_new_class_labels, linguagem, n_test_class)
 
 

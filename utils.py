@@ -84,7 +84,7 @@ class ST_functions:
     '''
 
     # Ordena os dados de teste de acordo com a classe
-    def sort_testset(x_test, y_test):
+    def sort_testset(self, x_test, y_test):
         list_labels_test = y_test[:]
         ind = []
         ordered_y_test = []
@@ -100,7 +100,7 @@ class ST_functions:
 
         return ordered_x_test, np.array(ordered_y_test)
 
-    def draw_new_classes(list_new_class_labels, ordered_x_test, ordered_y_test):
+    def draw_new_classes(self, list_new_class_labels, ordered_x_test, ordered_y_test):
 
         new_classes_objs = []
         for nc in list_new_class_labels:

@@ -17,7 +17,61 @@ class ST_graphics:
 
         pass
 
-    def accuracy_all_class_graph(self, metrics, results_dir, test_labels, class_proportion, list_new_class_labels):
+    def plot_metric_sel(self, sel, metrics, results_dir, dataset_name, linguagem):
+
+        def moving_average(a, n=50):  # n=3
+            # from https://stackoverflow.com/a/14314054
+            ret = np.cumsum(a, dtype=float)
+            ret[n:] = ret[n:] - ret[:-n]
+            return ret[n - 1:] / n
+
+        avg_window_size = 20  # 2
+        for i in range(np.shape(sel)[1]):
+            plt.figure()
+            for j in range(np.shape(sel)[0]):
+
+                y = moving_average(sel[j][i], n=avg_window_size)
+                x = np.array([i for i in range(len(y))]) + avg_window_size
+
+
+                plt.plot(x, y, label= metrics[j])
+
+            plt.legend()
+            if linguagem == 'pt':
+                plt.xlabel('Amostras')
+                plt.ylabel('Métrica')
+            elif linguagem == 'en':
+                plt.xlabel('Samples')
+                plt.ylabel('Metric')
+
+            #plt.title('Silhueta dos dados de teste')
+            print(results_dir)
+            plt.savefig(results_dir + '/'+dataset_name+'_curv_sel' +'_iter_'+ str(i+1) + '.png')
+
+
+    '''
+    def plot_metric_sel(self, sel, metrics, results_dir, k):
+        def moving_average(a, n=50):  # n=3
+            # from https://stackoverflow.com/a/14314054
+            ret = np.cumsum(a, dtype=float)
+            ret[n:] = ret[n:] - ret[:-n]
+            return ret[n - 1:] / n
+
+        avg_window_size = 50  # 2
+        y = moving_average(sel, n=avg_window_size)
+        x = np.array([i for i in range(len(y))]) + avg_window_size
+
+        plt.figure()
+        plt.plot(x, y)
+        # plt.vlines(x=980, ymin=min(silhueta), ymax=max(silhueta))
+        # plt.vlines(x=70, ymin=min(silhueta), ymax=max(silhueta))
+        # plt.plot((35,min(silhueta)),(35,max(silhueta)),scaley=False)
+        plt.xlabel('Amostra')
+        plt.ylabel('Métrica')
+        # plt.title('Silhueta dos dados de teste')
+        plt.savefig(results_dir + '/' +metrics + '_iter_' + str(k) + '.png')
+    '''
+    def accuracy_all_class_graph(self, metrics, results_dir, test_labels, class_proportion, list_new_class_labels, linguagem):
 
         w = 0
 
@@ -53,8 +107,10 @@ class ST_graphics:
                 if z == 2:
                     bars_iter = np.array(iter) + 0.3
                 '''
-
-                plt.plot(iter, acc, 'o--', label='class '+str(i))
+                if linguagem == 'en':
+                    plt.plot(iter, acc, 'o--', label='class '+str(i))
+                elif linguagem == 'pt':
+                    plt.plot(iter, acc, 'o--', label='classe ' + str(i))
 
                 for i in list_new_class_labels:
                     plt.vlines(i[0],ymin=0, ymax=1, colors='r',linestyles ='dashed')
@@ -64,9 +120,15 @@ class ST_graphics:
             w = w+1
             #plt.bar(iter, [0,1, 1,1,1,1,1,1,1,1,1])
             plt.legend()
-            plt.xlabel('Iteração', fontsize=15)
-            plt.ylabel('Acurácia e objetos selecionados da classe 3', fontsize=15)
-            plt.title('Resultados obtidos para  ' + str(k), fontsize=15)
+            if linguagem == 'pt':
+                plt.xlabel('Iteração', fontsize=15)
+                plt.ylabel('Acurácia e proporção de objetos selecionados da nova classe', fontsize=15)
+                plt.title('Resultados obtidos para  ' + str(k), fontsize=15)
+            elif linguagem == 'en':
+                plt.xlabel('Iteration', fontsize=15)
+                plt.ylabel("Accuracy and new class's selected object proportion", fontsize=15)
+                plt.title('Results achieved with  ' + str(k), fontsize=15)
+
             plt.rcParams['xtick.labelsize'] = 13
             plt.rcParams['ytick.labelsize'] = 13
             plt.rcParams["figure.figsize"] = [10.00, 3.50]
@@ -77,7 +139,7 @@ class ST_graphics:
 
     # gráfico da evolução do erro associada a cada classe
     # ---------------------------------------------
-    def class_error_graph (self, X, errors, name_metrics, test_labels, results_dir, dataset_name) :
+    def class_error_graph (self, X, errors, name_metrics, test_labels, results_dir, dataset_name, linguagem) :
         class_errors = []
         file_name = "/" + dataset_name + "_error_class_"
         style = ['ro--', 'ko--', 'bo--','go--']
@@ -107,9 +169,15 @@ class ST_graphics:
 
             plt.ylim([0,1.1])
             plt.legend()
-            plt.xlabel('Iteração', fontsize=15)
-            plt.ylabel('Erro', fontsize=15)
-            plt.title('Erro da classe ' + str(np.unique(test_labels)[i]), fontsize=15)
+            if linguagem == 'pt':
+                plt.xlabel('Iteração', fontsize=15)
+                plt.ylabel('Taxa de erro', fontsize=15)
+                plt.title('Taxa de erro da classe ' + str(np.unique(test_labels)[i]), fontsize=15)
+
+            elif linguagem =='en':
+                plt.xlabel('Iteration', fontsize=15)
+                plt.ylabel('Error rate', fontsize=15)
+                plt.title('Error rate of class ' + str(np.unique(test_labels)[i]), fontsize=15)
 
             #plt.savefig('./teste/Erro da classe_' + str(i) + '.png')
             plt.savefig(results_dir+file_name+str(np.unique(test_labels)[i])+'.png')
@@ -118,7 +186,7 @@ class ST_graphics:
     # gráfico de acurácia da função self_training
     # ---------------------------------------------
 
-    def accuracy_graph(self, X, Y, name_metrics, results_dir, dataset_name):
+    def accuracy_graph(self, X, Y, name_metrics, results_dir, dataset_name, linguagem):
 
 
         #print('SIlhoueta 0:' + str(y_axis_kmeans))
@@ -129,7 +197,8 @@ class ST_graphics:
 
 
         style = ['ro--', 'ko--', 'bo--','go--']
-        ind = ['accuracy', 'precision', 'Recall', 'F1-score']
+        ind_en = ['Accuracy', 'Precision', 'Recall', 'F1-score']
+        ind_pt = ['Acurácia', 'Precisão', 'Recall', 'F1-score']
         #file_name = "/accuracy_" + dataset_name + ".jpg"
 
         for x in range(np.shape(Y)[1]):
@@ -144,14 +213,28 @@ class ST_graphics:
                 _data.update(info.copy())
 
             plt.legend()
-            plt.ylabel(ind[x], fontsize=15)
-            plt.xlabel('Iteração', fontsize=15)
+            if linguagem == 'pt':
+                plt.ylabel(ind_pt[x], fontsize=15)
+                plt.xlabel('Iteração', fontsize=15)
+            elif linguagem == 'en':
+                plt.ylabel(ind_en[x], fontsize=15)
+                plt.xlabel('Iteração', fontsize=15)
+
             plt.rcParams['xtick.labelsize'] = 13
             plt.rcParams['ytick.labelsize'] = 13
             plt.xticks(X[0])
             #plt.savefig('acurácia_do_self_training.png')
-            plt.savefig(results_dir+'/'+ind[x]+'_'+dataset_name + ".jpg")
-            #plt.show()
 
-            pd_data = pd.DataFrame(_data)
-            pd_data.to_csv('results/' + dataset_name + '/graphics_data/'+ind[x]+'_data.csv', index=False)
+            if linguagem == 'pt':
+                plt.savefig(results_dir + '/' + ind_pt[x] + '_' + dataset_name + ".jpg")
+                # plt.show()
+                pd_data = pd.DataFrame(_data)
+                pd_data.to_csv('results/' + dataset_name + '/graphics_data/' + ind_pt[x] + '_data.csv', index=False)
+
+            elif linguagem == 'en':
+                plt.savefig(results_dir + '/' + ind_en[x] + '_' + dataset_name + ".jpg")
+                # plt.show()
+                pd_data = pd.DataFrame(_data)
+                pd_data.to_csv('results/' + dataset_name + '/graphics_data/' + ind_en[x] + '_data.csv', index=False)
+
+
