@@ -105,7 +105,7 @@ class ST_graphics:
                     info = {k: prop_bars}
                     _data.update(info.copy())
 
-                    print(_data)
+
 
 
                     plt.bar(bars_iter, prop_bars, ec= 'k',  color = 'green', alpha = 0.3, hatch= '//', width=0.3)

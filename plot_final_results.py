@@ -95,8 +95,10 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
 
     for sel in sel_list:
         plt.figure(figsize=(10,6))
+        mul = 0
         for dataset in datasets_list:
 
+            width = 0.3
             plt.rcParams['xtick.labelsize'] = 13
             plt.rcParams['ytick.labelsize'] = 13
 
@@ -110,8 +112,8 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
                 y = data[sel]
 
             #plt.plot(x, y, marker='o', linestyle='dashed', label=dataset)
-            plt.bar(x, y, ec='k', alpha=0.3, hatch='//', width=0.3, label=dataset)
-
+            plt.bar(x+width*mul, y, ec='k', alpha=0.3, hatch='//', width=width, label=dataset)
+            mul+=1
 
         plt.legend()
         if linguagem == 'pt':
@@ -123,12 +125,12 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
             plt.ylabel("New class' object proportion", fontsize=15)
             plt.xlabel('Iteration', fontsize=15)
             plt.title('Metric: ' + sel, fontsize=15)
-
+        plt.xticks(x+(width/2)*(len(datasets_list)-1),x)
         plt.savefig(results_dir+sel+'_overall_newclass_prop.png')
 
 if __name__ == "__main__":
 
-    dataset_list = ['dp_ceratocystis1']
+    dataset_list = ['dp_ceratocystis1','dp_ceratocystis2']
     sel_list = ['entropia','silhueta0','silhueta1']
     #sel_list = ['entropia']
     linguagem = 'pt'

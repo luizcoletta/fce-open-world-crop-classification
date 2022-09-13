@@ -33,6 +33,15 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         size_batch = int(689*0.2)
         class2drop = 3
 
+    if dataset_name == 'dp_ceratocystis2' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/dp_features/ceratocystis2.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(1183 * 0.2)
+        class2drop = 3
+
     if dataset_name == 'vae_ceratocystis1' and vae == True:
         dir_path = 'data/train_images/dataset_eucapytus/dataset-1/*.png'
         images_path = 'data/train_images/dataset_eucapytus/dataset-1'
@@ -546,7 +555,7 @@ if __name__ == "__main__":
 
     # PARÂMETROS:
     n_test_class = 3
-    dataset_name = 'dp_ceratocystis1'
+    dataset_name = 'dp_ceratocystis2'
     use_vae = False   # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
     len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
     vae_epochs = 100     # quantidade de épocas para a execução do VAE
