@@ -39,10 +39,10 @@ class ST_graphics:
             plt.legend()
             if linguagem == 'pt':
                 plt.xlabel('Amostras')
-                plt.ylabel('Métrica')
+                plt.ylabel('Métrica de seleção')
             elif linguagem == 'en':
                 plt.xlabel('Samples')
-                plt.ylabel('Metric')
+                plt.ylabel('Selection Metric')
 
             #plt.title('Silhueta dos dados de teste')
             print(results_dir)
@@ -74,6 +74,7 @@ class ST_graphics:
     def accuracy_all_class_graph(self, metrics, results_dir, test_labels, class_proportion, list_new_class_labels, linguagem):
 
         w = 0
+        _data = []
 
         for k in metrics:
             z = 0
@@ -97,6 +98,15 @@ class ST_graphics:
 
                     prop_bars = np.concatenate((np.array([0]), cp[int(i)-1]))
                     bars_iter = np.array(iter)
+
+                    if _data == []:
+                        _data = {'iter': bars_iter}
+
+                    info = {k: prop_bars}
+                    _data.update(info.copy())
+
+                    print(_data)
+
 
                     plt.bar(bars_iter, prop_bars, ec= 'k',  color = 'green', alpha = 0.3, hatch= '//', width=0.3)
                 '''
@@ -122,11 +132,11 @@ class ST_graphics:
             plt.legend()
             if linguagem == 'pt':
                 plt.xlabel('Iteração', fontsize=15)
-                plt.ylabel('Acurácia e proporção de objetos selecionados da nova classe', fontsize=15)
+                plt.ylabel('Proporção de objetos da nova classe e acurácia', fontsize=15)
                 plt.title('Resultados obtidos para  ' + str(k), fontsize=15)
             elif linguagem == 'en':
                 plt.xlabel('Iteration', fontsize=15)
-                plt.ylabel("Accuracy and new class's selected object proportion", fontsize=15)
+                plt.ylabel("new class's selected object proportion and accuracy", fontsize=15)
                 plt.title('Results achieved with  ' + str(k), fontsize=15)
 
             plt.rcParams['xtick.labelsize'] = 13
@@ -136,6 +146,9 @@ class ST_graphics:
             # plt.savefig('./teste/Erro da classe_' + str(i) + '.png')
             plt.savefig(results_dir + '/acur_classes_' + str(k) + '.png')
             # plt.show()
+
+        pd_data = pd.DataFrame(_data)
+        pd_data.to_csv(results_dir+'/graphics_data/barplot_data.csv', index=False)
 
     # gráfico da evolução do erro associada a cada classe
     # ---------------------------------------------
@@ -212,13 +225,15 @@ class ST_graphics:
                 info = {name_metrics[i] : Y[i][x]}
                 _data.update(info.copy())
 
+
+
             plt.legend()
             if linguagem == 'pt':
                 plt.ylabel(ind_pt[x], fontsize=15)
                 plt.xlabel('Iteração', fontsize=15)
             elif linguagem == 'en':
                 plt.ylabel(ind_en[x], fontsize=15)
-                plt.xlabel('Iteração', fontsize=15)
+                plt.xlabel('Iteration', fontsize=15)
 
             plt.rcParams['xtick.labelsize'] = 13
             plt.rcParams['ytick.labelsize'] = 13
