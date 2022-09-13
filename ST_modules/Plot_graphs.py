@@ -25,24 +25,27 @@ class ST_graphics:
             ret[n:] = ret[n:] - ret[:-n]
             return ret[n - 1:] / n
 
-        avg_window_size = 20  # 2
+        avg_window_size = 10  # 2
         for i in range(np.shape(sel)[1]):
-            plt.figure()
+            plt.figure(figsize=(10,6))
             for j in range(np.shape(sel)[0]):
 
                 y = moving_average(sel[j][i], n=avg_window_size)
                 x = np.array([i for i in range(len(y))]) + avg_window_size
 
+                plt.rcParams['xtick.labelsize'] = 13
+                plt.rcParams['ytick.labelsize'] = 13
+                #plt.xticks(x)
 
                 plt.plot(x, y, label= metrics[j])
 
             plt.legend()
             if linguagem == 'pt':
-                plt.xlabel('Amostras')
-                plt.ylabel('Métrica de seleção')
+                plt.xlabel('Amostras', fontsize=15)
+                plt.ylabel('Métrica de seleção', fontsize=15)
             elif linguagem == 'en':
-                plt.xlabel('Samples')
-                plt.ylabel('Selection Metric')
+                plt.xlabel('Samples', fontsize=15)
+                plt.ylabel('Selection Metric', fontsize=15)
 
             #plt.title('Silhueta dos dados de teste')
             print(results_dir)
