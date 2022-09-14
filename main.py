@@ -865,7 +865,6 @@ if __name__ == "__main__":
     lat_dim = args.latent_dim
     sel_model = args.classifiers
     metric = args.selection
-    #print(args.insert_nc, type(args.insert_nc), int(len(args.insert_nc)/2))
     list_new_class_labels = np.reshape(args.insert_nc, (int(len(args.insert_nc)/2), 2))
     n_iter = args.iteractions
     linguagem = args.language
