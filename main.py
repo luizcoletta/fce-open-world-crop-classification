@@ -15,6 +15,7 @@ from skimage.io import imread_collection
 import os
 from sklearn.metrics import precision_recall_fscore_support
 import time
+import argparse
 
 
 def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
@@ -22,6 +23,273 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
     script_dir = os.path.dirname(__file__)
 
     # inserir os outros datasets aqui
+
+    if dataset_name == 'vae_ceratocystis20' and vae == True:
+        dir_path = 'data/train_images/dataset_eucapytus/dataset-20/*.png'
+        images_path = 'data/train_images/dataset_eucapytus/dataset-20'
+
+        files = os.listdir(images_path)
+        files = np.sort(files)
+        img_labels = []
+        for txt in files:
+            n = int(txt.split('.')[0][-1])  # obtem a classe da imagem pelo ultimo caracter do nome do arquivo
+            img_labels.append(int(n + 1))
+
+        img_labels = np.array(img_labels)
+        col_img = imread_collection(dir_path)
+
+        col_img = col_img.concatenate()
+
+        print('\nRunning VAE to generate latent variables...\n')
+        vae_model = VAE(col_img, img_labels, epoch=vae_epoch, lat_dim=lat_dim, shape=np.shape(col_img[0]),
+                        len_train=len_train)  # len_train --> tamanho do conjunto de treino
+        data = vae_model.output
+
+        print('\nVAE has finished!!\n')
+
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+
+        if not os.path.isdir(data_dir):
+            os.makedirs(data_dir)
+
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+            lat_dim * 2) + 'D.csv'
+        data.to_csv(train_path, index=False, header=False)
+
+        test_path = ''
+        class_index = (lat_dim * 2)
+        join_data = False
+        size_batch = int(len(img_labels) * 0.2)
+        class2drop = 3
+
+
+    if dataset_name == 'vae_ceratocystis10' and vae == True:
+        dir_path = 'data/train_images/dataset_eucapytus/dataset-10/*.png'
+        images_path = 'data/train_images/dataset_eucapytus/dataset-10'
+
+        files = os.listdir(images_path)
+        files = np.sort(files)
+        img_labels = []
+        for txt in files:
+            n = int(txt.split('.')[0][-1])  # obtem a classe da imagem pelo ultimo caracter do nome do arquivo
+            img_labels.append(int(n + 1))
+
+        img_labels = np.array(img_labels)
+        col_img = imread_collection(dir_path)
+
+        col_img = col_img.concatenate()
+
+
+
+        print('\nRunning VAE to generate latent variables...\n')
+        vae_model = VAE(col_img, img_labels, epoch=vae_epoch, lat_dim=lat_dim, shape=np.shape(col_img[0]),
+                        len_train=len_train)  # len_train --> tamanho do conjunto de treino
+        data = vae_model.output
+
+        print('\nVAE has finished!!\n')
+
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+
+        if not os.path.isdir(data_dir):
+            os.makedirs(data_dir)
+
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+            lat_dim * 2) + 'D.csv'
+        data.to_csv(train_path, index=False, header=False)
+
+        test_path = ''
+        class_index = (lat_dim * 2)
+        join_data = False
+        size_batch = int(len(img_labels) * 0.2)
+        class2drop = 3
+
+
+    if dataset_name == 'vae_ceratocystis5' and vae == True:
+        dir_path = 'data/train_images/dataset_eucapytus/dataset-5/*.png'
+        images_path = 'data/train_images/dataset_eucapytus/dataset-5'
+
+        files = os.listdir(images_path)
+        files = np.sort(files)
+        img_labels = []
+        for txt in files:
+            n = int(txt.split('.')[0][-1])  # obtem a classe da imagem pelo ultimo caracter do nome do arquivo
+            img_labels.append(int(n + 1))
+
+        img_labels = np.array(img_labels)
+        col_img = imread_collection(dir_path)
+
+        col_img = col_img.concatenate()
+
+        print('\nRunning VAE to generate latent variables...\n')
+        vae_model = VAE(col_img, img_labels, epoch=vae_epoch, lat_dim=lat_dim, shape=np.shape(col_img[0]),
+                        len_train=len_train)  # len_train --> tamanho do conjunto de treino
+        data = vae_model.output
+
+        print('\nVAE has finished!!\n')
+
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+
+        if not os.path.isdir(data_dir):
+            os.makedirs(data_dir)
+
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+            lat_dim * 2) + 'D.csv'
+        data.to_csv(train_path, index=False, header=False)
+
+        test_path = ''
+        class_index = (lat_dim * 2)
+        join_data = False
+        size_batch = int(len(img_labels) * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'vae_ceratocystis2' and vae == True:
+        dir_path = 'data/train_images/dataset_eucapytus/dataset-2/*.png'
+        images_path = 'data/train_images/dataset_eucapytus/dataset-2'
+
+        files = os.listdir(images_path)
+        files = np.sort(files)
+        img_labels = []
+        for txt in files:
+            n = int(txt.split('.')[0][-1])  # obtem a classe da imagem pelo ultimo caracter do nome do arquivo
+            img_labels.append(int(n + 1))
+
+        img_labels = np.array(img_labels)
+        col_img = imread_collection(dir_path)
+
+        col_img = col_img.concatenate()
+
+
+
+        print('\nRunning VAE to generate latent variables...\n')
+        vae_model = VAE(col_img, img_labels, epoch=vae_epoch, lat_dim=lat_dim, shape=np.shape(col_img[0]),
+                        len_train=len_train)  # len_train --> tamanho do conjunto de treino
+        data = vae_model.output
+
+        print('\nVAE has finished!!\n')
+
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+
+        if not os.path.isdir(data_dir):
+            os.makedirs(data_dir)
+
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+            lat_dim * 2) + 'D.csv'
+        data.to_csv(train_path, index=False, header=False)
+
+        test_path = ''
+        class_index = (lat_dim * 2)
+        join_data = False
+        size_batch = int(len(img_labels) * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'vae_ceratocystis1' and vae == True:
+        dir_path = 'data/train_images/dataset_eucapytus/dataset-1/*.png'
+        images_path = 'data/train_images/dataset_eucapytus/dataset-1'
+
+        files = os.listdir(images_path)
+        files = np.sort(files)
+        img_labels = []
+        for txt in files:
+            n = int(txt.split('.')[0][-1])  # obtem a classe da imagem pelo ultimo caracter do nome do arquivo
+            img_labels.append(int(n + 1))
+
+        img_labels = np.array(img_labels)
+        col_img = imread_collection(dir_path)
+        col_img = col_img.concatenate()
+
+        print('\nRunning VAE to generate latent variables...\n')
+        vae_model = VAE(col_img, img_labels, epoch=vae_epoch, lat_dim=lat_dim, shape=np.shape(col_img[0]),
+                        len_train=len_train)  # len_train --> tamanho do conjunto de treino
+        data = vae_model.output
+
+        print('\nVAE has finished!!\n')
+
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+
+        if not os.path.isdir(data_dir):
+            os.makedirs(data_dir)
+
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name + '_' + str(
+            lat_dim * 2) + 'D.csv'
+        data.to_csv(train_path, index=False, header=False)
+
+        test_path = ''
+        class_index = (lat_dim * 2)
+        join_data = False
+        size_batch = int(len(img_labels) * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'hc_ceratocystis20' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/hc_features/ceratocystis20.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(6543 * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'hc_ceratocystis10' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/hc_features/ceratocystis10.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(4070 * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'hc_ceratocystis5' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/hc_features/ceratocystis5.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(2667 * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'hc_ceratocystis2' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/hc_features/ceratocystis2.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(1183 * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'hc_ceratocystis1' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/hc_features/ceratocystis1.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(689 * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'dp_ceratocystis20' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/dp_features/ceratocystis20.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(6543 * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'dp_ceratocystis10' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/dp_features/ceratocystis10.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(4070 * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'dp_ceratocystis5' and vae == False:
+
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Eucaliyptus_dataset/main/dp_features/ceratocystis5.csv'
+        test_path = ''
+        class_index = 8
+        join_data = False
+        size_batch = int(2667 * 0.2)
+        class2drop = 3
 
     if dataset_name == 'dp_ceratocystis1' and vae == False:
 
@@ -482,7 +750,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             all_props.append(prop_por_classe)
 
         all_curvas_sel.append(curva_sel.copy())
-        print(np.shape(all_curvas_sel))
+
         # Faz a média dos resultados obtidos em cada fold e armazena em uma lista para plotagem em gráficos:
 
         #print(np.shape(all_curvas_sel[0][-1]))
@@ -553,6 +821,24 @@ if __name__ == "__main__":
     ft = ST_functions() # cria objeto contendo funções diversas a serem usadas ao longo do código
     graph = ST_graphics()
 
+    parser = argparse.ArgumentParser(description='Implementação de modelo Open-World para aprendizagem de novas ameaças na lavoura')
+
+    parser.add_argument('-n_classes', metavar='n_classes', action='store', nargs='?', type= int, default = 3, help='N° de classes do conjunto teste')
+    parser.add_argument('-dataset', metavar='dataset', action='store', type=str, required=True, help='Nome do dataset')
+    parser.add_argument('-use_vae', metavar='use_vae', action='store', type=bool, default= False, help='Solicita ou não uso do VAE')
+    parser.add_argument('-vae_epochs', metavar='vae_epochs', action='store', nargs='?', type=int, default= 100, help='Qtd. de épocas do VAE')
+    parser.add_argument('-latent_dim', metavar='latent_dim', action='store', nargs='?', type=int, default= 4,  help='Qtd. dimensões latentes do VAE')
+    parser.add_argument('-classifiers', metavar='classifiers', action='store', nargs='+', type= str, default=['svm'], help='Classificadores usados no modelo')
+    parser.add_argument('-selection', metavar='selection', action='store', nargs='+', type=str, default=['entropia'], help='Método de seleção da nova classe')
+    parser.add_argument('-insert_nc', metavar='insert_nc', action='store', nargs='+', type=int, required=True, help='Insere a classe nova especificada na iteração especificada ([iteração rótulo_nc])')
+    parser.add_argument('-iteractions', metavar='iteractions', action='store', nargs='?', type=int, default= 10, help='Qtd. de iterações a ser executadas no modelo')
+    parser.add_argument('-language', metavar='language', action='store', type=str, default='pt', help="Idioma dos resultados gerados ('pt' ou 'en')")
+
+    args = parser.parse_args()
+    '''
+
+    #print(args.n_classes, type(args.n_classes))
+
     # PARÂMETROS:
     n_test_class = 3
     dataset_name = 'dp_ceratocystis1'
@@ -567,6 +853,23 @@ if __name__ == "__main__":
     list_new_class_labels = [[2, 3]]
     n_iter = 10         # numero de iterações da rotina de self-training
     linguagem = 'pt' # idioma dos resultados (pt ou en)
+
+    '''
+
+    # PARÂMETROS:
+    n_test_class = args.n_classes
+    dataset_name = args.dataset
+    use_vae = args.use_vae
+    len_train = []
+    vae_epochs = args.vae_epochs
+    lat_dim = args.latent_dim
+    sel_model = args.classifiers
+    metric = args.selection
+    #print(args.insert_nc, type(args.insert_nc), int(len(args.insert_nc)/2))
+    list_new_class_labels = np.reshape(args.insert_nc, (int(len(args.insert_nc)/2), 2))
+    n_iter = args.iteractions
+    linguagem = args.language
+
 
     main(dataset_name, sel_model, metric, use_vae, vae_epochs, lat_dim, len_train, n_iter, list_new_class_labels, linguagem, n_test_class)
 

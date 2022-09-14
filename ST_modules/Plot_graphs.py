@@ -48,7 +48,7 @@ class ST_graphics:
                 plt.ylabel('Selection Metric', fontsize=15)
 
             #plt.title('Silhueta dos dados de teste')
-            print(results_dir)
+
             plt.savefig(results_dir + '/'+dataset_name+'_curv_sel' +'_iter_'+ str(i+1) + '.png')
 
 

@@ -1,4 +1,5 @@
 import subprocess
+import shlex
 import os
 #import pip
 
@@ -23,26 +24,19 @@ install_pkg = False
 '''
 
 processes = ([
-    #"main.py"
-    "exp_dp_ceratocystis1.py",
-    "exp_dp_ceratocystis2.py",
-    "exp_dp_ceratocystis5.py",
-    "exp_dp_ceratocystis10.py",
-    "exp_dp_ceratocystis20.py",
-    "exp_hc_ceratocystis1.py",
-    "exp_hc_ceratocystis2.py",
-    "exp_hc_ceratocystis5.py",
-    "exp_hc_ceratocystis10.py",
-    "exp_hc_ceratocystis20.py",
-    "exp_vae_ceratocystis1.py",
-    "exp_vae_ceratocystis2.py",
-    "exp_vae_ceratocystis5.py",
-    "exp_vae_ceratocystis10.py",
-    "exp_vae_ceratocystis20.py"
+    'dp_ceratocystis1',
+    'dp_ceratocystis2'
+
+
+    #"plot_final_results.py"
+
+
 
 ])
 
-
+sel_list = " -selection silhueta0 silhueta1 entropia"
+classifiers = " -classifiers svm svm svm"
+insert_nc= " -insert_nc 2 3"
 
 '''
 if (install_pkg):
@@ -75,10 +69,20 @@ if (install_pkg):
 
 procs = []
 for pname in processes:
-    logfile = 'logs/' + os.path.splitext(pname)[0] + '.log'
+
+    command = shlex.split("python3 main.py -dataset " + pname + classifiers + insert_nc + sel_list)
+    logfile = 'logs/' + "exp_"+pname+ '.log'
     with open(logfile, 'w') as f:
-        proc = subprocess.Popen(['python3', pname], stdout=f)
+
+        proc = subprocess.Popen(command, stdout=f)
         procs.append(proc)
 
 for proc in procs:
     proc.wait()
+
+
+command = shlex.split("python3 plot_final_results.py -datasets dp_ceratocystis1 dp_ceratocystis2"
+                      + sel_list+
+                      " -language pt")
+pro = subprocess.Popen(command)
+pro.wait()
