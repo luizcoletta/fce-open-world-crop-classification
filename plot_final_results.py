@@ -28,17 +28,17 @@ def plot_overall_datasets_accuracy(datasets_list, sel_list, linguagem):
                 x = data['iter']
                 y = data[sel]
 
-            plt.plot(x, y, marker='o', linestyle='dashed', label=dataset)
+            plt.plot(x, y*100, marker='o', linestyle='dashed', label=dataset)
 
 
         plt.legend()
         if linguagem == 'pt':
-            plt.ylabel('Acurácia', fontsize=15)
+            plt.ylabel('Acurácia (%)', fontsize=15)
             plt.xlabel('Iteração', fontsize=15)
             plt.title('Desempenho usando ' + sel, fontsize=15)
 
         elif linguagem == 'en':
-            plt.ylabel('Accuracy', fontsize=15)
+            plt.ylabel('Accuracy (%)', fontsize=15)
             plt.xlabel('Iteration', fontsize=15)
             plt.title('Performance with ' + sel, fontsize=15)
 
@@ -69,17 +69,17 @@ def plot_overall_datasets_new_class_error(datasets_list, sel_list, linguagem):
                 x = data['iter']
                 y = data[sel]
 
-            plt.plot(x, y, marker='o', linestyle='dashed', label=dataset)
+            plt.plot(x, y*100, marker='o', linestyle='dashed', label=dataset)
 
 
         plt.legend()
         if linguagem == 'pt':
-            plt.ylabel('Erro da classe nova', fontsize=15)
+            plt.ylabel('Erro da classe nova (%)', fontsize=15)
             plt.xlabel('Iteração', fontsize=15)
             plt.title('Métrica: ' + sel, fontsize=15)
 
         elif linguagem == 'en':
-            plt.ylabel("New class' error", fontsize=15)
+            plt.ylabel("New class' error (%)", fontsize=15)
             plt.xlabel('Iteration', fontsize=15)
             plt.title('Metric: ' + sel, fontsize=15)
 
@@ -99,7 +99,7 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
         mul = 0
         for dataset in datasets_list:
 
-            width = 0.3
+            width = 0.15
             plt.rcParams['xtick.labelsize'] = 13
             plt.rcParams['ytick.labelsize'] = 13
 
@@ -113,17 +113,18 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
                 y = data[sel]
 
             #plt.plot(x, y, marker='o', linestyle='dashed', label=dataset)
-            plt.bar(x+width*mul, y, ec='k', alpha=0.3, hatch='//', width=width, label=dataset)
+            plt.bar(x+width*mul, y*100, ec='k', alpha=0.8, hatch='//', width=width, label=dataset)
             mul+=1
 
         plt.legend()
+
         if linguagem == 'pt':
-            plt.ylabel('Proporção de objetos da classe nova', fontsize=15)
+            plt.ylabel('Objetos selecionados da classe nova (%)', fontsize=15)
             plt.xlabel('Iteração', fontsize=15)
             plt.title('Métrica: ' + sel, fontsize=15)
 
         elif linguagem == 'en':
-            plt.ylabel("New class' object proportion", fontsize=15)
+            plt.ylabel("New class' objects selected (%)", fontsize=15)
             plt.xlabel('Iteration', fontsize=15)
             plt.title('Metric: ' + sel, fontsize=15)
         plt.xticks(x+(width/2)*(len(datasets_list)-1),x)
@@ -131,11 +132,12 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
 
 if __name__ == "__main__":
 
-    #dataset_list = ['dp_ceratocystis1','dp_ceratocystis2']
-    #sel_list = ['entropia','silhueta0','silhueta1']
+    dataset_list = ['dp_ceratocystis1','dp_ceratocystis2','dp_ceratocystis5','dp_ceratocystis10','dp_ceratocystis20']
+    sel_list = ['entropia','silhueta0','silhueta1']
     #sel_list = ['entropia']
-    #linguagem = 'pt'
+    linguagem = 'pt'
 
+    '''
     parser = argparse.ArgumentParser(description='Implementação de modelo Open-World para aprendizagem de novas ameaças na lavoura')
 
 
@@ -147,10 +149,11 @@ if __name__ == "__main__":
                         help="Idioma dos resultados gerados ('pt' ou 'en')")
 
     args = parser.parse_args()
-
+    
     dataset_list = args.datasets
     sel_list = args.selection
     linguagem = args.language
+    '''
 
     plot_overall_datasets_accuracy(dataset_list,sel_list,linguagem)
     plot_overall_datasets_new_class_error(dataset_list,sel_list,linguagem)
