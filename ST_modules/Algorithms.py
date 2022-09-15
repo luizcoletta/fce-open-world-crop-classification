@@ -24,7 +24,7 @@ class alghms:
 
 
 
-        if model_name == 'ic_eds':
+        if model_name == 'IC_EDS':
             start = time.time()
 
             self.probs, self.pred = self.ic_eds(train,train_labels, test,SSet)
@@ -33,7 +33,7 @@ class alghms:
             total_time = finish - start
             self.classifier_time = total_time
 
-        if metric =='ent&dens':
+        if metric =='EDS':
             start = time.time()
             self.e = self.ed(self.probs, SSet)
             finish = time.time()
@@ -41,7 +41,7 @@ class alghms:
             self.metric_time = total_time
 
 
-        if model_name == 'svm':
+        if model_name == 'SVM':
             start = time.time()
 
             self.probs, self.pred = self.svmClassification(train,train_labels, test)

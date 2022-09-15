@@ -497,18 +497,17 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     print('*********************************************')
 
 
-    if (model_name == 'ic_eds'):
-        [silhouette_list, clusterers_list, cluslabels_list, nuclusters_list, SSet, matDist] = ft.clusterEnsemble(test)
-
-    else:
-        SSet = []
-
     #retira os objetos da(s) classe(s) nova(s) do conj. de treino para acrescentar depois
     #-----------------------------------------
     all_labels = np.concatenate((train_labels, test_labels), axis=0)
     test,test_labels = ft.sort_testset(test,test_labels)
     new_classes_objs, test,test_labels = ft.draw_new_classes(list_new_class_labels, test, test_labels)
 
+    if (model_name == 'IC_EDS'):
+        [silhouette_list, clusterers_list, cluslabels_list, nuclusters_list, SSet, matDist] = ft.clusterEnsemble(test)
+
+    else:
+        SSet = []
 
     classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
                                     n_test_class, 0, kmeans_graph, SSet)
@@ -554,14 +553,16 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
             print('\nIteraction: ' + str(k) +' | Running train set increment...')
 
-            curva_sel.append(e.copy())
-            #graph.plot_metric_sel(e, metric, results_path, k)
+            if (model_name != 'IC_EDS'):
 
-            curva_sel_por_rodada.append(e.copy())
+                curva_sel.append(e.copy())
+                #graph.plot_metric_sel(e, metric, results_path, k)
+
+                curva_sel_por_rodada.append(e.copy())
 
             # https://scikit-learn.org/stable/modules/svm.html
 
-            if(model_name != 'ic_eds'):
+            if(model_name != 'IC_EDS'):
 
 
 
@@ -593,18 +594,26 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 prop_por_rodada.append(pro.copy())
 
             #  ft.visualize_data(train, train_labels,[])]
-            for nc in list_new_class_labels:
-                if nc[0] == k:
-                    print(np.shape(test_labels))
-                    test = np.concatenate((test, np.squeeze(new_classes_objs[count_nc][0])), axis=0)
-                    test_labels = np.concatenate((test_labels, np.expand_dims(new_classes_objs[count_nc][1],axis=1)))
-                count_nc += 1
+
 
             if len(test) > 0:
                 # https://scikit-learn.org/stable/modules/svm.html
 
-                if(model_name=='ic_eds'):
+                if(model_name=='IC_EDS'):
                     SSet = ft.reduce_matrix(w, SSet)
+
+                for nc in list_new_class_labels:
+                    if nc[0] == k:
+                        print(np.shape(test_labels))
+                        test = np.concatenate((test, np.squeeze(new_classes_objs[count_nc][0])), axis=0)
+                        test_labels = np.concatenate(
+                            (test_labels, np.expand_dims(new_classes_objs[count_nc][1], axis=1)))
+
+                        if (model_name == 'IC_EDS'):
+                            [silhouette_list, clusterers_list, cluslabels_list, nuclusters_list, SSet,
+                             matDist] = ft.clusterEnsemble(test)
+
+                    count_nc += 1
 
                 classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
                                             n_test_class, k, kmeans_graph,SSet)
