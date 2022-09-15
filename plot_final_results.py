@@ -132,12 +132,12 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
 
 if __name__ == "__main__":
 
-    dataset_list = ['dp_ceratocystis1','dp_ceratocystis2','dp_ceratocystis5','dp_ceratocystis10','dp_ceratocystis20']
-    sel_list = ['entropia','silhueta0','silhueta1']
+    #dataset_list = ['dp_ceratocystis1','dp_ceratocystis2','dp_ceratocystis5','dp_ceratocystis10','dp_ceratocystis20']
+    #sel_list = ['entropia','silhueta0','silhueta1']
     #sel_list = ['entropia']
-    linguagem = 'pt'
+    #linguagem = 'pt'
 
-    '''
+
     parser = argparse.ArgumentParser(description='Implementação de modelo Open-World para aprendizagem de novas ameaças na lavoura')
 
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     dataset_list = args.datasets
     sel_list = args.selection
     linguagem = args.language
-    '''
+
 
     plot_overall_datasets_accuracy(dataset_list,sel_list,linguagem)
     plot_overall_datasets_new_class_error(dataset_list,sel_list,linguagem)

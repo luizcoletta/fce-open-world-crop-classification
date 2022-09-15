@@ -32,7 +32,7 @@ for proc in procs:
     proc.wait()
 
 
-command = shlex.split("python3 plot_final_results.py -datasets dp_ceratocystis1 dp_ceratocystis2"
+command = shlex.split("python3 plot_final_results.py -datasets dp_ceratocystis1 dp_ceratocystis2 dp_ceratocystis5 dp_ceratocystis10 dp_ceratocystis20"
                       + sel_list+
                       " -language pt")
 pro = subprocess.Popen(command)
