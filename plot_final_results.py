@@ -105,12 +105,12 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
 
             if linguagem == 'pt':
                 data = pd.read_csv(os.path.join(results_dir,dataset+'/graphics_data/barplot_data.csv'))
-                x = data['iter']
-                y = data[sel]
+                x = data['iter'][1:]
+                y = data[sel][1:]
             elif linguagem == 'en':
                 data = pd.read_csv(os.path.join(results_dir, dataset + '/graphics_data/barplot_data.csv'))
-                x = data['iter']
-                y = data[sel]
+                x = data['iter'][1:]
+                y = data[sel][1:]
 
             #plt.plot(x, y, marker='o', linestyle='dashed', label=dataset)
             plt.bar(x+width*mul, y*100, ec='k', alpha=0.8, hatch='//', width=width, label=dataset)

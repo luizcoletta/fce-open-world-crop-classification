@@ -476,7 +476,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     time_metric = []
     prop_por_rodada = []
     curva_sel_por_rodada = []
-    curva_sel = []
+    #curva_sel = []
     #prop_por_classe = []
 
     if len(train[0]) == 2:
@@ -555,7 +555,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
             if (model_name != 'IC_EDS'):
 
-                curva_sel.append(e.copy())
+                #curva_sel.append(e.copy())
                 #graph.plot_metric_sel(e, metric, results_path, k)
 
                 curva_sel_por_rodada.append(e.copy())
@@ -758,7 +758,8 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             all_time_metric.append(time_metric)
             all_props.append(prop_por_classe)
 
-        all_curvas_sel.append(curva_sel.copy())
+        if curva_sel != []:
+            all_curvas_sel.append(curva_sel.copy())
 
         # Faz a média dos resultados obtidos em cada fold e armazena em uma lista para plotagem em gráficos:
 

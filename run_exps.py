@@ -17,11 +17,12 @@ processes = ([
 #https://stackoverflow.com/questions/24528464/converting-a-string-of-the-form-a-b-c-to-a-list-in-python-without-going-th
 
 #Parametros
-sel_list = " -selection EDS silhueta0 silhueta1 entropia"
-classifiers = " -classifiers IC_EDS SVM SVM SVM"
+sel_list = " -selection silhueta0 silhueta1 entropia EDS"
+classifiers = " -classifiers SVM SVM SVM IC_EDS"
 insert_nc= " -insert_nc 2 3" # [iter nc]
 
 procs = []
+
 for pname in processes:
 
     command = shlex.split("python3 main.py -dataset " + pname + classifiers + insert_nc + sel_list)
