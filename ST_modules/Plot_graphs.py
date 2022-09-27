@@ -17,7 +17,7 @@ class ST_graphics:
 
         pass
 
-    def plot_metric_sel(self, sel, metrics, results_dir, dataset_name, linguagem):
+    def plot_metric_sel(self, sel, metrics, results_dir, linguagem):
 
         def moving_average(a, n=50):  # n=3
             # from https://stackoverflow.com/a/14314054
@@ -49,7 +49,7 @@ class ST_graphics:
 
             #plt.title('Silhueta dos dados de teste')
 
-            plt.savefig(results_dir + '/'+dataset_name+'_curv_sel' +'_iter_'+ str(i+1) + '.png')
+            plt.savefig(results_dir + '/'+'_curv_sel' +'_iter_'+ str(i+1) + '.png')
 
 
     '''
@@ -74,7 +74,7 @@ class ST_graphics:
         # plt.title('Silhueta dos dados de teste')
         plt.savefig(results_dir + '/' +metrics + '_iter_' + str(k) + '.png')
     '''
-    def accuracy_all_class_graph(self, metrics, results_dir, test_labels, class_proportion, list_new_class_labels, linguagem):
+    def accuracy_all_class_graph(self, metrics, data_graphs_dir, results_dir, test_labels, class_proportion, list_new_class_labels, linguagem):
 
         w = 0
         _data = []
@@ -90,7 +90,7 @@ class ST_graphics:
 
 
             for i in np.unique(test_labels):
-                data = pd.read_csv(results_dir+'/graphics_data/error_class_'+str(i)+'.csv')
+                data = pd.read_csv(data_graphs_dir+'/error_class_'+str(int(i))+'.csv')
 
                 iter = list(data.iloc[:, 0])
                 acc = np.ones(len(iter)) - np.array(data.loc[:, k])
@@ -151,13 +151,13 @@ class ST_graphics:
             # plt.show()
 
         pd_data = pd.DataFrame(_data)
-        pd_data.to_csv(results_dir+'/graphics_data/barplot_data.csv', index=False)
+        pd_data.to_csv(data_graphs_dir+'/barplot_data.csv', index=False)
 
     # gráfico da evolução do erro associada a cada classe
     # ---------------------------------------------
-    def class_error_graph (self, X, errors, name_metrics, test_labels, results_dir, dataset_name, linguagem) :
+    def class_error_graph (self, X, errors, name_metrics, test_labels, data_graphs_dir, results_dir, dataset_name, linguagem) :
         class_errors = []
-        file_name = "/" + dataset_name + "_error_class_"
+        file_name = results_dir+"/" + dataset_name + "_error_class_"
         style = ['ro--', 'ko--', 'bo--','go--']
 
 
@@ -180,7 +180,7 @@ class ST_graphics:
                 error_data.update(info.copy())
 
             error_class = pd.DataFrame(error_data)
-            error_class.to_csv('results/' + dataset_name + '/graphics_data/' + 'error_class_'+str(np.unique(test_labels)[i])
+            error_class.to_csv(data_graphs_dir + '/error_class_'+str(int(np.unique(test_labels)[i]))
                                +'.csv', index=False)
 
             plt.ylim([0,1.1])
@@ -196,13 +196,13 @@ class ST_graphics:
                 plt.title('Error rate of class ' + str(np.unique(test_labels)[i]), fontsize=15)
 
             #plt.savefig('./teste/Erro da classe_' + str(i) + '.png')
-            plt.savefig(results_dir+file_name+str(np.unique(test_labels)[i])+'.png')
+            plt.savefig(file_name+str(np.unique(test_labels)[i])+'.png')
             #plt.show()
 
     # gráfico de acurácia da função self_training
     # ---------------------------------------------
 
-    def accuracy_graph(self, X, Y, name_metrics, results_dir, dataset_name, linguagem):
+    def accuracy_graph(self, X, Y, name_metrics, data_graphs_dir, results_dir, dataset_name, linguagem):
 
 
         #print('SIlhoueta 0:' + str(y_axis_kmeans))
@@ -247,12 +247,12 @@ class ST_graphics:
                 plt.savefig(results_dir + '/' + ind_pt[x] + '_' + dataset_name + ".jpg")
                 # plt.show()
                 pd_data = pd.DataFrame(_data)
-                pd_data.to_csv('results/' + dataset_name + '/graphics_data/' + ind_pt[x] + '_data.csv', index=False)
+                pd_data.to_csv(data_graphs_dir+'/' + ind_pt[x] + '_data.csv', index=False)
 
             elif linguagem == 'en':
                 plt.savefig(results_dir + '/' + ind_en[x] + '_' + dataset_name + ".jpg")
                 # plt.show()
                 pd_data = pd.DataFrame(_data)
-                pd_data.to_csv('results/' + dataset_name + '/graphics_data/' + ind_en[x] + '_data.csv', index=False)
+                pd_data.to_csv(data_graphs_dir+'/' + ind_en[x] + '_data.csv', index=False)
 
 

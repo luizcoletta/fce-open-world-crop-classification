@@ -75,9 +75,18 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
+    #random obj selection (baseline)
+        if metric == 'random' or metric == 'aleatória':
+            start = time.time()
+            self.e = []
+            finish = time.time()
+            total_time = finish - start
+            self.metric_time = total_time
 
 
-    #algoritmo IC_EDS
+
+
+    #algoritmo IC_EDS (baseline)
     #----------------------------------------------------------------
     def ic_eds(self,train, train_labels, test,SSet):
         probs = self.svmClassification(train, train_labels, test)

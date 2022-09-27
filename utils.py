@@ -83,6 +83,61 @@ class ST_functions:
         test_set.to_csv('data/'+dataset_name+'_test.csv', index=False)
     '''
 
+    def sel_exemplares(self, train, train_labels, len_exemplares):
+        classes, count = np.unique(train_labels, return_counts=True)
+        classes = classes.tolist()
+        buff_objs = []
+        buff_labels = []
+        #len_exemplares = 0.2*np.shape(train)[0]
+        n = round(len_exemplares / len(classes))
+        # print(classes)
+        # print(count)
+        for i in range(len(classes)):
+            # print(np.shape(train))
+            if count[i] < n:
+
+                aux = np.where(train_labels == classes[i])[0][:]
+
+                # print('aux', aux[0][:], np.shape(aux[0][:]))
+                buff_objs.extend(train[aux, :])
+
+                buff_labels.extend([x[0] for x in train_labels[aux]])
+
+                # print('boj: ', np.shape(train_labels[ax]), np.shape(train))
+                # print(train_labels[aux], type(buff_labels))
+                # print([list(x) for x in buff_objs])
+
+                train = np.delete(train, aux, axis=0)
+                train_labels = np.delete(train_labels, aux)
+
+        # print(np.shape(train))
+
+        for i in np.unique(buff_labels):
+            classes.remove(i)
+
+        # print(train_labels)
+        # print(buff_labels)
+
+        n = round(len_exemplares / len(classes))
+        # print((classes))
+        new_train = []
+        new_train_labels = []
+
+        for tl in classes:
+            ind = np.where(train_labels == tl)
+            rd_objs = np.random.choice(ind[0], n)
+            new_train.extend(train[rd_objs][:])
+            new_train_labels.extend(train_labels[rd_objs])
+
+        new_train.extend(buff_objs)
+        new_train_labels.extend(buff_labels)
+        # print(new_train_labels)
+        # print(np.shape(new_train), type(new_train))
+        # print(new_train)
+
+
+        return np.array(new_train), np.array(new_train_labels)
+
     # Ordena os dados de teste de acordo com a classe
     def sort_testset(self, x_test, y_test):
         list_labels_test = y_test[:]
@@ -167,6 +222,7 @@ class ST_functions:
             df_training = pd.read_csv(train_data_path, header=None)
 
             feat_index = list(range(df_training.shape[1]))
+
             feat_index.remove(class_index)
             train = df_training.iloc[:, feat_index].values
             if scale == True:

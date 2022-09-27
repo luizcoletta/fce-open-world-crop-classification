@@ -3,14 +3,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 
-def plot_overall_datasets_accuracy(datasets_list, sel_list, linguagem):
+
+def plot_overall_datasets_accuracy(datasets_list, sel_list, linguagem, results_dir, ml):
 
     # Gera gráfico com a acurácia de todos os datasets
     #Um gráfico para cada medida de seleção
 
-
     script_dir = os.path.dirname(__file__)
-    results_dir = os.path.join(script_dir, 'results/')
+    path_dir = os.path.join(script_dir, 'results/')
+
 
     for sel in sel_list:
         plt.figure(figsize=(10,6))
@@ -20,11 +21,11 @@ def plot_overall_datasets_accuracy(datasets_list, sel_list, linguagem):
             plt.rcParams['ytick.labelsize'] = 13
 
             if linguagem == 'pt':
-                data = pd.read_csv(os.path.join(results_dir,dataset+'/graphics_data/Acurácia_data.csv'))
+                data = pd.read_csv(os.path.join(path_dir, dataset+'/'+ml+'/graphics_data/Acurácia_data.csv'))
                 x = data['iter']
                 y = data[sel]
             elif linguagem == 'en':
-                data = pd.read_csv(os.path.join(results_dir, dataset + '/graphics_data/Accuracy_data.csv'))
+                data = pd.read_csv(os.path.join(path_dir, dataset + '/'+ml+ '/graphics_data/Accuracy_data.csv'))
                 x = data['iter']
                 y = data[sel]
 
@@ -44,14 +45,13 @@ def plot_overall_datasets_accuracy(datasets_list, sel_list, linguagem):
 
         plt.savefig(results_dir+sel+'_overall_accuracy.png')
 
-def plot_overall_datasets_new_class_error(datasets_list, sel_list, linguagem):
+def plot_overall_datasets_new_class_error(datasets_list, sel_list, linguagem, results_dir, ml):
 
     # Gera gráfico com a acurácia de todos os datasets
     #Um gráfico para cada medida de seleção
 
-
     script_dir = os.path.dirname(__file__)
-    results_dir = os.path.join(script_dir, 'results/')
+    path_dir = os.path.join(script_dir, 'results/')
 
     for sel in sel_list:
         plt.figure(figsize=(10,6))
@@ -61,11 +61,11 @@ def plot_overall_datasets_new_class_error(datasets_list, sel_list, linguagem):
             plt.rcParams['ytick.labelsize'] = 13
 
             if linguagem == 'pt':
-                data = pd.read_csv(os.path.join(results_dir,dataset+'/graphics_data/error_class_3.csv'))
+                data = pd.read_csv(os.path.join(path_dir,dataset+ '/'+ml+'/graphics_data/error_class_3.csv'))
                 x = data['iter']
                 y = data[sel]
             elif linguagem == 'en':
-                data = pd.read_csv(os.path.join(results_dir, dataset + '/graphics_data/error_class_3.csv'))
+                data = pd.read_csv(os.path.join(path_dir, dataset + '/'+ml+ '/graphics_data/error_class_3.csv'))
                 x = data['iter']
                 y = data[sel]
 
@@ -85,14 +85,14 @@ def plot_overall_datasets_new_class_error(datasets_list, sel_list, linguagem):
 
         plt.savefig(results_dir+sel+'_overall_newclass_error.png')
 
-def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
+def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem, results_dir, ml):
 
     # Gera gráfico com a acurácia de todos os datasets
     #Um gráfico para cada medida de seleção
 
-
     script_dir = os.path.dirname(__file__)
-    results_dir = os.path.join(script_dir, 'results/')
+    path_dir = os.path.join(script_dir, 'results/')
+
 
     for sel in sel_list:
         plt.figure(figsize=(10,6))
@@ -104,11 +104,11 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
             plt.rcParams['ytick.labelsize'] = 13
 
             if linguagem == 'pt':
-                data = pd.read_csv(os.path.join(results_dir,dataset+'/graphics_data/barplot_data.csv'))
+                data = pd.read_csv(os.path.join(path_dir,dataset+'/'+ml+'/graphics_data/barplot_data.csv'))
                 x = data['iter'][1:]
                 y = data[sel][1:]
             elif linguagem == 'en':
-                data = pd.read_csv(os.path.join(results_dir, dataset + '/graphics_data/barplot_data.csv'))
+                data = pd.read_csv(os.path.join(path_dir, dataset + '/'+ml+'/graphics_data/barplot_data.csv'))
                 x = data['iter'][1:]
                 y = data[sel][1:]
 
@@ -117,6 +117,7 @@ def plot_overall_datasets_new_class_prop(datasets_list, sel_list, linguagem):
             mul+=1
 
         plt.legend()
+        plt.ylim([0, 105])
 
         if linguagem == 'pt':
             plt.ylabel('Objetos selecionados da classe nova (%)', fontsize=15)
@@ -141,21 +142,47 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Implementação de modelo Open-World para aprendizagem de novas ameaças na lavoura')
 
 
-    parser.add_argument('-datasets', metavar='datasets', action='store', nargs='+', type=str, default=['dp_ceratocystis1'],
-                        help='Classificadores usados no modelo')
+    parser.add_argument('-datasets', metavar='datasets', action='store', nargs='+', default=['dp_ceratocystis1'],
+                        help='Datasets usados nos experimentos')
+    parser.add_argument('-classifiers', metavar='models', action='store', nargs='+', default=['SVM'],
+                        help='Classificadores usados')
     parser.add_argument('-selection', metavar='selection', action='store', nargs='+', type=str, default=['entropia'],
                         help='Método de seleção da nova classe')
     parser.add_argument('-language', metavar='language', action='store', type=str, default='pt',
                         help="Idioma dos resultados gerados ('pt' ou 'en')")
 
     args = parser.parse_args()
-    
+
+
     dataset_list = args.datasets
     sel_list = args.selection
     linguagem = args.language
+    models_list = args.classifiers
+
+    models_list = list(dict.fromkeys(models_list)) # remove palavras repetidas na lista
+    results_dir = []
+
+    for ml in models_list:
+
+        script_dir = os.path.dirname(__file__)
+        results_dir = os.path.join(script_dir, 'results/' + dataset_list[0].split('_')[0] + '_final_results/' + ml + '/')
+
+        if not os.path.isdir(results_dir):
+            os.makedirs(results_dir)
+
+        if ml == 'IC_EDS':
+            sel = ['EDS']
+        else:
+            if 'EDS' in sel_list:
+
+                sel = sel_list.copy()
+                sel.remove('EDS')
+
+            else:
+                sel = sel_list.copy()
 
 
-    plot_overall_datasets_accuracy(dataset_list,sel_list,linguagem)
-    plot_overall_datasets_new_class_error(dataset_list,sel_list,linguagem)
-    plot_overall_datasets_new_class_prop(dataset_list,sel_list,linguagem)
+        plot_overall_datasets_accuracy(dataset_list,sel,linguagem, results_dir, ml)
+        plot_overall_datasets_new_class_error(dataset_list,sel,linguagem, results_dir, ml)
+        plot_overall_datasets_new_class_prop(dataset_list,sel,linguagem, results_dir, ml)
 

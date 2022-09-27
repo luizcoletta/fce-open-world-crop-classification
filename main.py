@@ -47,17 +47,17 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
         print('\nVAE has finished!!\n')
 
-        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim) + 'D')
 
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
         train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
-            lat_dim * 2) + 'D.csv'
+            lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
         test_path = ''
-        class_index = (lat_dim * 2)
+        class_index = lat_dim
         join_data = False
         size_batch = int(len(img_labels) * 0.2)
         class2drop = 3
@@ -88,17 +88,17 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
         print('\nVAE has finished!!\n')
 
-        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim) + 'D')
 
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
         train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
-            lat_dim * 2) + 'D.csv'
+            lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
         test_path = ''
-        class_index = (lat_dim * 2)
+        class_index = lat_dim
         join_data = False
         size_batch = int(len(img_labels) * 0.2)
         class2drop = 3
@@ -127,17 +127,17 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
         print('\nVAE has finished!!\n')
 
-        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim) + 'D')
 
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
         train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
-            lat_dim * 2) + 'D.csv'
+            lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
         test_path = ''
-        class_index = (lat_dim * 2)
+        class_index = lat_dim
         join_data = False
         size_batch = int(len(img_labels) * 0.2)
         class2drop = 3
@@ -167,17 +167,17 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
         print('\nVAE has finished!!\n')
 
-        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim) + 'D')
 
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
         train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
-            lat_dim * 2) + 'D.csv'
+            lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
         test_path = ''
-        class_index = (lat_dim * 2)
+        class_index = lat_dim
         join_data = False
         size_batch = int(len(img_labels) * 0.2)
         class2drop = 3
@@ -204,17 +204,17 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
         print('\nVAE has finished!!\n')
 
-        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D')
+        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_' + str(lat_dim) + 'D')
 
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
-        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name + '_' + str(
-            lat_dim * 2) + 'D.csv'
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim) + 'D' + '/' + dataset_name + '_' + str(
+            lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
         test_path = ''
-        class_index = (lat_dim * 2)
+        class_index = lat_dim
         join_data = False
         size_batch = int(len(img_labels) * 0.2)
         class2drop = 3
@@ -310,47 +310,6 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         size_batch = int(1183 * 0.2)
         class2drop = 3
 
-    if dataset_name == 'vae_ceratocystis1' and vae == True:
-        dir_path = 'data/train_images/dataset_eucapytus/dataset-1/*.png'
-        images_path = 'data/train_images/dataset_eucapytus/dataset-1'
-
-        files = os.listdir(images_path)
-        files = np.sort(files)
-        img_labels = []
-        for txt in files:
-           n = int(txt.split('.')[0][-1]) #obtem a classe da imagem pelo ultimo caracter do nome do arquivo
-           img_labels.append(int(n+1))
-
-
-        img_labels = np.array(img_labels)
-        col_img = imread_collection(dir_path)
-        col_img = col_img.concatenate()
-
-
-        print('\nRunning VAE to generate latent variables...\n')
-        vae_model = VAE(col_img, img_labels, epoch=vae_epoch, lat_dim=lat_dim, shape=np.shape(col_img[0]),
-                        len_train=len_train)  # len_train --> tamanho do conjunto de treino
-        data = vae_model.output
-
-        print('\nVAE has finished!!\n')
-
-        data_dir = os.path.join(script_dir, 'data/' + dataset_name + '_'+ str(lat_dim*2) + 'D')
-
-        if not os.path.isdir(data_dir):
-            os.makedirs(data_dir)
-
-        train_path = 'data/' + dataset_name + '_'+str(lat_dim*2) + 'D' + '/' + dataset_name+ '_' + str(
-            lat_dim*2) + 'D.csv'
-        data.to_csv(train_path, index=False, header=False)
-
-        test_path = ''
-        class_index = (lat_dim*2)
-        join_data = False
-        size_batch = int(len(img_labels) * 0.2)
-        class2drop = 3
-
-
-
 
     if dataset_name == 'mnist' and vae == True:
         (train, train_labels), (test, test_labels) = keras.datasets.mnist.load_data()
@@ -395,23 +354,6 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         size_batch = int(70000 * 0.2)
         class2drop = 0
 
-        '''
-        class_index = 2
-        df_training = pd.read_csv(train_data_path)
-        df_valores = df_training.loc[df_training['class'] == 0]
-        df_training.drop(df_valores.index, inplace=True)
-
-        feat_index = list(range(df_training.shape[1]))
-        feat_index.remove(class_index)
-        train = df_training.iloc[:, feat_index].values
-        train_labels = df_training.iloc[:, class_index].values
-
-        df_test = pd.read_csv(test_data_path)
-        feat_index = list(range(df_test.shape[1]))
-        feat_index.remove(class_index)
-        test = df_test.iloc[:, feat_index].values
-        test_labels = df_test.iloc[:, class_index].values
-        '''
 
     if dataset_name == 'mnist4D' and vae == False:
         train_path= 'https://raw.githubusercontent.com/Mailson-Silva/mnist_lalent_features/main/mnist_train'
@@ -460,7 +402,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
 
 # Algoritmo de self-training
 def self_training(iter, model_name, train, train_labels, test, test_labels, metric,
-                  list_new_class_labels, results_path, n_test_class=10,  kmeans_graph=False):
+                  list_new_class_labels, results_dir, n_test_class=10,  kmeans_graph=False):
 
     # cria variáveis para execução do self-training e gera a pasta para armazenar os resultados
     #----------------------------------------------------------------
@@ -476,17 +418,16 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     time_metric = []
     prop_por_rodada = []
     curva_sel_por_rodada = []
+    ob = 0.3 * np.shape(train)[0]
     #curva_sel = []
     #prop_por_classe = []
 
     if len(train[0]) == 2:
-        script_dir = os.path.dirname(__file__)
-        results_dir = os.path.join(script_dir, 'results/' + dataset_name+ '/'+metric+'_objects_selected')
+        results_dir = os.path.join(results_dir, '/'+metric+'_objects_selected')
 
         if not os.path.isdir(results_dir):
             os.makedirs(results_dir)
-    else:
-        results_dir = ''
+
 
     test_original = test
     labels_original = test_labels
@@ -508,6 +449,10 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
     else:
         SSet = []
+        train, train_labels = ft.sel_exemplares(train, train_labels, ob)
+
+
+    # Modelo incremental
 
     classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
                                     n_test_class, 0, kmeans_graph, SSet)
@@ -553,7 +498,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
             print('\nIteraction: ' + str(k) +' | Running train set increment...')
 
-            if (model_name != 'IC_EDS'):
+            if (model_name != 'IC_EDS' and (metric != 'random' and metric != 'aleatória')):
 
                 #curva_sel.append(e.copy())
                 #graph.plot_metric_sel(e, metric, results_path, k)
@@ -562,9 +507,13 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
             # https://scikit-learn.org/stable/modules/svm.html
 
-            if(model_name != 'IC_EDS'):
+            if(metric == 'EDS'):
+                w = ft.eds(e[0], e[1], 5, SSet)
 
+            elif(metric == 'random' or metric == 'aleatória'):
+                w = np.random.choice(range(0, test_labels.shape[0]), 5, replace=False)
 
+            else:
 
                 df_e = pd.DataFrame(e)
                 df_e.sort_values(by=[0], inplace=True, ascending=False)
@@ -577,8 +526,6 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 p = 5  # 96
 
                 w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
-            else:
-                w = ft.eds(e[0],e[1],5,SSet)
             # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html
 
 
@@ -601,10 +548,14 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
                 if(model_name=='IC_EDS'):
                     SSet = ft.reduce_matrix(w, SSet)
+                else:
+                    # Modelo incremental
+                    train, train_labels = ft.sel_exemplares(train, train_labels, ob)
 
+                # código que faz a inserção da nova classe durante a execução do modelo
                 for nc in list_new_class_labels:
                     if nc[0] == k:
-                        print(np.shape(test_labels))
+
                         test = np.concatenate((test, np.squeeze(new_classes_objs[count_nc][0])), axis=0)
                         test_labels = np.concatenate(
                             (test_labels, np.expand_dims(new_classes_objs[count_nc][1], axis=1)))
@@ -614,6 +565,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                              matDist] = ft.clusterEnsemble(test)
 
                     count_nc += 1
+
 
                 classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
                                             n_test_class, k, kmeans_graph,SSet)
@@ -689,60 +641,59 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
     train_path, test_path, class_index, join_data, size_batch, class2drop = load_dataset(dataset_name, use_vae,
                                                                                          vae_epoch=vae_epoch, lat_dim= lat_dim,
-                                                                                         len_train=len_train)
+                                                                                   len_train=len_train)
 
-    #cria pastas para armazenar os resultados
-    script_dir = os.path.dirname(__file__)
-    results_dir = os.path.join(script_dir, 'results/'+dataset_name)
-
-    if not os.path.isdir(results_dir):
-        os.makedirs(results_dir)
-
-    dataset_logs_dir = os.path.join(script_dir, 'logs/' + dataset_name)
-
-    if not os.path.isdir(dataset_logs_dir):
-        os.makedirs(dataset_logs_dir)
-
-    data_graphs = os.path.join(script_dir, 'results/' + dataset_name+'/graphics_data')
-
-    if not os.path.isdir(data_graphs):
-        os.makedirs(data_graphs)
-
-    all_errors = []
-    all_x_axis = []
-    all_y_axis = []
-    all_metrics = []
-    all_time_classifier = []
-    all_time_metric = []
-    all_props = []
-    all_curvas_sel = []
-
-    class_errors = []
-    x_axis = []
-    y_axis = []
-    class_proportion = []
-    curv_sel = []
-
-    '''
-    # se use_vae é True, então utiliza o VAE para reduzir a dimensionalidade
-
-    if use_vae:
-        print('\nRunning VAE to generate latent variables...\n')
-        #vae_model = VAE(train, train_labels, test, test_labels, epoch=vae_epoch, lat_dim= lat_dim,
-        #                len_train=len_train)  # len_train --> tamanho do conjunto de treino
-        #train, train_labels, test, test_labels = vae_model.output
-
-        print('\nVAE has finished!!\n')
-    '''
-    time_per_model = []
     for i in range(len(model_name)):
+
+        results_dir = os.path.join(os.path.dirname(__file__), 'results/' + dataset_name+'/'+model_name[i])
+
+        if not os.path.isdir(results_dir):
+
+            # cria pastas para armazenar os resultados
+            script_dir = os.path.dirname(__file__)
+            results_dir = os.path.join(script_dir, 'results/' + dataset_name+'/'+model_name[i])
+
+            if not os.path.isdir(results_dir):
+                os.makedirs(results_dir)
+
+            dataset_logs_dir = os.path.join(script_dir, 'logs/' + dataset_name+'/'+model_name[i])
+
+            if not os.path.isdir(dataset_logs_dir):
+                os.makedirs(dataset_logs_dir)
+
+            data_graphs = os.path.join(script_dir, 'results/' + dataset_name+'/'+model_name[i] +'/graphics_data')
+
+            if not os.path.isdir(data_graphs):
+                os.makedirs(data_graphs)
+
+            all_errors = []
+            all_x_axis = []
+            all_y_axis = []
+            all_metrics = []
+            all_time_classifier = []
+            all_time_metric = []
+            all_props = []
+            all_curvas_sel = []
+
+            class_errors = []
+            x_axis = []
+            y_axis = []
+            class_proportion = []
+            curv_sel = []
+
+            time_per_model = []
+
         start = time.time()
 
         for j in range(1,6):
             print('\n*******************************************')
             print("TRAINING SET AND TEST SET - fold " + str(j))
 
-            train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
+            if dataset_name.split('_')[0] == 'hc':
+                train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop, scale = True)
+
+            else:
+                train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
 
             x_ent, y_ent, erros_ent,curva_sel, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,
                                                     test_labels, metric[i], list_new_class_labels, results_dir,  n_test_class,
@@ -806,24 +757,51 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
         steps = list(range(0, n_iter + 1))
         time_data = {'steps': steps, 'classifier_time (s)': mean_time_classifier, 'metric_time (s)': mean_time_metric}
         elapsed_time = pd.DataFrame(time_data)
-        elapsed_time.to_csv('logs/' + dataset_name + '/' + model_name[i] + '&' + metric[i] + '_elapsed_time.csv', index=False)
+        elapsed_time.to_csv(dataset_logs_dir + '/' + model_name[i] + '&' + metric[i] + '_elapsed_time.csv', index=False)
 
         finish = time.time()
         total_time = (finish - start)/60
         time_per_model.append(total_time)
 
 
+        if i == len(model_name)-1:
+            #print(curv_sel)
+            idx = indexes(model_name, model_name[i])
+            mtc = [metric[x] for x in idx]
 
-    #print(curv_sel)
-    graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, results_dir, dataset_name, linguagem)
-    graph.plot_metric_sel(all_curvas_sel, all_metrics, results_dir, dataset_name, linguagem)
-    graph.accuracy_graph(x_axis, y_axis, all_metrics, results_dir, dataset_name, linguagem)
-    graph.accuracy_all_class_graph(metric, results_dir, test_labels, class_proportion, list_new_class_labels, linguagem)
+            graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, data_graphs, results_dir, dataset_name, linguagem)
 
-    for i in range(len(model_name)):
-        print('Elapsed time (min) for '+str(model_name[i])+' and '+str(metric[i])+' : ' + str(time_per_model[i]))
+            if model_name[i] != 'IC_EDS':
+                graph.plot_metric_sel(all_curvas_sel, all_metrics, results_dir, linguagem)
 
+            graph.accuracy_graph(x_axis, y_axis, all_metrics, data_graphs, results_dir, dataset_name, linguagem)
+            graph.accuracy_all_class_graph(mtc, data_graphs, results_dir, test_labels, class_proportion, list_new_class_labels, linguagem)
 
+            for x in range(len(mtc)):
+                print('Elapsed time (min) for ' + str(model_name[i]) + ' and ' + str(mtc[x]) + ' : ' + str(
+                    time_per_model[x]))
+
+        elif model_name[i+1]!=model_name[i]:
+            # print(curv_sel)
+            idx = indexes(model_name, model_name[i])
+            mtc = [metric[x] for x in idx]
+
+            graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, data_graphs, results_dir,
+                                    dataset_name, linguagem)
+
+            if model_name[i] != 'IC_EDS':
+                graph.plot_metric_sel(all_curvas_sel, all_metrics, results_dir, linguagem)
+
+            graph.accuracy_graph(x_axis, y_axis, all_metrics, data_graphs, results_dir, dataset_name, linguagem)
+            graph.accuracy_all_class_graph(mtc, data_graphs, results_dir, test_labels, class_proportion,
+                                           list_new_class_labels, linguagem)
+
+            for x in range(len(mtc)):
+                print('Elapsed time (min) for ' + str(model_name[i]) + ' and ' + str(mtc[x]) + ' : ' + str(
+                    time_per_model[x]))
+
+def indexes(iterable, obj):
+    return list((index for index, elem in enumerate(iterable) if elem == obj))
 
 if __name__ == "__main__":
 

@@ -114,8 +114,9 @@ class VAE:
 
         z_mean, z_log_var, z = vae.encoder(dataset_features)
 
-        latent_features = np.concatenate([z_mean.numpy(), z_log_var.numpy()], axis=1)
+        #latent_features = np.concatenate([z_mean.numpy(), z_log_var.numpy()], axis=1)
 
+        latent_features = z_mean.numpy()
         #dataset_labels = np.concatenate([y_train, y_test], axis=0)
 
         dataset_labels.transpose()
