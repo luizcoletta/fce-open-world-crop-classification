@@ -418,7 +418,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     time_metric = []
     prop_por_rodada = []
     curva_sel_por_rodada = []
-    ob = 0.3 * np.shape(train)[0]
+    ob = 0.5 * np.shape(train)[0]
     #curva_sel = []
     #prop_por_classe = []
 
@@ -666,6 +666,9 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             if not os.path.isdir(data_graphs):
                 os.makedirs(data_graphs)
 
+
+            runtime = {}
+            #listas para geração de gráficos
             all_errors = []
             all_x_axis = []
             all_y_axis = []
@@ -674,7 +677,6 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             all_time_metric = []
             all_props = []
             all_curvas_sel = []
-
             class_errors = []
             x_axis = []
             y_axis = []
@@ -780,6 +782,11 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             for x in range(len(mtc)):
                 print('Elapsed time (min) for ' + str(model_name[i]) + ' and ' + str(mtc[x]) + ' : ' + str(
                     time_per_model[x]))
+                runtime.update({str(mtc[x]): time_per_model[x]})
+
+            print(runtime)
+            runtime_csv = pd.DataFrame(runtime, index= [0])
+            runtime_csv.to_csv(dataset_logs_dir + '/' + 'runtimes.csv', index=False)
 
         elif model_name[i+1]!=model_name[i]:
             # print(curv_sel)
@@ -799,6 +806,13 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             for x in range(len(mtc)):
                 print('Elapsed time (min) for ' + str(model_name[i]) + ' and ' + str(mtc[x]) + ' : ' + str(
                     time_per_model[x]))
+                runtime.update({str(mtc[x]):time_per_model[x]})
+
+            runtime_csv = pd.DataFrame(runtime, index=[0])
+            runtime_csv.to_csv(dataset_logs_dir + '/' +'runtimes.csv', index=False)
+
+
+
 
 def indexes(iterable, obj):
     return list((index for index, elem in enumerate(iterable) if elem == obj))

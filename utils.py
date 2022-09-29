@@ -84,6 +84,46 @@ class ST_functions:
     '''
 
     def sel_exemplares(self, train, train_labels, len_exemplares):
+
+        #seleção por proximidade à média da classe
+        #-----------------------------------------
+
+        classes, count = np.unique(train_labels, return_counts=True)
+        n = round(len_exemplares/len(classes)) # calcula numero de amostras por classe
+        new_train = []
+        new_train_labels = []
+
+        for c in classes:
+
+            if count[np.where(classes == c)] >= n:
+
+                idx = np.array(np.where(train_labels==c))[0] # pega todos os indices dos objetos da classe c
+
+                c_mean = np.mean(train[idx,:], axis=0) #calcula media da classe c
+
+                dists_to_mean = [np.linalg.norm(train[x,:]-c_mean) for x in idx] #calcula distancia dos objetos à media
+
+                ordered_obj = list(enumerate(dists_to_mean)) # organiza as distancias calculadas de forma crescente
+                ordered_obj.sort(key=lambda x: x[1])
+
+                argmins = [ob[0] for ob in ordered_obj] #extrai apenas os indices dos objetos ordenados
+
+                objs = argmins[:n]
+
+
+                new_train.extend(train[idx[objs],:])
+                new_train_labels.extend(train_labels[idx[objs]])
+
+            else:
+                idx = np.array(np.where(train_labels==c))[0]  # pega todos os indices dos objetos da classe c
+                new_train.extend(train[idx, :])
+                new_train_labels.extend(train_labels[idx])
+
+
+
+        # seleção aleatória para rehearsal
+        #-------
+        '''
         classes, count = np.unique(train_labels, return_counts=True)
         classes = classes.tolist()
         buff_objs = []
@@ -135,7 +175,9 @@ class ST_functions:
         # print(np.shape(new_train), type(new_train))
         # print(new_train)
 
-
+        '''
+        #------------------------
+        #print(np.array(new_train), np.array(new_train_labels))
         return np.array(new_train), np.array(new_train_labels)
 
     # Ordena os dados de teste de acordo com a classe

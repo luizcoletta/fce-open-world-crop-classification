@@ -11,8 +11,8 @@ datasets = []
 dp = (['dp_ceratocystis1'])
 
 #Parametros
-dp_parameters = " -selection entropia EDS " \
-           "-classifiers SVM IC_EDS " \
+dp_parameters = " -selection entropia " \
+           "-classifiers SVM " \
            "-insert_nc 2 3" # [iter nc]
 #-----------------------------------------------
 # hand craft features
@@ -59,6 +59,14 @@ for data,params in datasets:
 
     command = shlex.split("python3 plot_final_results.py -datasets "
                           + str(data).strip('[]').replace(',',' ')
+                          + " -" + params.split('-')[1]
+                          + "-" + params.split('-')[2] +
+                          "-language pt")
+    pro = subprocess.Popen(command)
+    pro.wait()
+
+    command = shlex.split("python3 summary_table.py -datasets "
+                          + str(data).strip('[]').replace(',', ' ')
                           + " -" + params.split('-')[1]
                           + "-" + params.split('-')[2] +
                           "-language pt")

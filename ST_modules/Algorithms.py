@@ -1,6 +1,8 @@
 #inserir a definição dos classificadores aqui
 
 from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
 import tensorflow as tf
 from sklearn.cluster import KMeans
 import numpy as np
@@ -22,7 +24,23 @@ class alghms:
         #nclusters_train e nclusters_test --> aplicados na obtenção do kmeans para cálculo da silhueta
         #SSet -> usado no algoritmo IC_EDS (matriz de similaridade)
 
+        if model_name == 'KNN':
+            start = time.time()
 
+            self.probs, self.pred = self.KNN(train,train_labels, test)
+
+            finish = time.time()
+            total_time = finish - start
+            self.classifier_time = total_time
+
+        if model_name == 'RF':
+            start = time.time()
+
+            self.probs, self.pred = self.RF(train,train_labels, test)
+
+            finish = time.time()
+            total_time = finish - start
+            self.classifier_time = total_time
 
         if model_name == 'IC_EDS':
             start = time.time()
@@ -101,6 +119,25 @@ class alghms:
         return [e,d]
     #----------------------------------------------------------------
 
+    # Random Forest classifier
+    def RF(self, train, train_labels, test):
+        rf = RandomForestClassifier(n_estimators=9, max_depth=5)
+        rf.fit(train, train_labels.ravel())
+        probs = rf.predict_proba(test)
+        pred = rf.predict(test)
+        # print(np.around(probs,2))
+        return [probs, pred]
+
+    #KNN classifier
+    def KNN(self, train, train_labels, test):
+        neigh = KNeighborsClassifier(n_neighbors=3)
+        neigh.fit(train, train_labels.ravel())
+        probs = neigh.predict_proba(test)
+        pred = neigh.predict(test)
+
+        # print(np.around(probs,2))
+        return [probs, pred]
+
 
     #SVM Classifier
     #-----------------------------------------------------------------
@@ -109,6 +146,7 @@ class alghms:
         SVM.fit(train, train_labels.ravel())
         probs = SVM.predict_proba(test)
         pred = SVM.predict(test)
+
         # print(np.around(probs,2))
         return [probs, pred]
 
