@@ -449,7 +449,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
     else:
         SSet = []
-        train, train_labels = ft.sel_exemplares(train, train_labels, ob)
+        #train, train_labels = ft.sel_exemplares(train, train_labels, ob)
 
 
     # Modelo incremental
@@ -548,9 +548,9 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
                 if(model_name=='IC_EDS'):
                     SSet = ft.reduce_matrix(w, SSet)
-                else:
+                #else:
                     # Modelo incremental
-                    train, train_labels = ft.sel_exemplares(train, train_labels, ob)
+                    #train, train_labels = ft.sel_exemplares(train, train_labels, ob)
 
                 # código que faz a inserção da nova classe durante a execução do modelo
                 for nc in list_new_class_labels:
