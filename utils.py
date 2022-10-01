@@ -101,6 +101,7 @@ class ST_functions:
 
                 c_mean = np.mean(train[idx,:], axis=0) #calcula media da classe c
 
+
                 dists_to_mean = [np.linalg.norm(train[x,:]-c_mean) for x in idx] #calcula distancia dos objetos à media
 
                 ordered_obj = list(enumerate(dists_to_mean)) # organiza as distancias calculadas de forma crescente
@@ -114,9 +115,12 @@ class ST_functions:
                 new_train.extend(train[idx[objs],:])
                 new_train_labels.extend(train_labels[idx[objs]])
 
+
             else:
                 idx = np.array(np.where(train_labels==c))[0]  # pega todos os indices dos objetos da classe c
                 new_train.extend(train[idx, :])
+
+
                 new_train_labels.extend(train_labels[idx])
 
 
@@ -264,7 +268,6 @@ class ST_functions:
             df_training = pd.read_csv(train_data_path, header=None)
 
             feat_index = list(range(df_training.shape[1]))
-
             feat_index.remove(class_index)
             train = df_training.iloc[:, feat_index].values
             if scale == True:
@@ -278,7 +281,7 @@ class ST_functions:
         test = []
         test_labels = []
         if test_data_path:
-            df_test = pd.read_csv(test_data_path)  # , header=None)
+            df_test = pd.read_csv(test_data_path, header=None)
             # print(df_test.shape)
             feat_index = list(range(df_test.shape[1]))
             feat_index.remove(class_index)
@@ -314,6 +317,7 @@ class ST_functions:
         train_labels_fold = []
         # X, y = data, data_labels
         skf = StratifiedKFold(n_splits=folds, random_state=None, shuffle=False)
+
 
         for test_index, train_index in skf.split(data, data_labels):
             # print(len(train_index))

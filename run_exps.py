@@ -10,8 +10,9 @@ datasets = []
 # deep features
 dp = (['dp_ceratocystis1','dp_ceratocystis2','dp_ceratocystis5','dp_ceratocystis10','dp_ceratocystis20'])
 
+
 #Parametros
-dp_parameters = " -selection entropia silhueta0 silhueta1 aleatória EDS " \
+dp_parameters = " -selection entropia silhueta silh*dens aleatória EDS " \
            "-classifiers SVM SVM SVM SVM IC_EDS " \
            "-insert_nc 2 3" # [iter nc]
 #-----------------------------------------------
@@ -19,16 +20,16 @@ dp_parameters = " -selection entropia silhueta0 silhueta1 aleatória EDS " \
 hc = (['hc_ceratocystis1','hc_ceratocystis2','hc_ceratocystis5','hc_ceratocystis10','hc_ceratocystis20'])
 
 #Parametros
-hc_parameters = " -selection entropia silhueta0 silhueta1 aleatória EDS " \
+hc_parameters = " -selection entropia silhueta silh*dens aleatória EDS " \
            "-classifiers SVM SVM SVM SVM IC_EDS " \
            "-insert_nc 2 3" # [iter nc]
 #-----------------------------------------------
 
 # VAE features
-vae = (['vae_ceratocystis1','vae_ceratocystis2','vae_ceratocystis5','vae_ceratocystis10','vae_ceratocystis20'])
+vae = (['vae_ceratocystis1','vae_ceratocystis2','vae_ceratocystis5','vae_ceratocystis20'])
 
 #Parametros
-vae_parameters = " -selection entropia silhueta0 silhueta1 aleatória EDS "\
+vae_parameters = " -selection entropia silhueta silh*dens aleatória EDS "\
                 "-classifiers SVM SVM SVM SVM IC_EDS " \
                  "-use_vae True " \
             "-latent_dim 8 "\
@@ -36,8 +37,8 @@ vae_parameters = " -selection entropia silhueta0 silhueta1 aleatória EDS "\
 #-----------------------------------------------
 
 datasets.append([dp, dp_parameters])
-#datasets.append([hc, hc_parameters])
-#datasets.append([vae, vae_parameters])
+datasets.append([hc, hc_parameters])
+datasets.append([vae, vae_parameters])
 
 for data,params in datasets:
 

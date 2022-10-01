@@ -390,7 +390,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         test_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/iris2d-test.csv'
 
 
-        class_index = 3
+        class_index = 2
         join_data = True
         size_batch = int(150 * 0.2)
         class2drop = -1
@@ -829,7 +829,7 @@ if __name__ == "__main__":
     parser.add_argument('-dataset', metavar='dataset', action='store', type=str, required=True, help='Nome do dataset')
     parser.add_argument('-use_vae', metavar='use_vae', action='store', type=bool, default= False, help='Solicita ou não uso do VAE')
     parser.add_argument('-vae_epochs', metavar='vae_epochs', action='store', nargs='?', type=int, default= 100, help='Qtd. de épocas do VAE')
-    parser.add_argument('-latent_dim', metavar='latent_dim', action='store', nargs='?', type=int, default= 4,  help='Qtd. dimensões latentes do VAE')
+    parser.add_argument('-latent_dim', metavar='latent_dim', action='store', nargs='?', type=int, default= 8,  help='Qtd. dimensões latentes do VAE')
     parser.add_argument('-classifiers', metavar='classifiers', action='store', nargs='+', type= str, default=['svm'], help='Classificadores usados no modelo')
     parser.add_argument('-selection', metavar='selection', action='store', nargs='+', type=str, default=['entropia'], help='Método de seleção da nova classe')
     parser.add_argument('-insert_nc', metavar='insert_nc', action='store', nargs='+', type=int, required=True, help='Insere a classe nova especificada na iteração especificada ([iteração rótulo_nc])')

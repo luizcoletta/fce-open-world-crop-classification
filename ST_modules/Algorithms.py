@@ -75,7 +75,7 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
-        if metric == 'silhouette0' or metric == 'silhueta0':
+        if metric == 'silh*dens':
             start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
@@ -84,7 +84,7 @@ class alghms:
             #print(np.unique(train_labels))
             self.metric_time = total_time
 
-        if metric == 'silhouette1' or metric == 'silhueta1':
+        if metric == 'silhouette' or metric == 'silhueta':
             start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 1, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)

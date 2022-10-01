@@ -90,7 +90,7 @@ if __name__ == "__main__":
             'Recall (%)': recall}
 
     pd_data = pd.DataFrame(data)
-    pd_data.to_csv(results_dir+'summary_table.csv', index=False)
+    pd_data.to_csv(results_dir+dataset_list[0].split('_')[0]+'_summary_table.csv', index=False)
 
 
 
