@@ -52,7 +52,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
-        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim) + 'D' + '/' + dataset_name+ '_'  + str(
             lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
@@ -93,7 +93,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
-        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim) + 'D' + '/' + dataset_name+ '_'  + str(
             lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
@@ -132,7 +132,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
-        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim) + 'D' + '/' + dataset_name+ '_'  + str(
             lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
@@ -172,7 +172,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         if not os.path.isdir(data_dir):
             os.makedirs(data_dir)
 
-        train_path = 'data/' + dataset_name + '_' + str(lat_dim * 2) + 'D' + '/' + dataset_name+ '_'  + str(
+        train_path = 'data/' + dataset_name + '_' + str(lat_dim) + 'D' + '/' + dataset_name+ '_'  + str(
             lat_dim) + 'D.csv'
         data.to_csv(train_path, index=False, header=False)
 
