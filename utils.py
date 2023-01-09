@@ -83,6 +83,320 @@ class ST_functions:
         test_set.to_csv('data/'+dataset_name+'_test.csv', index=False)
     '''
 
+    #Funções para uso do classificador incremental
+    #--------------------------------------------------------------
+    def get_pseudopoints(self, train):
+
+        kmeans = KMeans(n_clusters=10,  # numero de clusters
+                        init='k-means++', n_init=10,
+                        # método de inicialização dos centróides que permite convergencia mais rápida
+                        max_iter=300)  # numero de iterações do algoritmo
+
+        # Visualização do K-means para os dois conjuntos de dados
+
+        pred_train = kmeans.fit_predict(train)
+        kmeans_train_center = kmeans.cluster_centers_
+        # objs_train_to_center_clusters = kmeans.fit_transform(train) #calcula a distancia de cada ponto até os centros de cada cluster
+
+        n_centros = len(kmeans_train_center)
+
+        from collections import Counter, defaultdict
+        # print(Counter(pred_train))
+        # print(Counter(pred_train)[1])
+
+        train_center_dists = []
+        for k in train:
+            col = np.zeros(shape=(len(kmeans_train_center)))
+
+            for c in range(len(kmeans_train_center)):
+                d = np.linalg.norm(k - kmeans_train_center[c])
+                col[c] = d
+
+            train_center_dists.append(col)
+
+        def find_rad(dist_matrix, obj_per_cluster):
+            rad = []
+            n_clusters = np.shape(dist_matrix)[1]
+
+            for i in range(n_clusters):
+                dist_matrix[:, i].sort()
+                dist = dist_matrix[:, i]
+                dist_ci = dist[:obj_per_cluster[i]]
+                rad.append(max(dist_ci))
+
+            return rad
+
+        rad = find_rad(np.array(train_center_dists), Counter(pred_train))
+
+        pseudopoints = []
+
+        for i in range(n_centros):
+            a = [kmeans_train_center[i], rad[i], Counter(pred_train)[i]]
+            pseudopoints.append(a.copy())
+
+
+
+        return pseudopoints, n_centros, pred_train, kmeans_train_center, train_center_dists
+
+    def get_mean_class(self,train, train_labels):
+
+        mean = []
+        old_class = []
+        labels = np.unique(train_labels)
+        # print(train, train.shape, type(train))
+
+        for l in labels:
+            ind = np.where(train_labels == l)[0]
+            # print(ind)
+            objs = train[ind]
+            # print('sh', np.shape(objs))
+
+            old_class.append(l)
+            mean.append(np.mean(objs, axis=0))  # media original sobre todas as amostras da classe
+
+        # old_class = train_labels
+
+
+        # print(mean)
+
+        return mean, old_class
+
+    def upg_means(self,old_class, mean, train, train_labels, nb_exemplars):
+
+        labels = np.unique(train_labels)
+
+        for l in labels:
+
+            ind = np.where(train_labels == l)[0]
+            objs = train[ind]
+            # print(objs)
+
+            if not (l in old_class):
+                old_class.append(l)
+
+                mean.append(np.mean(objs, axis=0))
+
+
+            elif len(ind) < nb_exemplars:
+                id = np.where(old_class == l)[0][0]
+                # print(id, old_class, mean)
+                mean[id] = np.mean(objs, axis=0)
+                print('new', mean[id])
+
+        # print(mean)
+
+        return old_class, mean
+
+    def upg_pseudopoints(self,old_class, pseudopoints, train, train_labels):
+
+        labels = np.unique(train_labels)
+
+        for l in labels:
+            # print(l in old_class)
+            if not (l in old_class):
+
+                ind = np.where(train_labels == l)[0]
+
+                mean = np.mean(train[ind], axis=0)
+                # print('mean ', mean)
+                nb_obj = len(ind)
+                dists = [np.sqrt(np.sum((x - mean) ** 2, axis=0)) for x in train[ind]]
+                rad = max(dists)
+                a = [mean, rad, nb_obj]
+
+                pseudopoints.append(a.copy())
+
+
+            else:
+
+                ind = np.where(train_labels == l)[0]
+
+                objs = train[ind]
+
+                for o in objs:
+
+                    belong = False
+                    for ps in pseudopoints:
+                        # print(o, ps[0])
+                        # print(np.sqrt(np.sum((o - ps[0])**2,axis=0)))
+
+                        if np.sqrt(np.sum((o - ps[0]) ** 2, axis=0)) <= ps[1]:
+                            belong = True
+
+                    if belong == False:
+                        # print('extend')
+                        vec_dist = [np.sqrt(np.sum((o - ps[0]) ** 2, axis=0)) for ps in pseudopoints]
+                        pseudopoints[np.argmin(vec_dist)][1] = min(vec_dist)
+
+
+        # print(pseudopoints, np.shape(pseudopoints))
+        return pseudopoints
+
+    # teste incremental
+    def kms_for_new_class(self, pseudopoints, test, kmeans_approach):
+
+        kmeans_test = KMeans(n_clusters=12,  # numero de clusters
+                             init='k-means++', n_init=10,
+                             # método de inicialização dos centróides que permite convergencia mais rápida
+                             max_iter=300)  # numero de iterações do algoritmo
+
+        # Visualização do K-means para os dois conjuntos de dados
+
+        pred_test = kmeans_test.fit_predict(test)
+        kmeans_test_center = kmeans_test.cluster_centers_
+        objs_test_to_center_clusters = kmeans_test.fit_transform(test)
+
+        data_centers = np.array([centroids[0] for centroids in pseudopoints])
+
+        # print(data_centers, np.shape(data_centers))
+        new_data_labels, new_centers_kept, silhouette, nearest_data_object_position = self.fd_novelties([], [],
+                                                                                                          data_centers,
+                                                                                                          [], test,
+                                                                                                          pred_test,
+                                                                                                          kmeans_test_center,
+                                                                                                          objs_test_to_center_clusters,
+                                                                                                          kmeans_approach,
+                                                                                                          0.8)
+
+        return silhouette
+
+    def fd_novelties(self, data, data_labels, data_centers, data_dists, new_data, new_data_labels,
+                       new_data_centers,
+                       new_data_dists, kmeans_approach, thrs):
+
+        # the higher the value the greater the qualification to be a new cluster object
+        threshold = thrs
+
+        # 0: new obj center X nearest data obj
+        # 1: new obj center X nearest data center
+        # 2: new obj center * new objs density X nearest data center * data density
+        # 3: new obj center * (std new obj cluster / std near data cluster) X near data center * (std near data cluster / std new obj cluster)
+        approach = kmeans_approach
+
+        silhouette = [-1] * len(new_data_labels)
+        new_centers_kept = [-1] * len(new_data_centers)
+
+        nearest_data_object_position = list()
+        min_val = 0.0000000001
+        # print(new_data_labels)
+
+        for i in range(len(new_data_labels)):
+            #    if i%50 ==0: print(i)
+
+            ### new object distance to the center of its cluster
+            # dist_new_obj_center = new_data_dists[i, new_data_labels[i]]
+
+            dist_new_obj_center = np.min(new_data_dists[i])
+            #     print([i,new_data_labels[i]])
+
+            ### new object distance to the nearest center calculated from existing data
+            dist_data_centers = []
+            for j in range(len(data_centers)):
+                dist_data_centers.append(np.linalg.norm(new_data[i, :] - data_centers[j, :]))
+            nearest_data_cluster = np.argmin(dist_data_centers)  # label nearest data cluster
+            dist_nearest_data_center = dist_data_centers[nearest_data_cluster]
+
+            a0 = 0  # dist_new_obj_center * density_new_objs
+            b0 = 0  # distance_nearest_data_object * density_data
+
+            a1 = dist_new_obj_center
+            b1 = dist_nearest_data_center
+
+            a2 = 0  # dist_new_obj_center * density_new_objs
+            b2 = 0  # dist_nearest_data_center * density_data
+
+            a3 = 0  # dist_new_obj_center * (std_new_objs / (std_data + min_val))
+            b3 = 0  # dist_nearest_data_center * (std_data / (std_new_objs + min_val))
+
+            sil_calc_terms = np.array([[a0, b0], [a1, b1], [a2, b2], [a3, b3]])
+
+            # print(sil_calc_terms[approach, :])
+            silhouette[i] = (sil_calc_terms[approach, 1] - sil_calc_terms[approach, 0]) / np.max(
+                sil_calc_terms[approach, :])
+
+            if silhouette[i] < threshold:
+                new_data_labels[i] = nearest_data_cluster
+            else:
+                # when a new cluster is found (by keeping a new center)
+                # a new label higher than all already annotated is defined for its objects
+                # position p with -1 in new_centers_kept means that the p cluster in new data won't be kept
+                if new_centers_kept[new_data_labels[i]] < 0:
+                    new_centers_kept[new_data_labels[i]] = new_data_labels[i] + int(np.max(new_data_labels)) + 1
+                new_data_labels[i] = new_centers_kept[new_data_labels[i]]
+            # np.savetxt('silhouette.csv', silhouette, delimiter=',', fmt='%1.4f')
+            # np.savetxt('silhouette_density.csv', silhouette_density, delimiter=',', fmt='%1.4f')
+        # print(sum(silhouette)/len(silhouette))
+
+        return new_data_labels, new_centers_kept, silhouette, nearest_data_object_position
+    #-------------------------------------------------------------
+
+    def select_exemplars(self, train, train_labels, mean, nb_exemplars, old_class):
+
+        exemplars_set = []
+        labels_set = []
+        labels = np.unique(train_labels)
+        # print('labels', labels)
+        cm = 0
+        # print(train, train.shape, type(train))
+
+        for l in labels:
+            ind = np.where(train_labels == l)[0]
+            # print(ind)
+            objs = train[ind]
+            # print('sh', np.shape(objs))
+
+            # print('teste', np.where(old_class == l)[0][0] )
+            mean_aux = mean[np.where(old_class == l)[0][0]]  # pode dar erro aqui, pois as labels podem estar ordenadas de forma diferente dos elementos do vetor mean
+            exemplars = []
+            ex_lb = []
+            # print('mean', mean)
+            if np.shape(objs)[0] < nb_exemplars:
+
+                [exemplars.append(x.copy()) for x in objs]  # New object to avoid passing by inference
+
+                [ex_lb.append(l) for i in range(np.shape(objs)[0])]
+
+            else:
+                for k in range(1, nb_exemplars + 1):
+                    # print(exemplars, np.shape(exemplars))
+                    S = np.sum(exemplars, axis=0)  # [feature_dim] sum of selected exemplars vectors
+                    mu_p = (objs + S) / k  # [n, feature_dim] sum to all vectors
+                    # print(mu_p, np.shape(mu_p))
+                    # print(mean, np.shape(mean))
+                    # print('dists')
+                    # print(np.sqrt(np.sum((mean_aux - mu_p) ** 2, axis=1)))
+                    i = np.argmin(np.sqrt(np.sum((mean_aux - mu_p) ** 2, axis=1)))
+
+                    exemplars.append(np.array(objs[i]))  # New object to avoid passing by inference
+                    ex_lb.append(l)
+
+                    objs = np.delete(objs, i, axis=0)  # Remove it to avoid duplicative selection
+
+            # cm+=1
+            exemplars_set.append(exemplars.copy())
+            labels_set.append(ex_lb.copy())
+
+        exemplars_set = np.concatenate(exemplars_set, axis=0)
+        labels_set = np.concatenate(labels_set, axis=0)
+        # print(exemplars_set, np.shape(exemplars_set))
+        # print(labels_set, np.shape(labels_set))
+        return exemplars_set, labels_set
+
+    def nearest_mean_examplars(self, exemplars_set, ex_lb, test):
+
+        class_means = []
+        labels = np.unique(ex_lb)
+
+        for l in labels:
+            ind = np.where(ex_lb == l)[0]
+            ex = exemplars_set[ind]
+            class_means.append(np.mean(ex, axis=0))  # obs: pode dar erro aqui (fazer ex.copy())
+        # print([np.sqrt(np.sum((x - class_means)**2,axis=1)) for x in test])
+
+        y = [labels[np.argmin(np.sqrt(np.sum((x - class_means) ** 2, axis=1)))] for x in test]
+
+        return y
+
     def sel_exemplares(self, train, train_labels, len_exemplares):
 
         #seleção por proximidade à média da classe
@@ -265,7 +579,7 @@ class ST_functions:
         train = []
         train_labels = []
         if train_data_path:
-            df_training = pd.read_csv(train_data_path, header=None)
+            df_training = pd.read_csv(train_data_path)#, header=None)
 
             feat_index = list(range(df_training.shape[1]))
             feat_index.remove(class_index)
@@ -281,7 +595,7 @@ class ST_functions:
         test = []
         test_labels = []
         if test_data_path:
-            df_test = pd.read_csv(test_data_path, header=None)
+            df_test = pd.read_csv(test_data_path)#, header=None)
             # print(df_test.shape)
             feat_index = list(range(df_test.shape[1]))
             feat_index.remove(class_index)
@@ -499,15 +813,27 @@ class ST_functions:
         objects = test.iloc[sel_objects, :]
         objects_labels = test_labels.iloc[sel_objects, :]
 
-        # print("Selected Objects Classes: " + str(objects_labels.values.ravel()))
-        train = pd.DataFrame(train)
-        train_labels = pd.DataFrame(train_labels)
-        train.columns = objects.columns
-        train_labels.columns = objects_labels.columns
-        tr = pd.concat([train, objects], axis=0)
-        trl = pd.concat([train_labels, objects_labels], axis=0)
-        te = test.drop(test.index[sel_objects])
-        tel = test_labels.drop(test_labels.index[sel_objects])
+        str_model = save_dir.split('/') [-1]
+        if str_model != 'NNO':
+            # print("Selected Objects Classes: " + str(objects_labels.values.ravel()))
+            train = pd.DataFrame(train)
+            train_labels = pd.DataFrame(train_labels)
+            train.columns = objects.columns
+            train_labels.columns = objects_labels.columns
+            tr = pd.concat([train, objects], axis=0)
+            trl = pd.concat([train_labels, objects_labels], axis=0)
+            te = test.drop(test.index[sel_objects])
+            tel = test_labels.drop(test_labels.index[sel_objects])
+        else:
+
+            tr = objects
+            trl = objects_labels
+            te = test.drop(test.index[sel_objects])
+
+            tel = test_labels.drop(test_labels.index[sel_objects])
+
+
+
         return [tr.to_numpy(), trl.to_numpy(), te.to_numpy(), tel.to_numpy(), objects_labels.to_numpy()]
 
     def class_proportion_objects(self, objs_labels, labels):
@@ -713,8 +1039,8 @@ class ST_functions:
             # std_data = np.std(data_dists[list(data_labels == nearest_data_cluster), nearest_data_cluster])
             std_data = np.std(data_dists[list(data_labels == nearest_data_cluster), np.argmin(data_dists[index])])
 
-            a0 = dist_new_obj_center * density_new_objs
-            b0 = distance_nearest_data_object * density_data
+            a0 = dist_new_obj_center #* density_new_objs
+            b0 = distance_nearest_data_object #* density_data
 
             a1 = dist_new_obj_center
             b1 = dist_nearest_data_center

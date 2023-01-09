@@ -172,14 +172,31 @@ if __name__ == "__main__":
 
         if ml == 'IC_EDS':
             sel = ['EDS']
+
+        elif ml ==  'NNO' and linguagem == 'en':
+            sel = ['unk_class_prob']
+        elif ml ==  'NNO' and linguagem == 'pt':
+            sel = ['prob_class_desc']
         else:
-            if 'EDS' in sel_list:
+            if linguagem == 'en':
+                if 'EDS' in sel_list:
+                    sel = sel_list.copy()
+                    sel.remove('EDS')
+                if 'unk_class_prob' in sel_list:
+                    sel = sel_list.copy()
+                    sel.remove('unk_class_prob')
+                else:
+                    sel = sel_list.copy()
+            elif linguagem == 'pt':
+                if 'EDS' in sel_list:
+                    sel = sel_list.copy()
+                    sel.remove('EDS')
+                if 'prob_class_desc' in sel_list:
+                    sel = sel_list.copy()
+                    sel.remove('prob_class_desc')
+                else:
+                    sel = sel_list.copy()
 
-                sel = sel_list.copy()
-                sel.remove('EDS')
-
-            else:
-                sel = sel_list.copy()
 
 
         plot_overall_datasets_accuracy(dataset_list,sel,linguagem, results_dir, ml)

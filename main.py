@@ -16,6 +16,11 @@ import os
 from sklearn.metrics import precision_recall_fscore_support
 import time
 import argparse
+from ST_modules.ncm import NCM_classifier
+from ST_modules.deep_nno import DeepNNO
+import torch
+import torch.nn as nn
+from torch.nn import Parameter
 
 
 def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
@@ -349,7 +354,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
                                                                                 class_index=2,
                                                                                 class2drop= 0)
         '''
-        class_index = 3
+        class_index = 2
         join_data = True
         size_batch = int(70000 * 0.2)
         class2drop = 0
@@ -411,6 +416,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     y_precisao = []
     y_recall = []
     y_fscore = []
+    pseudopoints = []
 
     erro_das_classes = []
     erro_da_classe_por_rodada = []
@@ -423,7 +429,10 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     #prop_por_classe = []
 
     if len(train[0]) == 2:
-        results_dir = os.path.join(results_dir, '/'+metric+'_objects_selected')
+        print(results_dir)
+        #results_dir = os.path.join(results_dir, '/'+metric+'_objects_selected')
+        results_dir = results_dir + '/' + metric + '_objects_selected'
+        print(results_dir)
 
         if not os.path.isdir(results_dir):
             os.makedirs(results_dir)
@@ -447,6 +456,13 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     if (model_name == 'IC_EDS'):
         [silhouette_list, clusterers_list, cluslabels_list, nuclusters_list, SSet, matDist] = ft.clusterEnsemble(test)
 
+    elif (model_name == 'incremental'):
+        SSet = []
+        nb_exemplars = int(np.ceil(60 / len(np.unique(train_labels))))
+
+        pseudopoints, n_centros, pred_train, kmeans_train_center, train_center_dists = ft.get_pseudopoints(train)
+        mean_old_class, old_class = ft.get_mean_class(train, train_labels)
+        train, train_labels = ft.select_exemplars(train, train_labels, mean_old_class, nb_exemplars, old_class)
     else:
         SSet = []
         #train, train_labels = ft.sel_exemplares(train, train_labels, ob)
@@ -454,13 +470,64 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
     # Modelo incremental
 
-    classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
-                                    n_test_class, 0, kmeans_graph, SSet)
+    if model_name == 'NNO':
+        device  = 'cpu'
+        known_classes = len(np.unique(train_labels))
+        updated_known_classes = np.unique(train_labels)
 
-    preds = classifier_results.pred
+        NNO = NCM_classifier(len(train[0]),known_classes,True)
+        tau = Parameter(torch.tensor([0.5], device=device), requires_grad=True)
+        deep_nno_tau = DeepNNO(tau, device, factor=2.0, bm=False)
+        print(f'Tau original: {tau}')
 
-    probs = classifier_results.probs
-    e = classifier_results.e
+        torch_train = torch.from_numpy(train)
+
+        NNO.update_means(torch_train, train_labels)
+        prediction, exp, distances = NNO.forward(torch_train)
+        deep_nno_tau.update_taus(prediction, train_labels,len(np.unique(train_labels)))
+        print(f'Tau novo: {tau}')
+
+        outputs, _, distances = NNO.forward(torch.from_numpy(test))
+        new_outputs = NNO.reject(outputs, distances, tau)
+        _, preds = new_outputs.max(1)
+        preds = preds +1
+
+        #print('labels: ', test_labels)
+        #print(f'preds: {preds}')
+
+        #indices = np.where(preds == known_classes)[0]
+        sel_objs = [] #armazena os indices dos objetos preditos como oriundos de classe desconhecida
+        score_objs = [] #armazena o 'score' dos objetos de classe desconhecida
+
+        #sel_objs.extend(indices)
+        new_outputs_copy = new_outputs.detach().cpu().numpy()
+        score_objs.extend(new_outputs_copy[:, known_classes]) #score_objs.extend(new_outputs_copy[indices, known_classes])
+
+        sel_objs = np.array(sel_objs)
+        score_objs = np.array(score_objs)
+        sorted_score = score_objs.argsort() # encontra o indice dos objetos com os 5 maiores scores
+        e = score_objs[sorted_score]
+
+        '''
+        indices = np.where(predicted == last_class)[0]
+
+        sel_objs.extend(indices)
+        new_outputs_copy = new_outputs.detach().cpu().numpy()
+        score_objs.extend(new_outputs_copy[indices, last_class])
+        
+        '''
+        classifier_results = alghms(model_name, train, train_labels, test, test_labels, None, results_dir,
+                                    n_test_class, 0, kmeans_graph, SSet, pseudopoints)
+
+    else:
+
+        classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
+                                        n_test_class, 0, kmeans_graph, SSet, pseudopoints)
+
+        preds = classifier_results.pred
+
+        probs = classifier_results.probs
+        e = classifier_results.e
 
 
     acuracia = accuracy_score(test_labels, preds)
@@ -513,7 +580,12 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             elif(metric == 'random' or metric == 'aleatória'):
                 w = np.random.choice(range(0, test_labels.shape[0]), 5, replace=False)
 
-            else:
+            elif(model_name == 'NNO'):
+                #w = sel_objs[sorted_score[-5:][::-1]]
+                w = sorted_score[-5:][::-1]
+                print(w)
+
+            elif not model_name == 'NNO':
 
                 df_e = pd.DataFrame(e)
                 df_e.sort_values(by=[0], inplace=True, ascending=False)
@@ -566,13 +638,48 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
                     count_nc += 1
 
+                if model_name == 'incremental':
+                    nb_exemplars = int(np.ceil(60 / len(np.unique(train_labels))))
+                    pseudopoints = ft.upg_pseudopoints(old_class, pseudopoints, train, train_labels)
+                    old_class, mean_old_class = ft.upg_means(old_class, mean_old_class, train, train_labels, nb_exemplars)
+                    train, train_labels = ft.select_exemplars(train, train_labels, mean_old_class, nb_exemplars, old_class)
 
-                classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
-                                            n_test_class, k, kmeans_graph,SSet)
+                if model_name == 'NNO':
+                    new_class = [x for x in np.unique(train_labels) if x not in updated_known_classes]
+                    train_labels = train_labels.flatten()
 
-                preds = classifier_results.pred
-                probs = classifier_results.probs
-                e = classifier_results.e
+                    NNO.add_classes(len(new_class))##
+                    updated_known_classes = np.append(updated_known_classes,new_class)
+                    print(f'classe nova {updated_known_classes} e {len(new_class)}')
+
+                    NNO.update_means(torch.from_numpy(train), train_labels)
+                    outputs, _, distances = NNO.forward(torch.from_numpy(test))
+                    new_outputs = NNO.reject(outputs, distances, tau)
+                    _, preds = new_outputs.max(1)
+                    preds = preds + 1
+
+                    #indices = np.where(preds == known_classes)[0]
+                    #print(f'objs desconhecidos: {len(indices)}')
+                    sel_objs = []  # armazena os indices dos objetos preditos como oriundos de classe desconhecida
+                    score_objs = []  # armazena o 'score' dos objetos de classe desconhecida
+
+                    #sel_objs.extend(indices)
+                    new_outputs_copy = new_outputs.detach().cpu().numpy()
+                    score_objs.extend(new_outputs_copy[:, known_classes])
+
+                    sel_objs = np.array(sel_objs)
+                    score_objs = np.array(score_objs)
+                    sorted_score = score_objs.argsort()  # encontra o indice dos objetos com os 5 maiores scores
+                    e = score_objs[sorted_score]
+
+
+                else:
+                    classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
+                                                n_test_class, k, kmeans_graph,SSet,pseudopoints)
+
+                    preds = classifier_results.pred
+                    probs = classifier_results.probs
+                    e = classifier_results.e
 
                 acuracia = accuracy_score(test_labels, preds)
                 precisao = precision_recall_fscore_support(test_labels, preds, average='weighted')[0]

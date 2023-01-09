@@ -9,36 +9,49 @@ datasets = []
 #-----------------------------------------------
 # deep features
 dp = (['dp_ceratocystis1','dp_ceratocystis2','dp_ceratocystis5','dp_ceratocystis10','dp_ceratocystis20'])
+#dp = (['dp_ceratocystis1'])
+
 
 
 #Parametros
-dp_parameters = " -selection entropia silhueta silh*dens aleatória EDS " \
-           "-classifiers SVM SVM SVM SVM IC_EDS " \
-           "-insert_nc 2 3" # [iter nc]
+dp_parameters = " -selection prob_class_desc silh_inc " \
+                "-classifiers NNO incremental " \
+                "-insert_nc 2 3" # [iter nc]
+
+
 #-----------------------------------------------
 # hand craft features
 hc = (['hc_ceratocystis1','hc_ceratocystis2','hc_ceratocystis5','hc_ceratocystis10','hc_ceratocystis20'])
 
 #Parametros
-hc_parameters = " -selection entropia silhueta silh*dens aleatória EDS " \
-           "-classifiers SVM SVM SVM SVM IC_EDS " \
+hc_parameters = " -selection prob_class_desc silh_inc " \
+           "-classifiers NNO incremental " \
            "-insert_nc 2 3" # [iter nc]
 #-----------------------------------------------
 
 # VAE features
-vae = (['vae_ceratocystis1','vae_ceratocystis2','vae_ceratocystis5','vae_ceratocystis20'])
+vae = (['vae_ceratocystis1','vae_ceratocystis2','vae_ceratocystis5','vae_ceratocystis10','vae_ceratocystis20'])
 
 #Parametros
-vae_parameters = " -selection entropia silhueta silh*dens aleatória EDS "\
-                "-classifiers SVM SVM SVM SVM IC_EDS " \
+vae_parameters = " -selection prob_class_desc silh_inc  "\
+                "-classifiers NNO incremental " \
                  "-use_vae True " \
             "-latent_dim 8 "\
+                 "-insert_nc 2 3" # [iter nc]
+#-----------------------------------------------
+
+mnist = (['mnist2D'])
+
+#Parametros
+mnist_parameters = " -selection entropia "\
+                "-classifiers SVM " \
                  "-insert_nc 2 3" # [iter nc]
 #-----------------------------------------------
 
 datasets.append([dp, dp_parameters])
 datasets.append([hc, hc_parameters])
 datasets.append([vae, vae_parameters])
+
 
 for data,params in datasets:
 
@@ -73,4 +86,5 @@ for data,params in datasets:
                           "-language pt")
     pro = subprocess.Popen(command)
     pro.wait()
+
 

@@ -12,18 +12,21 @@ import matplotlib.pyplot as plt
 from utils import ST_functions
 ft = ST_functions()
 import time
+from .ncm import NCM_classifier
+from .deep_nno import DeepNNO
 
 
 class alghms:
 
     def __init__(self, model_name, train, train_labels, test, test_labels, metric, results_path,
-                 nclusters_test=10, iter_graph = None, kmeans_graph = False, SSet = None):
+                 nclusters_test=10, iter_graph = None, kmeans_graph = False, SSet = None, pseudopoints=None
+                 ):
 
         #interaction --> usado para gerar os gráficos a cada iteração
         #graph --> habilita a exibição de gráficos se True
         #nclusters_train e nclusters_test --> aplicados na obtenção do kmeans para cálculo da silhueta
         #SSet -> usado no algoritmo IC_EDS (matriz de similaridade)
-
+        '''
         if model_name == 'KNN':
             start = time.time()
 
@@ -41,6 +44,10 @@ class alghms:
             finish = time.time()
             total_time = finish - start
             self.classifier_time = total_time
+        '''
+
+        self.classifier_time = -1
+        self.metric_time = -1
 
         if model_name == 'IC_EDS':
             start = time.time()
@@ -51,6 +58,7 @@ class alghms:
             total_time = finish - start
             self.classifier_time = total_time
 
+
         if metric =='EDS':
             start = time.time()
             self.e = self.ed(self.probs, SSet)
@@ -58,6 +66,14 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
+        if model_name == 'incremental':
+            start = time.time()
+
+            self.pred = ft.nearest_mean_examplars(train, train_labels, test)
+
+            finish = time.time()
+            total_time = finish - start
+            self.classifier_time = total_time
 
         if model_name == 'SVM':
             start = time.time()
@@ -75,13 +91,21 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
-        if metric == 'silh*dens':
+        if metric == 'silh_mod':
             start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
             finish = time.time()
             total_time = finish - start
             #print(np.unique(train_labels))
+            self.metric_time = total_time
+
+        if metric == 'silh_inc':
+            start = time.time()
+            self.e = ft.kms_for_new_class(pseudopoints, test, 1)
+
+            finish = time.time()
+            total_time = finish - start
             self.metric_time = total_time
 
         if metric == 'silhouette' or metric == 'silhueta':
@@ -101,9 +125,9 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
-
-
-
+    #######BASELINES####
+    #########################################
+    #------------------------------------------
     #algoritmo IC_EDS (baseline)
     #----------------------------------------------------------------
     def ic_eds(self,train, train_labels, test,SSet):
@@ -118,7 +142,7 @@ class alghms:
         d = ft.calc_density(SSet)
         return [e,d]
     #----------------------------------------------------------------
-
+ 
     # Random Forest classifier
     def RF(self, train, train_labels, test):
         rf = RandomForestClassifier(n_estimators=9, max_depth=5)
