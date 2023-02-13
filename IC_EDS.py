@@ -17,6 +17,8 @@ def c3e_sl(piSet, SSet, I, alpha):
     N = len(piSet)
     c = len(piSet[0, :])
 
+    # testando
+
     # piSet = np.array(piSet)
     y = [[1] * c] * N
     y = np.divide(y, c)
