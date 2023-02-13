@@ -19,7 +19,7 @@ class DeepNNO:
 
         for i in range(n_classes):
             # For each label compute tau with weights for positive and negative
-            N, tau = self.compute_tau_fn(x, y, i+1, alpha=self.factor, w=weight)  # Compute mean
+            N, tau = self.compute_tau_fn(x, y, i, alpha=self.factor, w=weight)  # Compute mean
             # If labels already in the set, just update holder, otherwise add it to the model
             if N == 0:
                 continue

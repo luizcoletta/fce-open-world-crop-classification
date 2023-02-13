@@ -9,14 +9,11 @@ datasets = []
 #-----------------------------------------------
 # deep features
 dp = (['dp_ceratocystis1','dp_ceratocystis2','dp_ceratocystis5','dp_ceratocystis10','dp_ceratocystis20'])
-#dp = (['dp_ceratocystis1'])
-
-
 
 #Parametros
-dp_parameters = " -selection prob_class_desc silh_inc " \
-                "-classifiers NNO incremental " \
-                "-insert_nc 2 3" # [iter nc]
+dp_parameters = " -selection prob_class_desc silh_inc "\
+                "-classifiers NNO incremental "\
+                "-insert_nc 2 3"# [iter nc]
 
 
 #-----------------------------------------------
@@ -40,17 +37,21 @@ vae_parameters = " -selection prob_class_desc silh_inc  "\
                  "-insert_nc 2 3" # [iter nc]
 #-----------------------------------------------
 
-mnist = (['mnist2D'])
+mnist = (['mnist2D_c0','mnist2D_c1','mnist2D_c2','mnist2D_c3','mnist2D_c4','mnist2D_c5',
+          'mnist2D_c6','mnist2D_c7','mnist2D_c8','mnist2D_c9'])
+
 
 #Parametros
-mnist_parameters = " -selection entropia "\
-                "-classifiers SVM " \
-                 "-insert_nc 2 3" # [iter nc]
+mnist_parameters =" -n_classes 10 "\
+                "-selection entropy silhouette silh_mod "\
+                "-classifiers SVM SVM SVM " \
+                 "-insert_nc -1 -1 " \
+                  "-language en"# [iter nc]
 #-----------------------------------------------
-
-datasets.append([dp, dp_parameters])
-datasets.append([hc, hc_parameters])
-datasets.append([vae, vae_parameters])
+datasets.append([mnist, mnist_parameters])
+#datasets.append([dp, dp_parameters])
+#datasets.append([hc, hc_parameters])
+#datasets.append([vae, vae_parameters])
 
 
 for data,params in datasets:
@@ -75,7 +76,7 @@ for data,params in datasets:
                           + str(data).strip('[]').replace(',',' ')
                           + " -" + params.split('-')[1]
                           + "-" + params.split('-')[2] +
-                          "-language pt")
+                          "-language en")
     pro = subprocess.Popen(command)
     pro.wait()
 
@@ -83,7 +84,7 @@ for data,params in datasets:
                           + str(data).strip('[]').replace(',', ' ')
                           + " -" + params.split('-')[1]
                           + "-" + params.split('-')[2] +
-                          "-language pt")
+                          "-language en")
     pro = subprocess.Popen(command)
     pro.wait()
 

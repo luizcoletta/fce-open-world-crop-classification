@@ -2,6 +2,7 @@
 from install_req import install_missing_pkg
 check_pkg = install_missing_pkg()  # faz a instalação de pacotes faltantes, se houver
 import numpy as np
+import copy
 import pandas as pd
 from tensorflow import keras
 from ST_modules.Variational_Autoencoder import VAE
@@ -21,6 +22,11 @@ from ST_modules.deep_nno import DeepNNO
 import torch
 import torch.nn as nn
 from torch.nn import Parameter
+from torch.utils.data import DataLoader
+import torch.optim as optim
+from ST_modules.resnet import ResNet18
+from ST_modules.trainer import Trainer
+from ST_modules.data_loader import RODFolder
 
 
 def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
@@ -28,6 +34,37 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
     script_dir = os.path.dirname(__file__)
 
     # inserir os outros datasets aqui
+
+    if dataset_name == 'nno_ceratocystis1' and vae == False:
+        dir_path = 'data/train_images/dataset_eucapytus/dataset-1/*.png'
+        images_path = 'data/train_images/dataset_eucapytus/dataset-1'
+
+        files = os.listdir(images_path)
+        files = np.sort(files)
+        img_labels = []
+        samples_path = []
+        for txt in files:
+            n = int(txt.split('.')[0][-1])  # obtem a classe da imagem pelo ultimo caracter do nome do arquivo
+            img_labels.append(int(n))
+            samples_path.append(os.path.join(images_path,txt))
+
+
+        img_labels = np.array(img_labels)
+        samples_path = np.array(samples_path)
+        #col_img = imread_collection(dir_path)
+
+        #col_img = col_img.concatenate()
+
+
+        train_path = np.stack((samples_path,img_labels), axis=1) #une os vetores como sendo colunas de uma matriz
+        #print(train_path)
+        #print(np.shape(train_path))
+
+        test_path = ''
+        class_index = 1
+        join_data = False
+        size_batch = int(len(img_labels) * 0.2)
+        class2drop = 2
 
     if dataset_name == 'vae_ceratocystis20' and vae == True:
         dir_path = 'data/train_images/dataset_eucapytus/dataset-20/*.png'
@@ -344,6 +381,96 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         size_batch = int(70000 * 0.2)
         class2drop = 0
 
+    if dataset_name == 'mnist2D_c0' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 0
+
+    if dataset_name == 'mnist2D_c1' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 1
+
+    if dataset_name == 'mnist2D_c2' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 2
+
+    if dataset_name == 'mnist2D_c3' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 3
+
+    if dataset_name == 'mnist2D_c4' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 4
+
+    if dataset_name == 'mnist2D_c5' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 5
+
+    if dataset_name == 'mnist2D_c6' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 6
+
+    if dataset_name == 'mnist2D_c7' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 7
+
+    if dataset_name == 'mnist2D_c8' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 8
+
+    if dataset_name == 'mnist2D_c9' and vae == False:
+        train_path = 'https://raw.githubusercontent.com/Mailson-Silva/Dataset/main/mnist_2d_tsne.csv'
+        test_path = ''
+
+        class_index = 2
+        join_data = False
+        size_batch = int(70000 * 0.2)
+        class2drop = 9
+
     if dataset_name == 'mnist2D' and vae == False:
         train_path = 'https://raw.githubusercontent.com/Mailson-Silva/weka-dataset/main/mnist_train_2d_weka.csv'
         test_path = 'https://raw.githubusercontent.com/Mailson-Silva/weka-dataset/main/mnist_test_2d_weka.csv'
@@ -357,7 +484,7 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         class_index = 2
         join_data = True
         size_batch = int(70000 * 0.2)
-        class2drop = 0
+        class2drop = 1
 
 
     if dataset_name == 'mnist4D' and vae == False:
@@ -384,10 +511,10 @@ def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
         test = df_test.iloc[:, feat_index].values
         test_labels = df_test.iloc[:, class_index].values
         '''
-        class_index = 5
+        class_index = 4
         join_data = True
         size_batch = int(70000 * 0.2)
-        class2drop = 0
+        class2drop = 1
 
     if dataset_name == 'iris' and vae == False:
 
@@ -432,7 +559,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
         print(results_dir)
         #results_dir = os.path.join(results_dir, '/'+metric+'_objects_selected')
         results_dir = results_dir + '/' + metric + '_objects_selected'
-        print(results_dir)
+        #print(results_dir)
 
         if not os.path.isdir(results_dir):
             os.makedirs(results_dir)
@@ -447,10 +574,11 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     print('*********************************************')
 
 
-    #retira os objetos da(s) classe(s) nova(s) do conj. de treino para acrescentar depois
+    #retira os objetos da(s) classe(s) nova(s) do conj. de teste para acrescentar depois
     #-----------------------------------------
     all_labels = np.concatenate((train_labels, test_labels), axis=0)
     test,test_labels = ft.sort_testset(test,test_labels)
+
     new_classes_objs, test,test_labels = ft.draw_new_classes(list_new_class_labels, test, test_labels)
 
     if (model_name == 'IC_EDS'):
@@ -469,8 +597,108 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
 
     # Modelo incremental
+    if model_name == 'deepncm':
+        # FIX SEEDS.
+        import random
+        torch.manual_seed(1993)
+        torch.cuda.manual_seed(1993)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        np.random.seed(1993)
+        random.seed(1993)
 
-    if model_name == 'NNO':
+        device = 'cpu'
+        known_classes = len(np.unique(train_labels))
+        updated_known_classes = np.unique(train_labels)
+
+        batch_size = 15
+        transform_train, transform_basic, transform_val, transform_test,start, end = ft.make_dataset()
+
+        # set up network
+        network = ResNet18(classes= len(np.unique(train_labels)), pretrained=None, relu=not False,
+                                    deep_nno=True).to(device)
+        # setup trainer
+        trainer = Trainer(batch_size, network,device) #batch size = 15
+
+
+        train_set = RODFolder(train, train_labels, target_transform=None, transform=transform_train)
+
+        trainloader = DataLoader(train_set, batch_size=batch_size, shuffle=True,
+                                 num_workers=2, sampler=None)
+
+        # Setup Network
+
+
+        #network.to(device)
+
+        # Start iteration
+        print(f'Start trainning ResNet...')
+        # Setup epoch and optimizer
+        epochs = 12  # epochs é 12 ou 6
+        epochs_strat = [80]
+
+        learning_rate = 0.05  # opts.lr #pode ser modificado
+        lr_factor = 0.1
+
+        wght_decay = 0.0
+
+        optimizer = optim.SGD(filter(lambda p: p.requires_grad, network.parameters()), lr=learning_rate,
+                              momentum=0.9, weight_decay=wght_decay, nesterov=False)
+
+        lr_strat = [epstrat * epochs // 100 for epstrat in epochs_strat]
+        scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=lr_strat, gamma=lr_factor)
+        # lr_strat e lr_factor podem ser ajustados
+
+        #print(f'\n learning rate: {learning_rate}\n lr strat: {lr_strat}\n lr_factor: {lr_factor}\n features_dw: {opts.features_dw}\n')
+
+
+        subset_trainloader = []
+        for epoch in range(epochs):
+            trainer.train(epoch, trainloader, subset_trainloader, optimizer, updated_known_classes, 0)
+            scheduler.step()
+
+        ##############
+        #teste
+        network.eval()
+
+        test_set = RODFolder(test, test_labels, target_transform=None, transform=transform_test)
+
+        testloader = DataLoader(test_set, batch_size=len(test_labels), shuffle=True,
+                                 num_workers=2, sampler=None)
+
+
+        for (inputs, targets_prep) in testloader:
+            test_loaded = inputs
+            test_labels = targets_prep
+
+        test_loaded = test_loaded.to(device)
+        outputs, _ = network(test_loaded)
+        outputs, _, distances = network.predict(outputs)
+        test_labels = test_labels.to(outputs.device)
+        # changes the probabilities (distances) for known and unknown
+
+        new_outputs = trainer.reject(outputs, distances, trainer.tau)
+        # print(new_outputs)
+        _, preds = new_outputs.max(1)
+
+        # indices = np.where(preds == known_classes)[0]
+        sel_objs = []  # armazena os indices dos objetos preditos como oriundos de classe desconhecida
+        score_objs = []  # armazena o 'score' dos objetos de classe desconhecida
+
+        # sel_objs.extend(indices)
+        new_outputs_copy = new_outputs.detach().cpu().numpy()
+        score_objs.extend(new_outputs_copy[:, len(np.unique(train_labels))])  # score_objs.extend(new_outputs_copy[indices, known_classes])
+
+        sel_objs = np.array(sel_objs)
+        score_objs = np.array(score_objs)
+        sorted_score = score_objs.argsort()  # encontra o indice dos objetos com os 5 maiores scores
+        e = score_objs[sorted_score]
+
+        classifier_results = alghms(model_name, train, train_labels, test, test_labels, None, results_dir,
+                                    n_test_class, 0, kmeans_graph, SSet, pseudopoints)
+
+
+    elif model_name == 'NNO':
         device  = 'cpu'
         known_classes = len(np.unique(train_labels))
         updated_known_classes = np.unique(train_labels)
@@ -580,12 +808,12 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             elif(metric == 'random' or metric == 'aleatória'):
                 w = np.random.choice(range(0, test_labels.shape[0]), 5, replace=False)
 
-            elif(model_name == 'NNO'):
+            elif(model_name == 'NNO' or model_name == 'deepncm'):
                 #w = sel_objs[sorted_score[-5:][::-1]]
                 w = sorted_score[-5:][::-1]
                 print(w)
 
-            elif not model_name == 'NNO':
+            else:
 
                 df_e = pd.DataFrame(e)
                 df_e.sort_values(by=[0], inplace=True, ascending=False)
@@ -595,7 +823,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
                 posicoes = df_e.index.values
                 posicoes = posicoes.tolist()
-                p = 5  # 96
+                p = 100  # 96
 
                 w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
             # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html
@@ -625,6 +853,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                     #train, train_labels = ft.sel_exemplares(train, train_labels, ob)
 
                 # código que faz a inserção da nova classe durante a execução do modelo
+
                 for nc in list_new_class_labels:
                     if nc[0] == k:
 
@@ -638,13 +867,98 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
                     count_nc += 1
 
+
                 if model_name == 'incremental':
                     nb_exemplars = int(np.ceil(60 / len(np.unique(train_labels))))
                     pseudopoints = ft.upg_pseudopoints(old_class, pseudopoints, train, train_labels)
                     old_class, mean_old_class = ft.upg_means(old_class, mean_old_class, train, train_labels, nb_exemplars)
                     train, train_labels = ft.select_exemplars(train, train_labels, mean_old_class, nb_exemplars, old_class)
 
-                if model_name == 'NNO':
+                elif model_name == 'deepncm':
+                    new_class = [x for x in np.unique(train_labels) if x not in updated_known_classes]
+                    train_labels = train_labels.flatten()
+                    train = train.flatten()
+
+
+                    train_set = RODFolder(train, train_labels, target_transform=None, transform=transform_test)
+
+                    trainloader = DataLoader(train_set, batch_size=batch_size, shuffle=True,
+                                             num_workers=2, sampler=None)
+
+                    trainer.network2 = copy.deepcopy(network)
+                    # Setup Network
+                    if new_class != []:
+                        trainer.next_iteration(len(new_class))  # adiciona novas classes ao deepNCM
+                        network.to(device)
+                        updated_known_classes = np.append(updated_known_classes, new_class)
+                    # network.to(device)
+
+                    # Start iteration
+                    print(f'Start trainning ResNet...')
+                    # Setup epoch and optimizer
+                    epochs = 6 # epochs é 12 ou 6
+                    epochs_strat = [80]
+
+                    learning_rate = 0.05  # opts.lr #pode ser modificado
+                    lr_factor = 0.1
+
+                    wght_decay = 0.0
+
+                    optimizer = optim.SGD(filter(lambda p: p.requires_grad, network.parameters()), lr=learning_rate,
+                                          momentum=0.9, weight_decay=wght_decay, nesterov=False)
+
+                    lr_strat = [epstrat * epochs // 100 for epstrat in epochs_strat]
+                    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=lr_strat, gamma=lr_factor)
+                    # lr_strat e lr_factor podem ser ajustados
+
+                    # print(f'\n learning rate: {learning_rate}\n lr strat: {lr_strat}\n lr_factor: {lr_factor}\n features_dw: {opts.features_dw}\n')
+
+                    subset_trainloader = []
+                    for epoch in range(epochs):
+                        trainer.train(epoch, trainloader, subset_trainloader, optimizer, updated_known_classes, k)
+                        scheduler.step()
+
+                    ##############
+                    # teste
+                    network.eval()
+                    test_labels = test_labels.flatten()
+                    test = test.flatten()
+
+                    test_set = RODFolder(test, test_labels, target_transform=None, transform=transform_test)
+
+                    testloader = DataLoader(test_set, batch_size=len(test_labels), shuffle=True,
+                                            num_workers=2, sampler=None)
+
+                    for (inputs, targets_prep) in testloader:
+                        test_loaded = inputs
+                        test_labels = targets_prep
+
+                    test_loaded = test_loaded.to(device)
+                    outputs, _ = network(test_loaded)
+                    outputs, _, distances = network.predict(outputs)
+                    test_labels = test_labels.to(outputs.device)
+                    # changes the probabilities (distances) for known and unknown
+
+                    new_outputs = trainer.reject(outputs, distances, trainer.tau)
+                    # print(new_outputs)
+                    _, preds = new_outputs.max(1)
+
+                    # indices = np.where(preds == known_classes)[0]
+                    sel_objs = []  # armazena os indices dos objetos preditos como oriundos de classe desconhecida
+                    score_objs = []  # armazena o 'score' dos objetos de classe desconhecida
+
+                    # sel_objs.extend(indices)
+                    new_outputs_copy = new_outputs.detach().cpu().numpy()
+                    score_objs.extend(new_outputs_copy[:, len(np.unique(
+                        train_labels))])  # score_objs.extend(new_outputs_copy[indices, known_classes])
+
+                    sel_objs = np.array(sel_objs)
+                    score_objs = np.array(score_objs)
+                    sorted_score = score_objs.argsort()  # encontra o indice dos objetos com os 5 maiores scores
+                    e = score_objs[sorted_score]
+
+
+                elif model_name == 'NNO':
                     new_class = [x for x in np.unique(train_labels) if x not in updated_known_classes]
                     train_labels = train_labels.flatten()
 
@@ -718,6 +1032,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
             print('\n Iteraction ' + str(k) + '--> Test set empty, self-training is done!\n')
             time_metric.append(-1)
             time_classifier.append(-1)
+
 
     erros = erro_das_classes.copy()
     x = x_axis.copy()
@@ -801,8 +1116,11 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             if dataset_name.split('_')[0] == 'hc':
                 train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop, scale = True)
 
+
+
             else:
                 train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
+
 
             x_ent, y_ent, erros_ent,curva_sel, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,
                                                     test_labels, metric[i], list_new_class_labels, results_dir,  n_test_class,
@@ -940,7 +1258,7 @@ if __name__ == "__main__":
     parser.add_argument('-classifiers', metavar='classifiers', action='store', nargs='+', type= str, default=['svm'], help='Classificadores usados no modelo')
     parser.add_argument('-selection', metavar='selection', action='store', nargs='+', type=str, default=['entropia'], help='Método de seleção da nova classe')
     parser.add_argument('-insert_nc', metavar='insert_nc', action='store', nargs='+', type=int, required=True, help='Insere a classe nova especificada na iteração especificada ([iteração rótulo_nc])')
-    parser.add_argument('-iteractions', metavar='iteractions', action='store', nargs='?', type=int, default= 10, help='Qtd. de iterações a ser executadas no modelo')
+    parser.add_argument('-iteractions', metavar='iteractions', action='store', nargs='?', type=int, default= 3, help='Qtd. de iterações a ser executadas no modelo')
     parser.add_argument('-language', metavar='language', action='store', type=str, default='pt', help="Idioma dos resultados gerados ('pt' ou 'en')")
 
     args = parser.parse_args()

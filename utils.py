@@ -13,6 +13,8 @@ from scipy.spatial import distance
 import random
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import euclidean_distances
+import torchvision.transforms as transforms
+from ST_modules.data_loader import RODFolder
 
 
 class ST_functions:
@@ -82,6 +84,49 @@ class ST_functions:
         train_set.to_csv('data/'+dataset_name+'_train.csv', index = False)
         test_set.to_csv('data/'+dataset_name+'_test.csv', index=False)
     '''
+
+    #Funções para uso do NNO com rede neural
+    #-------------------------------------------------------------------
+    def make_dataset(self):
+
+        transform_train = transforms.Compose([
+            transforms.Resize((64, 64)),
+            transforms.RandomCrop(64, padding=8, padding_mode='edge'),
+
+        ])
+
+        transform_train = transforms.Compose([transform_train,
+                                              transforms.RandomHorizontalFlip(),
+                                              transforms.ToTensor(),
+                                              transforms.Normalize((0.5, 0.5, 0.5), (1., 1., 1.)),
+                                              ])
+
+        transform_basic = transforms.Compose([
+            transforms.Resize((64, 64)),
+            transforms.RandomCrop(64, padding=8, padding_mode='edge'),
+            transforms.RandomHorizontalFlip(),
+        ])
+
+        transform_val = transforms.Compose([
+            transforms.Resize((64, 64)),
+            transforms.RandomCrop(64, padding=8, padding_mode='edge'), ])
+
+        transform_val = transforms.Compose([transform_val,
+                                            transforms.RandomHorizontalFlip(),
+                                            transforms.ToTensor(),
+                                            transforms.Normalize((0.5, 0.5, 0.5), (1., 1., 1.)),
+                                            ])
+
+        transform_test = transforms.Compose([
+            transforms.Resize((64, 64)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (1., 1., 1.)),
+        ])
+
+        start = 0
+        end = 1000
+
+        return transform_train, transform_basic, transform_val, transform_test,start, end
 
     #Funções para uso do classificador incremental
     #--------------------------------------------------------------
@@ -521,7 +566,10 @@ class ST_functions:
         for nc in list_new_class_labels:
             # print(nc, ordered_y_test)
             ind = np.where(ordered_y_test == nc[1])
-            nc_objs = ordered_x_test[ind, :]
+            if len(np.shape(ordered_x_test)) == 1:
+                nc_objs = ordered_x_test[ind]
+            else:
+                nc_objs = ordered_x_test[ind, :]
             nc_labels = ordered_y_test[ind]
 
             ordered_x_test = np.delete(ordered_x_test, ind, axis=0)
@@ -578,7 +626,12 @@ class ST_functions:
         df_training = []
         train = []
         train_labels = []
-        if train_data_path:
+        if type(train_data_path) != str:
+            train = train_data_path[:,0]
+            train_labels = train_data_path[:,1].astype(int) #converte todos os dados para tipo int
+            #print(train,train_labels)
+
+        elif train_data_path:
             df_training = pd.read_csv(train_data_path)#, header=None)
 
             feat_index = list(range(df_training.shape[1]))
@@ -616,6 +669,7 @@ class ST_functions:
 
 
         folds = round(num_objects / size_batch)
+
 
 
         '''skf = StratifiedKFold(n_splits=folds)
@@ -814,7 +868,7 @@ class ST_functions:
         objects_labels = test_labels.iloc[sel_objects, :]
 
         str_model = save_dir.split('/') [-1]
-        if str_model != 'NNO':
+        if str_model != 'NNO' and str_model != 'deepncm':
             # print("Selected Objects Classes: " + str(objects_labels.values.ravel()))
             train = pd.DataFrame(train)
             train_labels = pd.DataFrame(train_labels)
@@ -938,6 +992,7 @@ class ST_functions:
 
 
     def visualize_data(self, X, labels, med_ind_list, k, save_dir):
+        '''
         color_discrete_map = {'-3': 'rgb(255,255,0)',
                               'Centers': 'rgb(0,0,0)',
                               '-1': 'rgb(255,0,0)',
@@ -947,17 +1002,47 @@ class ST_functions:
                               'Cluster 3': 'rgb(189,91,0)',
                               'Cluster 4': 'rgb(130,0,156)'}
 
-        df_X = pd.DataFrame({'X': X[:, 0], 'Y': X[:, 1], 'Labels': [str(labels[i]) for i in range(len(labels))]})
+        '''
+
+        #Ploty - legend -> https://plotly.com/python/legend/
+        #PLoty - discrete colors -> https://plotly.com/python/discrete-color/
+        color_discrete_map = {'0.0': '#1F77B4',
+                              '1.0': '#FF7F0E',
+                              '2.0': '#2CA02C',
+                              '3.0': '#D62728',
+                              '4.0': '#9467BD',
+                              '5.0': '#8C564B',
+                              '6.0': '#E377C2',
+                              '7.0': '#7F7F7F',
+                              '8.0': '#BCBD22',
+                              '9.0': '#17BECF',
+                              'Selected': 'black'}
+
+        if type(labels[0]) != np.ndarray:
+            df_X = pd.DataFrame({'X': X[:, 0], 'Y': X[:, 1], 'Labels': [str(labels[i]) for i in range(len(labels))]})
+
+        else:
+            df_X = pd.DataFrame({'X': X[:, 0], 'Y': X[:, 1], 'Labels': [str(labels[i][0]) for i in range(len(labels))]})
+
+
         if (med_ind_list != []):
             med_labels = np.array([-1] * len(med_ind_list))
+            med_labels = ['Selected' for i in med_labels]
             df_M = pd.DataFrame({'X': X[med_ind_list, 0], 'Y': X[med_ind_list, 1],
-                                 'Labels': med_labels.astype(str)})
+                                 'Labels': med_labels})#'Labels': med_labels.astype(str)})
             df_X = pd.concat([df_X, df_M])
 
         fig = px.scatter(df_X, x='X', y='Y', color='Labels',
-                         color_discrete_map=color_discrete_map, width=500, height=400)
+                         color_discrete_map=color_discrete_map, width=1000, height=800)
         fig.update_traces(marker=dict(size=8), line=dict(color='rgb(0,0,0)', width=4),
                           selector=dict(mode='Masked'))
+        fig.update_layout(
+            legend=dict(
+            font=dict(
+            family="Courier",
+            size=18,
+            color="black"
+        )))
         ### TENTE AI INVÉS DO FIG.SHOW() USAR UMA LINHA PARA SALVAR EM DISCO EM ALGUMA EXTENSÃO DE IMAGEM.
         #fig.show()
         fig.write_image(save_dir+"/selection_"+str(k)+".png")
