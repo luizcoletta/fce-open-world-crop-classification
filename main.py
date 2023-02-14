@@ -1258,7 +1258,7 @@ if __name__ == "__main__":
     parser.add_argument('-classifiers', metavar='classifiers', action='store', nargs='+', type= str, default=['svm'], help='Classificadores usados no modelo')
     parser.add_argument('-selection', metavar='selection', action='store', nargs='+', type=str, default=['entropia'], help='Método de seleção da nova classe')
     parser.add_argument('-insert_nc', metavar='insert_nc', action='store', nargs='+', type=int, required=True, help='Insere a classe nova especificada na iteração especificada ([iteração rótulo_nc])')
-    parser.add_argument('-iteractions', metavar='iteractions', action='store', nargs='?', type=int, default= 3, help='Qtd. de iterações a ser executadas no modelo')
+    parser.add_argument('-iteractions', metavar='iteractions', action='store', nargs='?', type=int, default= 10, help='Qtd. de iterações a ser executadas no modelo')
     parser.add_argument('-language', metavar='language', action='store', type=str, default='pt', help="Idioma dos resultados gerados ('pt' ou 'en')")
 
     args = parser.parse_args()
