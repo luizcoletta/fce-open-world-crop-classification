@@ -632,7 +632,26 @@ class ST_functions:
             #print(train,train_labels)
 
         elif train_data_path:
-            df_training = pd.read_csv(train_data_path)#, header=None)
+            #https://www.pythonanywhere.com/forums/topic/30323/
+            #https://stackoverflow.com/questions/2083987/how-to-retry-after-exception
+            #https://www.hashtagtreinamentos.com/try-e-except-no-python?gclid=Cj0KCQiAorKfBhC0ARIsAHDzslv8twjYhj3cBwnujIVtL_3wI15CAgFh8VukglyiajnKOO8y9ZNLu38aAhBzEALw_wcB
+
+            for x in range(20): # 20 tentativas
+                try:
+                    #faça algo
+                    df_training = pd.read_csv(train_data_path)  # , header=None)
+
+                except OSError as error:
+                    #se ocorrer o erro especificado faça
+                    print(error)
+                except:
+                    #se ocorrer outro tipo de erro faça
+                    print('Deu algum outro problema no pd.read_csv(train_data_path)')
+                else:
+                    #o try foi executado sem erros, então encerra o for
+                    break
+
+
 
             feat_index = list(range(df_training.shape[1]))
             feat_index.remove(class_index)
@@ -648,7 +667,22 @@ class ST_functions:
         test = []
         test_labels = []
         if test_data_path:
-            df_test = pd.read_csv(test_data_path)#, header=None)
+            #df_test = pd.read_csv(test_data_path)#, header=None)
+            for x in range(20):
+                try:
+                    # faça algo
+                    df_test = pd.read_csv(test_data_path)#, header=None)
+
+                except OSError as error:
+                    # se ocorrer o erro especificado faça
+                    print(error)
+                except:
+                    # se ocorrer outro tipo de erro faça
+                    print('Deu algum outro problema no pd.read_csv(test_data_path)')
+                else:
+                    # o try foi executado sem erros, então encerra o for
+                    break
+
             # print(df_test.shape)
             feat_index = list(range(df_test.shape[1]))
             feat_index.remove(class_index)
