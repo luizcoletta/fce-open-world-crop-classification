@@ -806,7 +806,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 w = ft.eds(e[0], e[1], 5, SSet)
 
             elif(metric == 'random' or metric == 'aleatória'):
-                w = np.random.choice(range(0, test_labels.shape[0]), 5, replace=False)
+                w = np.random.choice(range(0, test_labels.shape[0]), 100, replace=False)
 
             elif(model_name == 'NNO' or model_name == 'deepncm'):
                 #w = sel_objs[sorted_score[-5:][::-1]]
