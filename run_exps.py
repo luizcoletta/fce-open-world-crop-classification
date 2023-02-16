@@ -44,8 +44,8 @@ mnist = (['mnist2D_c0','mnist2D_c1','mnist2D_c2','mnist2D_c3','mnist2D_c4','mnis
 #Parametros
 mnist_parameters =" -n_classes 10 "\
                 "-selection entropy silhouette silh_mod random "\
-                "-classifiers SVM SVM SVM " \ 
-                 "-insert_nc -1 -1 " \
+                "-classifiers SVM SVM SVM SVM " \
+                  "-insert_nc -1 -1 " \
                   "-language en"# [iter nc]
 #-----------------------------------------------
 datasets.append([mnist, mnist_parameters])
