@@ -4,6 +4,7 @@
 # ------------------------------------------------------------------------------
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.model_selection import StratifiedKFold, KFold
 from itertools import combinations
 from sklearn.cluster import KMeans
@@ -292,6 +293,7 @@ class ST_functions:
         objs_test_to_center_clusters = kmeans_test.fit_transform(test)
 
         data_centers = np.array([centroids[0] for centroids in pseudopoints])
+        rad_clusters = np.array([ps[1] for ps in pseudopoints])
 
         # print(data_centers, np.shape(data_centers))
         new_data_labels, new_centers_kept, silhouette, nearest_data_object_position = self.fd_novelties([], [],
@@ -300,6 +302,7 @@ class ST_functions:
                                                                                                           pred_test,
                                                                                                           kmeans_test_center,
                                                                                                           objs_test_to_center_clusters,
+                                                                                                        rad_clusters,
                                                                                                           kmeans_approach,
                                                                                                           0.8)
 
@@ -307,7 +310,7 @@ class ST_functions:
 
     def fd_novelties(self, data, data_labels, data_centers, data_dists, new_data, new_data_labels,
                        new_data_centers,
-                       new_data_dists, kmeans_approach, thrs):
+                       new_data_dists, rad_clusters, kmeans_approach, thrs):
 
         # the higher the value the greater the qualification to be a new cluster object
         threshold = thrs
@@ -334,6 +337,7 @@ class ST_functions:
             dist_new_obj_center = np.min(new_data_dists[i])
             #     print([i,new_data_labels[i]])
 
+
             ### new object distance to the nearest center calculated from existing data
             dist_data_centers = []
             for j in range(len(data_centers)):
@@ -341,8 +345,12 @@ class ST_functions:
             nearest_data_cluster = np.argmin(dist_data_centers)  # label nearest data cluster
             dist_nearest_data_center = dist_data_centers[nearest_data_cluster]
 
-            a0 = 0  # dist_new_obj_center * density_new_objs
-            b0 = 0  # distance_nearest_data_object * density_data
+            ### find distance of the new object to the nearest object belonging to the nearest data cluster
+
+            distance_nearest_data_object = dist_nearest_data_center - rad_clusters[nearest_data_cluster]
+
+            a0 = dist_new_obj_center
+            b0 = distance_nearest_data_object
 
             a1 = dist_new_obj_center
             b1 = dist_nearest_data_center
@@ -438,9 +446,20 @@ class ST_functions:
             class_means.append(np.mean(ex, axis=0))  # obs: pode dar erro aqui (fazer ex.copy())
         # print([np.sqrt(np.sum((x - class_means)**2,axis=1)) for x in test])
 
+        probs = [self.class_prob_NCM(np.sqrt(np.sum((x - class_means) ** 2, axis=1))) for x in test]
         y = [labels[np.argmin(np.sqrt(np.sum((x - class_means) ** 2, axis=1)))] for x in test]
 
-        return y
+        return y,np.array(probs)
+
+    def class_prob_NCM (self, dw_dists):
+        # p(c|x) = exp(-dw_dists)/ sum(exp(-dw_dists))
+        #https://patents.google.com/patent/US20140029839A1/en
+
+        prob = np.exp(-1*dw_dists)/sum(np.exp(-1*dw_dists))
+
+        return prob
+
+
 
     def sel_exemplares(self, train, train_labels, len_exemplares):
 
@@ -894,6 +913,7 @@ class ST_functions:
 
     def increment_training_set(self, sel_objects, train, train_labels, test, test_labels, iter, save_dir):
         if len(train[0]) <= 2:
+
             self.visualize_data(test, test_labels, sel_objects, iter, save_dir)
 
         test = pd.DataFrame(test)

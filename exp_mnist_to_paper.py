@@ -4,9 +4,9 @@ import numpy as np
 
 mnist = (['mnist2D_c0','mnist2D_c1','mnist2D_c2','mnist2D_c3','mnist2D_c4','mnist2D_c5',
           'mnist2D_c6','mnist2D_c7','mnist2D_c8','mnist2D_c9'])
-selectors = ['entropy', 'silhouette', 'silh_mod']
+selectors = ['entropy', 'silhouette', 'silh_mod', 'random']
 metrics = ['Accuracy','Precision','F1-score','Recall']
-mnist = (['mnist2D_c0','mnist2D_c1'])
+
 
 
 
@@ -15,6 +15,8 @@ for x in metrics:
     res_entropia = []
     res_silh = []
     res_silh_mod = []
+    res_random = []
+
     for dataset in mnist:
 
         res_path = path+'/results/'+dataset+'/SVM/graphics_data/'+x+'_data.csv'
@@ -22,8 +24,9 @@ for x in metrics:
         acc_data = pd.read_csv(res_path)
 
         res_entropia.append(acc_data[selectors[0]].values) #eixo 0 é o experimento e o eixo 1 é a iteração
-        #res_silh.append(acc_data[selectors[1]].values)
-        #res_silh_mod.append(acc_data[selectors[2]].values)
+        res_silh.append(acc_data[selectors[1]].values)
+        res_silh_mod.append(acc_data[selectors[2]].values)
+        res_random.append(acc_data[selectors[3]].values)
 
 
     print(f'Resultados para {x} com {selectors[0]}:\n')
@@ -36,7 +39,7 @@ for x in metrics:
     print(f'media das execuções na iteração final: {ent_media_final}')
     print(f'Valor final de cada execução: {ent_iter_res}\n\n')
 
-    '''
+
     print(f'Resultados para {x} com {selectors[1]}:\n')
     means = [np.mean(values,axis=0) for values in zip(*res_silh)] #faz a media dos valores de cada coluna
     ent_media_ini = round(means[0],4)
@@ -56,7 +59,17 @@ for x in metrics:
     print(f'media das execuções na iteração 0: {ent_media_ini}')
     print(f'media das execuções na iteração final: {ent_media_final}')
     print(f'Valor final de cada execução: {ent_iter_res}\n\n')
-    '''
+
+    print(f'Resultados para {x} com {selectors[3]}:\n')
+    means = [np.mean(values, axis=0) for values in zip(*res_random)]  # faz a media dos valores de cada coluna
+    ent_media_ini = round(means[0], 4)
+    ent_media_final = round(means[-1], 4)
+    ent_iter_res = [round(i[-1], 4) for i in res_random]
+
+    print(f'media das execuções na iteração 0: {ent_media_ini}')
+    print(f'media das execuções na iteração final: {ent_media_final}')
+    print(f'Valor final de cada execução: {ent_iter_res}\n\n')
+
     print('---------------------------------------------')
 
 

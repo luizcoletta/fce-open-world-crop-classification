@@ -577,14 +577,14 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     #retira os objetos da(s) classe(s) nova(s) do conj. de teste para acrescentar depois
     #-----------------------------------------
     all_labels = np.concatenate((train_labels, test_labels), axis=0)
-    test,test_labels = ft.sort_testset(test,test_labels)
+    test,test_labels = ft.sort_testset(test,test_labels) # ordena os dados de teste de acordo com a classe
 
-    new_classes_objs, test,test_labels = ft.draw_new_classes(list_new_class_labels, test, test_labels)
+    new_classes_objs, test,test_labels = ft.draw_new_classes(list_new_class_labels, test, test_labels) #retira a classe nova do conjunto de teste
 
     if (model_name == 'IC_EDS'):
         [silhouette_list, clusterers_list, cluslabels_list, nuclusters_list, SSet, matDist] = ft.clusterEnsemble(test)
-
-    elif (model_name == 'incremental'):
+    # Modelo incremental
+    elif (model_name == 'iCaRL'):
         SSet = []
         nb_exemplars = int(np.ceil(60 / len(np.unique(train_labels))))
 
@@ -596,7 +596,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
         #train, train_labels = ft.sel_exemplares(train, train_labels, ob)
 
 
-    # Modelo incremental
+
     if model_name == 'deepncm':
         # FIX SEEDS.
         import random
@@ -712,13 +712,25 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
 
         NNO.update_means(torch_train, train_labels)
         prediction, exp, distances = NNO.forward(torch_train)
-        deep_nno_tau.update_taus(prediction, train_labels,len(np.unique(train_labels)))
+        #print(f'PREDICTION (PROBS): {prediction}')
+
+        deep_nno_tau.update_taus(prediction, train_labels,len(np.unique(train_labels))) ###
         print(f'Tau novo: {tau}')
 
         outputs, _, distances = NNO.forward(torch.from_numpy(test))
+
+        _, preds = outputs.max(1)  ####
+        preds = preds + 1
+        acuracia = accuracy_score(test_labels, preds)
+        #print(f'(antes) DESEMPENHO NO TEST SET {acuracia} e PREDS: {preds}')
+
+        #print(f'OUTPUTS (PROBS): {outputs}')
+
         new_outputs = NNO.reject(outputs, distances, tau)
-        _, preds = new_outputs.max(1)
+        _, preds = new_outputs.max(1) ####
         preds = preds +1
+        acuracia = accuracy_score(test_labels, preds)
+        #print(f'(depois) DESEMPENHO NO TEST SET {acuracia} e PREDS: {preds}')
 
         #print('labels: ', test_labels)
         #print(f'preds: {preds}')
@@ -806,7 +818,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 w = ft.eds(e[0], e[1], 5, SSet)
 
             elif(metric == 'random' or metric == 'aleatória'):
-                w = np.random.choice(range(0, test_labels.shape[0]), 100, replace=False)
+                w = np.random.choice(range(0, test_labels.shape[0]), 5, replace=False)
 
             elif(model_name == 'NNO' or model_name == 'deepncm'):
                 #w = sel_objs[sorted_score[-5:][::-1]]
@@ -823,7 +835,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 # funcao q a partir de e retorna um w que sao os indices dos c mais confiaveis
                 posicoes = df_e.index.values
                 posicoes = posicoes.tolist()
-                p = 100  # 96
+                p = 5  # 96
 
                 w = posicoes[0:p]  # posicoes[0:p] # índices (posição) dos objetos que serão retirados do conjunto de teste e colocados no conjunto de treino
             # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html
@@ -868,11 +880,18 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                     count_nc += 1
 
 
-                if model_name == 'incremental':
+                if model_name == 'iCaRL':
                     nb_exemplars = int(np.ceil(60 / len(np.unique(train_labels))))
                     pseudopoints = ft.upg_pseudopoints(old_class, pseudopoints, train, train_labels)
                     old_class, mean_old_class = ft.upg_means(old_class, mean_old_class, train, train_labels, nb_exemplars)
                     train, train_labels = ft.select_exemplars(train, train_labels, mean_old_class, nb_exemplars, old_class)
+
+                    classifier_results = alghms(model_name, train, train_labels, test, test_labels, metric, results_dir,
+                                                n_test_class, k, kmeans_graph, SSet, pseudopoints)
+
+                    preds = classifier_results.pred
+                    probs = classifier_results.probs
+                    e = classifier_results.e
 
                 elif model_name == 'deepncm':
                     new_class = [x for x in np.unique(train_labels) if x not in updated_known_classes]
@@ -1113,13 +1132,18 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
             print('\n*******************************************')
             print("TRAINING SET AND TEST SET - fold " + str(j))
 
-            if dataset_name.split('_')[0] == 'hc':
-                train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop, scale = True)
-
-
-
+            if model_name[i] == 'NNO':
+                train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index,
+                                                                           join_data, size_batch, j, class2drop,
+                                                                           scale=True)
             else:
-                train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
+                if dataset_name.split('_')[0] == 'hc':
+                    train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop, scale = True)
+
+
+
+                else:
+                    train, train_labels, test, test_labels = ft.get_batch_data(train_path, test_path, class_index, join_data, size_batch, j, class2drop)
 
 
             x_ent, y_ent, erros_ent,curva_sel, time_classifier, time_metric, prop_por_classe = self_training(n_int, model_name[i], train, train_labels, test,

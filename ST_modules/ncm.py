@@ -32,8 +32,12 @@ class NCM_classifier(nn.Module):
         if self.deep_nno:
             means_reshaped = self.means.view(1, self.classes, self.features).expand(x.data.shape[0],
                                                                                     self.classes,
-                                                                                    self.features)
-            features_reshaped = x.view(-1, 1, self.features).expand(x.data.shape[0], self.classes, self.features)
+                                                                                    self.features)###
+            features_reshaped = x.view(-1, 1, self.features).expand(x.data.shape[0], self.classes, self.features)###
+
+            #print(f'MEANS: {self.means} \n MEANS_RESHAP: {means_reshaped}')
+            #print(f'FEATURES: {x} \n FEATURES_RESHAP: {features_reshaped}')
+
             diff = (features_reshaped - means_reshaped) ** 2
             cumulative_diff = diff.sum(dim=-1)
             exponent = -cumulative_diff / 2.
@@ -83,7 +87,7 @@ class NCM_classifier(nn.Module):
         return torch.norm(x - mean, p=2, dim=1)
 
     # Update centers (x=features, y=labels)
-    def update_means(self, x, y, std=True, weight=None, alpha=0.9):
+    def update_means(self, x, y, std=True, weight=None, alpha=0.8):
         if not self.deep_nno:
             if self.variance.data == -1:
                 self.variance.data = x.data.std()
@@ -118,7 +122,7 @@ class NCM_classifier(nn.Module):
                     dist = self.compute_dist(x, self.means.data[i, :])
                     mean_dist = dist[y == i+1].mean()
                     self.mean_distance.data[i] = self.mean_distance.data[i] * alpha + mean_dist * (1-alpha)
-                self.counter_means[i] += N
+                self.counter_means[i] += N # qtd de objs de treino relativo a classe i
 
     def get_average_dist(self, dim=-1):
         if dim == 0:

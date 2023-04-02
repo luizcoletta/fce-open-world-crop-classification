@@ -66,10 +66,11 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
-        if model_name == 'incremental':
+        if model_name == 'iCaRL':
             start = time.time()
 
-            self.pred = ft.nearest_mean_examplars(train, train_labels, test)
+            self.pred, self.probs = ft.nearest_mean_examplars(train, train_labels, test)
+            #print(f'dist prob: {self.probs}')
 
             finish = time.time()
             total_time = finish - start
@@ -91,13 +92,28 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
-        if metric == 'silh_mod':
+        if metric == 'silh_mod' and model_name == 'iCaRL':
+            start = time.time()
+            self.e = ft.kms_for_new_class(pseudopoints, test, 0)
+
+            finish = time.time()
+            total_time = finish - start
+            self.metric_time = total_time
+        elif metric == 'silh_mod' and model_name != 'iCaRL':
             start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
             finish = time.time()
             total_time = finish - start
             #print(np.unique(train_labels))
+            self.metric_time = total_time
+        '''
+        if metric == 'silh_mod_inc':
+            start = time.time()
+            self.e = ft.kms_for_new_class(pseudopoints, test, 0)
+
+            finish = time.time()
+            total_time = finish - start
             self.metric_time = total_time
 
         if metric == 'silh_inc':
@@ -107,11 +123,19 @@ class alghms:
             finish = time.time()
             total_time = finish - start
             self.metric_time = total_time
+        '''
 
-        if metric == 'silhouette' or metric == 'silhueta':
+        if (metric == 'silhouette' or metric == 'silhueta') and model_name != 'iCaRL':
             start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 1, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
+
+            finish = time.time()
+            total_time = finish - start
+            self.metric_time = total_time
+        elif (metric == 'silhouette' or metric == 'silhueta') and model_name == 'iCaRL':
+            start = time.time()
+            self.e = ft.kms_for_new_class(pseudopoints, test, 1)
 
             finish = time.time()
             total_time = finish - start

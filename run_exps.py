@@ -11,27 +11,26 @@ datasets = []
 dp = (['dp_ceratocystis1','dp_ceratocystis2','dp_ceratocystis5','dp_ceratocystis10','dp_ceratocystis20'])
 
 #Parametros
-dp_parameters = " -selection prob_class_desc silh_inc "\
-                "-classifiers NNO incremental "\
+dp_parameters = " -selection prob_class_desc silhueta silh_mod entropia aleatória "\
+                "-classifiers NNO iCaRL iCaRL iCaRL iCaRL "\
                 "-insert_nc 2 3"# [iter nc]
-
 
 #-----------------------------------------------
 # hand craft features
 hc = (['hc_ceratocystis1','hc_ceratocystis2','hc_ceratocystis5','hc_ceratocystis10','hc_ceratocystis20'])
 
 #Parametros
-hc_parameters = " -selection prob_class_desc silh_inc " \
-           "-classifiers NNO incremental " \
-           "-insert_nc 2 3" # [iter nc]
+hc_parameters = " -selection prob_class_desc silhueta silh_mod entropia aleatória "\
+                "-classifiers NNO iCaRL iCaRL iCaRL iCaRL "\
+                "-insert_nc 2 3"# [iter nc]
 #-----------------------------------------------
 
 # VAE features
 vae = (['vae_ceratocystis1','vae_ceratocystis2','vae_ceratocystis5','vae_ceratocystis10','vae_ceratocystis20'])
 
 #Parametros
-vae_parameters = " -selection prob_class_desc silh_inc  "\
-                "-classifiers NNO incremental " \
+vae_parameters = " -selection prob_class_desc silhueta silh_mod entropia aleatória "\
+                "-classifiers NNO iCaRL iCaRL iCaRL iCaRL " \
                  "-use_vae True " \
             "-latent_dim 8 "\
                  "-insert_nc 2 3" # [iter nc]
@@ -39,19 +38,19 @@ vae_parameters = " -selection prob_class_desc silh_inc  "\
 
 mnist = (['mnist2D_c0','mnist2D_c1','mnist2D_c2','mnist2D_c3','mnist2D_c4','mnist2D_c5',
           'mnist2D_c6','mnist2D_c7','mnist2D_c8','mnist2D_c9'])
-
+mnist = (['mnist2D_c0'])
 
 #Parametros
 mnist_parameters =" -n_classes 10 "\
-                "-selection entropy silhouette silh_mod random "\
-                "-classifiers SVM SVM SVM SVM " \
+                "-selection entropy "\
+                "-classifiers SVM " \
                   "-insert_nc -1 -1 " \
                   "-language en"# [iter nc]
 #-----------------------------------------------
-datasets.append([mnist, mnist_parameters])
-#datasets.append([dp, dp_parameters])
-#datasets.append([hc, hc_parameters])
-#datasets.append([vae, vae_parameters])
+#datasets.append([mnist, mnist_parameters])
+datasets.append([dp, dp_parameters])
+datasets.append([hc, hc_parameters])
+datasets.append([vae, vae_parameters])
 
 
 for data,params in datasets:
@@ -76,7 +75,7 @@ for data,params in datasets:
                           + str(data).strip('[]').replace(',',' ')
                           + " -" + params.split('-')[1]
                           + "-" + params.split('-')[2] +
-                          "-language en")
+                          "-language pt")
     pro = subprocess.Popen(command)
     pro.wait()
 
@@ -84,7 +83,7 @@ for data,params in datasets:
                           + str(data).strip('[]').replace(',', ' ')
                           + " -" + params.split('-')[1]
                           + "-" + params.split('-')[2] +
-                          "-language en")
+                          "-language pt")
     pro = subprocess.Popen(command)
     pro.wait()
 
