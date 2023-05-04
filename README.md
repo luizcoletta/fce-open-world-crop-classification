@@ -11,14 +11,14 @@ cd ~
 git clone https://github.com/luizcoletta/fce-open-world-crop-classification.git
 ```
 
-Then execute the file run_exps.py:
+Then execute the file `run_exps.py`:
 
 ```
 cd ~/fce-open-world-crop-classification
 python3 run_exps.py
 ```
 
-The outcomes produced are stored in 'results' folder, where each subfolder 
+The outcomes produced are stored in `results` folder, where each subfolder 
 refers to a dataset:
 
 ```
@@ -42,7 +42,7 @@ refers to a dataset:
 ```
 
 Log files are yielded as well, showing the experiment's behavior through the iterations.
-These files are stored in 'logs' folder according to the nomenclature pattern exp_{dataset}.log:
+These files are stored in `logs` folder according to the nomenclature pattern `exp_{dataset}.log`:
 
 ```
 ~/fce-open-world-crop-classification/
@@ -85,7 +85,7 @@ When performing experiments in this code, some parameters can be defined by the 
     language -> defines the language used in graphics: 'pt' for portuguese or 'en' for english
 ```
 
-In the file run_exps.py these parameters are specified as arguments from the ArgParse Package, so they are defined through
+In the file `run_exps.py` these parameters are specified as arguments from the ArgParse Package, so they are defined through
  command lines. Example:
 
 ```
@@ -98,8 +98,8 @@ datasets.append([dp, dp_parameters])
 
 ```
 
-The variable dp refers to the feature space where one or more datasets lies to, while at same time, its content defines the 
-parameter 'dataset'. The variable dp_parameters can be used to define others parameters seen previously.
+The variable `dp` refers to the feature space where one or more datasets lies to, while at same time, its content defines the 
+parameter `dataset`. The variable `dp_parameters` can be used to define others parameters seen previously.
 
 So, the experiments settings are stablished following the pattern:
 
@@ -114,8 +114,8 @@ datasets.append([{feature space}, {feature space}_parameters])
 
 ```
 
-When the framework is executed, the {classifier-1} is used along with {criterion-1}, {classifier-n} is applied with 
-{criterion-n} and so on.
+When the framework is executed, the `{classifier-1}` is used along with `{criterion-1}`, `{classifier-n}` is applied with 
+`{criterion-n}` and so on.
 
 In this implementation the following classifiers and criteria are available:
 
