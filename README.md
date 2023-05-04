@@ -39,13 +39,10 @@ refers to a dataset:
           |----vae_ceratocystis5/
           |----vae_ceratocystis10/
           |----vae_ceratocystis20/
-          |----dp_final_results/
-          |----hc_final_results/
-          |----vae_final_results/
 ```
 
 Log files are yielded as well, showing the experiment's behavior through the iterations.
-These files are stored in 'logs' folder according to the following nomenclature pattern:
+These files are stored in 'logs' folder according to the nomenclature pattern exp_{dataset}.log:
 
 ```
 ~/fce-open-world-crop-classification/
