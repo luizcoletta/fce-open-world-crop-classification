@@ -77,7 +77,7 @@ When performing experiments in this code, some parameters can be defined by the 
     dataset -> dataset name
     use_vae (True/False) -> enables the use of VAE to extract features if True    
     vae_epochs -> amount of epochs for VAE
-    latent_dim -> amount of latent variables used to represent the intances (lenght of the feature vector)
+    latent_dim -> amount of latent variables used to represent the intances (length of the feature vector)
     classifiers -> name of the classifier that it will be used
     selection -> criterion's name applied to find new classes
     insert_nc ([iter, nc])-> defines the iteraction (iter) where a new class with label 'nc' appears in the test set 
@@ -108,10 +108,35 @@ So, the experiments settings are stablished following the pattern:
 
 {feature space}_parameters = " -selection  {criterion-1} {criterion-2} {criterion-n} "\
                 "-classifiers {classifier-1} {classifier-2} {classifier-n} "\
-                "-insert_nc {iter} {nc}"
+                "-insert_nc {iter} {nc} "\
+                "-{other_parameters}"
 datasets.append([{feature space}, {feature space}_parameters])    
 
 ```
+
+When the framework is executed, the {classifier-1} is used along with {criterion-1}, {classifier-n} is applied with 
+{criterion-n} and so on.
+
+In this implementation the following classifiers and criteria are available:
+
+```
+Classifiers: 
+   -NNO
+   -iCaRL 
+   -SVM
+   -IC-EDS
+
+Criteria: 
+   -prob_class_desc (for NNO)
+   -silhouette (or silhueta) 
+   -silh_mod 
+   -entropy (or entropia) 
+   -random (or aleatória)
+   -EDS (for IC-EDS)
+```
+
+
+
 
 
 
