@@ -1291,19 +1291,16 @@ if __name__ == "__main__":
     #print(args.n_classes, type(args.n_classes))
 
     # PARÂMETROS:
-    n_test_class = 3
-    dataset_name = 'dp_ceratocystis1'
-    use_vae = False   # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset
-    len_train = 60000   # tamanho do conjunto de treinamento do dataset para uso do VAE
+    n_classes = 3 'N° de classes do conjunto teste'
+    dataset = ['dp_ceratocystis1']
+    use_vae = True/False   # se verdadeiro usa o VAE para reduzir dimensionalidade do dataset    
     vae_epochs = 100     # quantidade de épocas para a execução do VAE
-    lat_dim = 4        # quantidade de variaveis latentes do VAE
-    sel_model = ['svm'] #, 'ic_eds'] # define o classificador a ser usado
-    metric = ['entropia'] #, 'ent&dens'] # define a metrica para descobrir classes novas
-    #sel_model = ['svm','svm','svm']#,'ic_eds']  # define o classificador a ser usado
-    #metric = ['silhueta0', 'silhueta1', 'entropia']
-    list_new_class_labels = [[2, 3]]
-    n_iter = 10         # numero de iterações da rotina de self-training
-    linguagem = 'pt' # idioma dos resultados (pt ou en)
+    latent_dim = 4        # quantidade de variaveis latentes do VAE
+    classifiers = 'SVM' define o classificador a ser usado
+    selection = 'entropia' # define a metrica para descobrir classes novas
+    insert_nc = [2, 3]
+    iteractions = 10         # numero de iterações da rotina de self-training
+    language = 'pt'/'en' # idioma dos resultados (pt ou en)
 
     '''
 

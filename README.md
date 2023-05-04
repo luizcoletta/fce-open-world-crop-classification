@@ -67,8 +67,23 @@ These files are stored in 'logs' folder according to the nomenclature pattern ex
 
 ## Experiments Settings
 
+When performing experiments in this code, some parameters can be defined by the user in order to define the conditions desired.
 
 
+```
+    Parameters: 
+    
+    n_classes -> Number of classes in test set
+    dataset -> dataset name
+    use_vae (True/False) -> enables the use of VAE to extract features if True    
+    vae_epochs -> amount of epochs for VAE
+    latent_dim -> amount of latent variables used to represent the intances (lenght of the feature vector)
+    classifiers -> name of the classifier that it will be used
+    selection -> criterion's name applied to find new classes
+    insert_nc ([iter, nc])-> defines the iteraction (iter) where a new class (nc) appear in the test set 
+    iteractions -> number of iteractions executed by the framework
+    language -> defines the language used in graphics: 'pt' for portuguese or 'en' for english
+```
 
 
 
