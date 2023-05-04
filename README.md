@@ -106,8 +106,8 @@ So, the experiments settings are stablished following the pattern:
 ```
 {feature space} = (['{dataset-1}','{dataset-2}','{dataset-n}'])
 
-{feature space}_parameters = " -selection  {criterion-1} {criterion-2} {criterion-3} "\
-                "-classifiers {classifier-1} {classifier-2} {classifier-3} "\
+{feature space}_parameters = " -selection  {criterion-1} {criterion-2} {criterion-n} "\
+                "-classifiers {classifier-1} {classifier-2} {classifier-n} "\
                 "-insert_nc {iter} {nc}"
 datasets.append([{feature space}, {feature space}_parameters])    
 
