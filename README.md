@@ -80,10 +80,40 @@ When performing experiments in this code, some parameters can be defined by the 
     latent_dim -> amount of latent variables used to represent the intances (lenght of the feature vector)
     classifiers -> name of the classifier that it will be used
     selection -> criterion's name applied to find new classes
-    insert_nc ([iter, nc])-> defines the iteraction (iter) where a new class (nc) appear in the test set 
+    insert_nc ([iter, nc])-> defines the iteraction (iter) where a new class with label 'nc' appears in the test set 
     iteractions -> number of iteractions executed by the framework
     language -> defines the language used in graphics: 'pt' for portuguese or 'en' for english
 ```
+
+In the file run_exps.py these parameters are specified as arguments from the ArgParse Package, so they are defined through
+ command lines. Example:
+
+```
+dp = (['dp_ceratocystis1','dp_ceratocystis2','dp_ceratocystis5','dp_ceratocystis10','dp_ceratocystis20'])
+
+dp_parameters = " -selection  silhouette silh_mod entropy random "\
+                "-classifiers iCaRL iCaRL iCaRL iCaRL "\
+                "-insert_nc 2 3"
+datasets.append([dp, dp_parameters])    
+
+```
+
+The variable dp refers to the feature space where one or more datasets lies to, while at same time, its content defines the 
+parameter 'dataset'. The variable dp_parameters can be used to define others parameters seen previously.
+
+So, the experiments settings are stablished following the pattern:
+
+```
+{feature space} = (['{dataset-1}','{dataset-2}','{dataset-n}'])
+
+{feature space}_parameters = " -selection  {criterion-1} {criterion-2} {criterion-3} "\
+                "-classifiers {classifier-1} {classifier-2} {classifier-3} "\
+                "-insert_nc {iter} {nc}"
+datasets.append([{feature space}, {feature space}_parameters])    
+
+```
+
+
 
 
 
