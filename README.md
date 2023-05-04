@@ -68,9 +68,8 @@ These files are stored in 'logs' folder according to the following nomenclature 
 
 ```
 
-## Settings of the experiments
+## Experiments Settings
 
-## Framework Settings
 
 
 
