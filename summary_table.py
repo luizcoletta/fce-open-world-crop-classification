@@ -44,6 +44,7 @@ if __name__ == "__main__":
     f1_score = []
     precisao = []
     recall = []
+    prauc = []
 
     for dt in dataset_list:
 
@@ -77,6 +78,10 @@ if __name__ == "__main__":
             res = round(100*data[sel_list[i]].values[-1],2)
             recall.append(res)
 
+            data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/PRC_AUC_data.csv')
+            res = round(100*data[sel_list[i]].values[-1],2)
+            prauc.append(res)
+
 
 
 
@@ -87,7 +92,8 @@ if __name__ == "__main__":
             'Acurácia (%)':acc,
             'F1-score (%)':f1_score,
             'Precisão (%)':precisao,
-            'Recall (%)': recall}
+            'Recall (%)': recall,
+            'PRC_AUC (%)': prauc}
 
     pd_data = pd.DataFrame(data)
     pd_data.to_csv(results_dir+dataset_list[0].split('_')[0]+'_summary_table.csv', index=False)

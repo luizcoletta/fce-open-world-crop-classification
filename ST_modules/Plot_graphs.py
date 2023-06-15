@@ -213,8 +213,8 @@ class ST_graphics:
 
 
         style = ['ro--', 'ko--', 'bo--','go--']
-        ind_en = ['Accuracy', 'Precision', 'Recall', 'F1-score']
-        ind_pt = ['Acurácia', 'Precisão', 'Recall', 'F1-score']
+        ind_en = ['Accuracy', 'Precision', 'Recall', 'F1-score', 'PRC_AUC']
+        ind_pt = ['Acurácia', 'Precisão', 'Recall', 'F1-score', 'PRC_AUC']
         #file_name = "/accuracy_" + dataset_name + ".jpg"
 
         for x in range(np.shape(Y)[1]):

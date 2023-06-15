@@ -27,6 +27,8 @@ import torch.optim as optim
 from ST_modules.resnet import ResNet18
 from ST_modules.trainer import Trainer
 from ST_modules.data_loader import RODFolder
+from sklearn.metrics import average_precision_score
+from sklearn.preprocessing import label_binarize
 
 
 def load_dataset(dataset_name, vae, vae_epoch, lat_dim, len_train):
@@ -543,6 +545,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     y_precisao = []
     y_recall = []
     y_fscore = []
+    y_prauc = []
     pseudopoints = []
 
     erro_das_classes = []
@@ -775,6 +778,22 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     recall = precision_recall_fscore_support(test_labels, preds, average='weighted')[1]
     f_score = precision_recall_fscore_support(test_labels, preds, average='weighted')[2]
 
+    # TESTE DA METRICA PRC AUC:
+    if len(np.unique(test_labels)) == 2:
+        one_hot_test_labels = []
+        for i in range(len(test_labels)):
+            if test_labels[i] == 1 or test_labels[i]== [1]:
+                one_hot_test_labels.append([1,0])
+            else:
+                one_hot_test_labels.append([0,1])
+        one_hot_test_labels = np.array(one_hot_test_labels)
+    else:
+        one_hot_test_labels = label_binarize(test_labels, classes=np.unique(test_labels))
+
+    pr_auc = average_precision_score(one_hot_test_labels, probs,average="micro")
+    print(pr_auc)
+    #########################################
+
     for i in np.unique(labels_original):
         erro = ft.class_error(preds, test_labels, i)
         erro_da_classe_por_rodada.append(erro)
@@ -786,6 +805,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     y_precisao.append(precisao)
     y_recall.append(recall)
     y_fscore.append(f_score)
+    y_prauc.append(pr_auc)
 
     print("\nIteration " + str(0) + " (before train set increment) - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)) +
           " - Accuracy: " + str(round(acuracia,4)) )
@@ -1019,6 +1039,43 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 recall = precision_recall_fscore_support(test_labels, preds, average='weighted')[1]
                 f_score = precision_recall_fscore_support(test_labels, preds, average='weighted')[2]
 
+                # TESTE DA METRICA PRC AUC:
+                '''
+                if len(np.unique(test_labels)) == 2:
+                    one_hot_test_labels = []
+                    for i in range(len(test_labels)):
+                        if test_labels[i] == 1 or test_labels[i] == [1]:
+                            one_hot_test_labels.append([1, 0])
+                        else:
+                            one_hot_test_labels.append([0, 1])
+                    one_hot_test_labels = np.array(one_hot_test_labels)
+                else:
+                    one_hot_test_labels = label_binarize(test_labels, classes=np.unique(test_labels))
+
+
+                if one_hot_test_labels.shape[1] != probs.shape[1]:
+                    prob_ext = []
+
+                    for i in probs:
+                        prob_ext.append(np.append(i, [0], axis=0))
+                    pr_auc = average_precision_score(one_hot_test_labels, np.array(prob_ext), average="micro")
+                else:
+                    pr_auc = average_precision_score(one_hot_test_labels, probs, average="micro")
+
+                '''
+                if k != 10:
+                    pr_auc = 0
+                else:
+                    one_hot_test_labels = []
+                    for i in test_labels:
+                        if i == 1 or i == [1] or i ==2 or i ==[2]:
+                            one_hot_test_labels.append(0)
+                        else:
+                            one_hot_test_labels.append(1)
+                    pr_auc = average_precision_score(one_hot_test_labels, probs[:,-1])
+
+                #########################################
+
                 for i in np.unique(labels_original):
                     erro = ft.class_error(preds, test_labels, i)
                     erro_da_classe_por_rodada.append(erro)
@@ -1030,6 +1087,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 y_precisao.append(precisao)
                 y_recall.append(recall)
                 y_fscore.append(f_score)
+                y_prauc.append(pr_auc)
 
             print(
                 "\nIteration " + str(k) + " - Sizes: Training Set " + str(len(train)) + " - Test Set " + str(len(test)) +
@@ -1061,6 +1119,7 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
     y.append(y_precisao.copy())
     y.append(y_recall.copy())
     y.append(y_fscore.copy())
+    y.append(y_prauc.copy())
 
     #y = y_acc.copy()
     prop_por_classe = prop_por_rodada.copy()
