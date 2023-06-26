@@ -92,14 +92,14 @@ class alghms:
             total_time = finish - start
             self.metric_time = total_time
 
-        if metric == 'silh_mod' and model_name == 'iCaRL':
+        if (metric == 'silh_mod' or metric == 'mod_silh') and model_name == 'iCaRL':
             start = time.time()
             self.e = ft.kms_for_new_class(pseudopoints, test, 0)
 
             finish = time.time()
             total_time = finish - start
             self.metric_time = total_time
-        elif metric == 'silh_mod' and model_name != 'iCaRL':
+        elif (metric == 'silh_mod' or metric == 'mod_silh') and model_name != 'iCaRL':
             start = time.time()
             self.e = self.kmeans_for_new_class(train, test, 0, iter_graph, kmeans_graph, results_path,
                                                len(np.unique(train_labels)), nclusters_test)
