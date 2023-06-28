@@ -53,8 +53,8 @@ mnist_parameters =" -n_classes 10 "\
                   "-language en"# [iter nc]
 #-----------------------------------------------
 #datasets.append([mnist, mnist_parameters])
-#datasets.append([dp, dp_parameters])
-#datasets.append([hc, hc_parameters])
+datasets.append([dp, dp_parameters])
+datasets.append([hc, hc_parameters])
 datasets.append([vae, vae_parameters])
 
 
@@ -75,7 +75,7 @@ for data,params in datasets:
         proc.wait()
 
 
-    '''
+
     command = shlex.split("python3 plot_final_results.py -datasets "
                           + str(data).strip('[]').replace(',',' ')
                           + " -" + params.split('-')[1]
@@ -91,5 +91,6 @@ for data,params in datasets:
                           "-language en")
     pro = subprocess.Popen(command)
     pro.wait()
-    '''
+
+
 

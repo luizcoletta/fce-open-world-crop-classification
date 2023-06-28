@@ -62,17 +62,27 @@ if __name__ == "__main__":
             res = round(100*(1-data[sel_list[i]].values[-1]),2)
             per_nc.append(res)
 
-            data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/Acurácia_data.csv')
-            res = round(100*data[sel_list[i]].values[-1],2)
-            acc.append(res)
+            if linguagem == 'pt':
+                data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/Acurácia_data.csv')
+                res = round(100*data[sel_list[i]].values[-1],2)
+                acc.append(res)
+
+                data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/Precisão_data.csv')
+                res = round(100 * data[sel_list[i]].values[-1], 2)
+                precisao.append(res)
+
+            elif linguagem == 'en' :
+                data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/Accuracy_data.csv')
+                res = round(100 * data[sel_list[i]].values[-1], 2)
+                acc.append(res)
+
+                data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/Precision_data.csv')
+                res = round(100 * data[sel_list[i]].values[-1], 2)
+                precisao.append(res)
 
             data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/F1-score_data.csv')
             res = round(100*data[sel_list[i]].values[-1],2)
             f1_score.append(res)
-
-            data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/Precisão_data.csv')
-            res = round(100*data[sel_list[i]].values[-1],2)
-            precisao.append(res)
 
             data = pd.read_csv(results_dir + dt + '/' + classifiers[i] + '/graphics_data/Recall_data.csv')
             res = round(100*data[sel_list[i]].values[-1],2)

@@ -25,6 +25,7 @@ def plot_overall_datasets_accuracy(datasets_list, sel_list, linguagem, results_d
                 x = data['iter']
                 y = data[sel]
             elif linguagem == 'en':
+
                 data = pd.read_csv(os.path.join(path_dir, dataset + '/'+ml+ '/graphics_data/Accuracy_data.csv'))
                 x = data['iter']
                 y = data[sel]
@@ -158,8 +159,10 @@ if __name__ == "__main__":
     sel_list = args.selection
     linguagem = args.language
     models_list = args.classifiers
+    
 
     models_list = list(dict.fromkeys(models_list)) # remove palavras repetidas na lista
+
     results_dir = []
 
     for ml in models_list:
@@ -179,14 +182,16 @@ if __name__ == "__main__":
             sel = ['prob_class_desc']
         else:
             if linguagem == 'en':
+
                 if 'EDS' in sel_list:
                     sel = sel_list.copy()
                     sel.remove('EDS')
-                if 'unk_class_prob' in sel_list:
+                elif 'unk_class_prob' in sel_list:
                     sel = sel_list.copy()
                     sel.remove('unk_class_prob')
                 else:
                     sel = sel_list.copy()
+
             elif linguagem == 'pt':
                 if 'EDS' in sel_list:
                     sel = sel_list.copy()
