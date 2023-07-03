@@ -1065,14 +1065,32 @@ def self_training(iter, model_name, train, train_labels, test, test_labels, metr
                 '''
                 if k != 10:
                     pr_auc = 0
+                    print(np.shape(probs))
                 else:
+                    '''
                     one_hot_test_labels = []
                     for i in test_labels:
                         if i == 1 or i == [1] or i ==2 or i ==[2]:
                             one_hot_test_labels.append(0)
                         else:
                             one_hot_test_labels.append(1)
-                    pr_auc = average_precision_score(one_hot_test_labels, probs[:,-1])
+                    print(np.shape(one_hot_test_labels), np.shape(probs))
+                    if probs.shape[1] == 3:
+                        pr_auc = average_precision_score(one_hot_test_labels, probs[:,-1])
+                    else:
+                        
+                        pr_auc = average_precision_score(one_hot_test_labels, np.zeros(len(one_hot_test_labels)))
+                    '''
+
+                    one_hot_test_labels = label_binarize(test_labels, classes=np.unique(test_labels))
+                    print(np.shape(one_hot_test_labels), np.shape(probs))
+
+                    if probs.shape[1] == 3:
+                        pr_auc = average_precision_score(one_hot_test_labels, probs, average="macro")
+                    else:
+
+                        pr_auc = average_precision_score(one_hot_test_labels, np.concatenate((probs,np.zeros((probs.shape[0],1))),axis=1), average="macro")
+
 
                 #########################################
 
@@ -1281,7 +1299,7 @@ def main(dataset_name, model_name, metric, use_vae , vae_epoch, lat_dim, len_tra
 
             graph.class_error_graph(x_axis, class_errors, all_metrics, test_labels, data_graphs, results_dir, dataset_name, linguagem)
 
-            if model_name[i] != 'IC_EDS':
+            if model_name[i] != 'IC_EDS' and (metric[i] != 'random' and metric[i] != 'aleatoria'):
                 graph.plot_metric_sel(all_curvas_sel, all_metrics, results_dir, linguagem)
 
             graph.accuracy_graph(x_axis, y_axis, all_metrics, data_graphs, results_dir, dataset_name, linguagem)

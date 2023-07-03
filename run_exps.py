@@ -22,10 +22,13 @@ dp_parameters = " -selection entropy silhouette mod_silh random EDS "\
 # hand craft features
 hc = (['hc_ceratocystis1','hc_ceratocystis2','hc_ceratocystis5','hc_ceratocystis10','hc_ceratocystis20'])
 
+
 #Parametros
 hc_parameters = " -selection entropy silhouette mod_silh random EDS "\
                 "-classifiers SVM SVM SVM SVM IC_EDS "\
                 "-insert_nc 2 3"# [iter nc]
+
+
 #-----------------------------------------------
 
 # VAE features
@@ -52,7 +55,7 @@ mnist_parameters =" -n_classes 10 "\
                   "-insert_nc -1 -1 " \
                   "-language en"# [iter nc]
 #-----------------------------------------------
-#datasets.append([mnist, mnist_parameters])
+datasets.append([mnist, mnist_parameters])
 datasets.append([dp, dp_parameters])
 datasets.append([hc, hc_parameters])
 datasets.append([vae, vae_parameters])
